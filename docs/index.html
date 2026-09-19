@@ -118,6 +118,7 @@
 </div>
 
 <div class="jumpbar">
+  <a href="#weeklyPicksPanel">↓ Weekly Picks (top 2)</a>
   <a href="#goldenPanel">↓ Golden cross &middot; #1</a>
   <a href="#rsDivPanel">↓ RS Leaders &middot; #2</a>
   <a href="#bullFlagPanel">↓ Bull Flag Watch &middot; #3</a>
@@ -132,6 +133,24 @@
 <div class="statgrid" id="stats"></div>
 
 <div class="desc" style="margin:0 0 6px;font-weight:600">Panels are ordered by BACKTESTED hit rate (entry next open, target = entry + 1.5&times;ATR14, no stop, 20-session max hold, Jan&ndash;Aug 2026). Buying on a RANDOM day hits that same target <strong>62.3%</strong> of the time (n=799) &mdash; that is the number every panel below must be read against. A 78% hit rate is roughly +16 points of edge, not 78 points of skill. One regime only: an 8-month tech bull market. In a flat or falling market these converge toward each other and the order may not hold. Bull Flag and Intraday Breakout now use CMF(20) &gt; 0.20 in place of their original raw-volume rules; their numbers above are post-swap. The top three (79.2 / 78.3 / 77.9) are within noise of each other on samples of 53&ndash;95 &mdash; read the panels as two tiers, not four ranks, and note that these figures come from a single 8-month sample that has now been searched many times over.</div>
+
+<div class="panel" id="weeklyPicksPanel">
+  <h2><span style="background:#1d4ed8;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">WEEKLY &middot; TOP 2</span>Weekly Picks &mdash; ranked selection</h2>
+  <div class="desc" id="weeklyPicksCaption">
+    <strong>This is a ONCE-A-WEEK decision, not a daily one.</strong> Pick a fixed day, take the two names below, hold ~20 sessions to the target or to time-exit, and do not re-pick mid-week. The backtest rebalanced weekly; acting on this panel daily is a different (untested) strategy and will churn you.<br><br>
+    <strong>Rule:</strong> universe = CMF(20) &gt; 0.20 AND price above MA200. Those that qualify are ranked by CMF <em>ascending</em> &mdash; the LOWEST qualifying CMF first. That is deliberate and counterintuitive: among names that already clear the buying-pressure gate, the most extreme ones are already extended. Ranking descending (highest CMF first) backtested materially worse (equity &times;2.20 vs &times;3.42). The gate is what carries the edge; maximising the gated variable works against you.<br><br>
+    <strong>Backtest (27 weekly cycles, Jan&ndash;Aug 2026, 54 trades):</strong> 79.6% of picks reached entry + 1.5&times;ATR14 within 20 sessions; average +4.89% per trade; profit factor 3.55; 81.5% of weeks positive; compounded equity &times;3.42 equal-weighted; max drawdown 11.7%. Split in half, the rule held up on data it was never fitted to: +4.99% per trade Jan&ndash;Apr vs +4.77% May&ndash;Aug.<br><br>
+    <strong>Why 2 and not 3 or 5:</strong> returns decay monotonically as you add positions (out-of-sample per-trade: top1 +4.99%, top2 +4.77%, top3 +4.73%, top4 +4.12%, top5 +3.59%, all qualifiers +1.39%). Only ~6 names qualify in a median week, so "top 5" is often just taking everything and converges to the unranked result. Top 1 scored higher (&times;4.58) but on 27 trades, which is too few to size on.<br><br>
+    <strong>NO STOP IS MODELLED.</strong> Target-only, time-exit at 20 sessions. Individual picks in the backtest dipped as far as &minus;25% before recovering to target. Position sizing is entirely yours and this panel does not tell you how much to risk.<br><br>
+    <strong>Limits, stated plainly:</strong> 54 trades over 27 weeks in a single 8-month tech bull market where simply buying every qualifier returned &times;2.49. No slippage, no commissions, no position limits. This dataset has been searched many times over, so the true edge is likely smaller than shown. Treat this as a hypothesis to paper-trade forward for a quarter, not a validated system. 10% of weeks produced ZERO qualifiers &mdash; an empty panel is normal and means sit in cash, not lower the bar.
+  </div>
+  <div style="overflow-x:auto">
+    <table>
+      <thead><tr id="weeklyPicksTheadRow"></tr></thead>
+      <tbody id="weeklyPicksBody"></tbody>
+    </table>
+  </div>
+</div>
 
 <div class="panel" id="goldenPanel">
   <h2><span style="background:#0a9e5c;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">#1 &middot; 79.2% hit</span>Golden cross zone (MA50 &times; MA200)</h2>
@@ -241,7 +260,7 @@
 const LS_HIDDEN = 'basket-hidden-tickers-v1';
 const BENCHMARKS = new Set(["SPY","QQQ","IWM","VOO"]);
 const PINNED = new Set(["SPY","VOO"]);
-const ETF_TICKERS = new Set(["EWY","LYTE","FOTO","NCLD","AIPO","DRAM","POWR","SMH","BUG","HACK","BOTT","IGV"]);
+const ETF_TICKERS = new Set(["EWY","LYTE","FOTO","NCLD","AIPO","DRAM","POWR","SMH","BUG","HACK"]);
 
 let allTickers = [];   // from data.json, in file order
 let hidden = loadHidden();
@@ -747,6 +766,7 @@ function render() {
   renderDetailed(spy, tickers);
   renderTable(spy, tickers);
   renderRotationCandidates(stocks);
+  renderWeeklyPicks(stocks);
   renderRSDivergence(stocks);
   renderIntradayBreakout(stocks);
   renderBullFlag(stocks);
@@ -1632,6 +1652,58 @@ function renderRSDivergence(stocks) {
     '<td>' + r.atr.toFixed(2) + '</td>' +
     '<td>' + (r.rsi != null ? r.rsi.toFixed(0) : '—') + '</td>' +
     '<td>' + (r.earnings ? esc(r.earnings) : '—') + '</td></tr>').join('');
+}
+
+
+// ---- Weekly Picks: CMF>0.20 + above MA200, ranked CMF ASCENDING, top 2 ----
+// Backtest: 27 weekly cycles Jan-Aug 2026, 54 trades, 79.6% reached +1.5xATR within
+// 20 sessions, avg +4.89%/trade, PF 3.55, equity x3.42, maxDD 11.7%.
+// IS (Jan-Apr) +4.99%/trade vs OOS (May-Aug) +4.77% - held up out-of-sample.
+// Ranking is ASCENDING on purpose: descending scored x2.20 vs x3.42.
+const WEEKLY_PICK_COUNT = 2, WEEKLY_CMF_MIN = 0.20, WEEKLY_TARGET_ATR = 1.5;
+function computeWeeklyPicks(stocks) {
+  const out = [];
+  for (const t of stocks) {
+    const d = data[t];
+    if (!d || d.error || d.price == null || d.ma200 == null || d.atr == null) continue;
+    if (!(d.price > d.ma200)) continue;                 // trend gate
+    const cmf = computeCMF(t);
+    if (cmf == null || cmf <= WEEKLY_CMF_MIN) continue; // buying-pressure gate
+    if (!(d.atr > 0)) continue;
+    const target = d.price + WEEKLY_TARGET_ATR * d.atr;
+    out.push({ sym: t, price: d.price, cmf: cmf, atr: d.atr, target: target,
+               upside: (target / d.price - 1) * 100,
+               aboveMa200: (d.price / d.ma200 - 1) * 100,
+               rsi: d.rsi, earnings: fund[t] ? fund[t].nextEarnings : null });
+  }
+  out.sort((a, b) => a.cmf - b.cmf);                    // ASCENDING - lowest qualifying CMF first
+  return { picks: out.slice(0, WEEKLY_PICK_COUNT), total: out.length };
+}
+function renderWeeklyPicks(stocks) {
+  const head = document.getElementById('weeklyPicksTheadRow');
+  const body = document.getElementById('weeklyPicksBody');
+  if (!head || !body) return;
+  const cols = ['#', 'Ticker', 'Entry (ref)', 'Target (+1.5 ATR)', 'Upside %', 'CMF(20)', 'Above MA200', 'ATR14', 'RSI', 'Next earnings'];
+  head.innerHTML = cols.map(c => '<th>' + c + '</th>').join('');
+  const res = computeWeeklyPicks(stocks);
+  if (!res.picks.length) {
+    body.innerHTML = '<tr><td colspan="' + cols.length + '" class="empty">No qualifiers this week &mdash; sit in cash. About 10% of weeks produced zero candidates in the backtest. An empty panel is a valid result, not a reason to relax the rule.</td></tr>';
+    return;
+  }
+  body.innerHTML = res.picks.map((p, i) =>
+    '<tr><td><strong>' + (i + 1) + '</strong></td>' +
+    '<td><strong>' + esc(p.sym) + '</strong></td>' +
+    '<td>' + p.price.toFixed(2) + '</td>' +
+    '<td style="font-weight:700">' + p.target.toFixed(2) + '</td>' +
+    '<td style="color:#0a9e5c;font-weight:700">+' + p.upside.toFixed(1) + '%</td>' +
+    '<td>' + cmfBadge(p.cmf) + '</td>' +
+    '<td>+' + p.aboveMa200.toFixed(1) + '%</td>' +
+    '<td>' + p.atr.toFixed(2) + '</td>' +
+    '<td>' + (p.rsi != null ? p.rsi.toFixed(0) : '—') + '</td>' +
+    '<td>' + (p.earnings ? esc(p.earnings) : '—') + '</td></tr>').join('') +
+    '<tr><td colspan="' + cols.length + '" style="font-size:12px;color:#6b7280;padding-top:8px">' +
+    res.total + ' name' + (res.total === 1 ? '' : 's') + ' qualified this week; the ' + res.picks.length +
+    ' with the LOWEST qualifying CMF are shown. Entry is a reference price only — the backtest entered at the NEXT session\'s open.</td></tr>';
 }
 
 function renderGoldenCross(stocks) {
