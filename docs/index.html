@@ -1320,7 +1320,8 @@ function cmfBadge(v) {
 }
 
 const INTRADAY_BREAKOUT_COLS = [
-  ['sym','Ticker'], ['price','Price'], ['daily','Day %'], ['cmf','CMF(20)'], ['volRatio','Vol vs 20d Median'],
+  ['rank','#'], ['sym','Ticker'], ['price','Price'], ['daily','Day %'], ['cmf','CMF(20)'], ['volRatio','Vol vs 20d Median'],
+  ['vol','Volume'], ['mcap','Market Cap'],
   ['moveVsAtr','Move vs Typical Day'], ['offHighToday','Off Today\'s High'], ['premkt','Pre-Mkt Gap'], ['earningsFlag','Earnings'], ['newHigh','New 20D High'], ['rsi','RSI (14D)']
 ];
 const BREAKOUT_MIN_DAY_PCT = 5;      // must be up at least this much today
@@ -1384,17 +1385,21 @@ function renderIntradayBreakout(stocks) {
     const cmf = computeCMF(t);
     if (dayPct != null && dayPct >= BREAKOUT_MIN_DAY_PCT && cmf != null && cmf > CMF_MIN) {
       const f = fund[t] || {};
-      candidates.push({ sym: t, price: d.price, daily: dayPct, cmf: cmf, volRatio: volRatio, offHighToday: offHighToday, moveVsAtr: moveVsAtr,
+      candidates.push({ sym: t, price: d.price, daily: dayPct, cmf: cmf, volRatio: volRatio, vol: d.vol, mcap: (f.mcap != null ? f.mcap : null),
+                         offHighToday: offHighToday, moveVsAtr: moveVsAtr,
                          premkt: f.premarketGapPct, earningsFlag: f.earningsFlag, newHigh: newHigh, rsi: d.rsi });
     }
   }
 
-  candidates.sort((a, b) => {
-    const x = a[intradayBreakoutSortCol], y = b[intradayBreakoutSortCol];
-    if (intradayBreakoutSortCol === 'sym') return intradayBreakoutSortDir * String(x).localeCompare(String(y));
-    if (intradayBreakoutSortCol === 'newHigh') return intradayBreakoutSortDir * ((x ? 1 : 0) - (y ? 1 : 0));
-    return intradayBreakoutSortDir * ((x == null ? -Infinity : x) - (y == null ? -Infinity : y));
-  });
+  if (intradayBreakoutSortCol !== 'rank') {
+    candidates.sort((a, b) => {
+      const x = a[intradayBreakoutSortCol], y = b[intradayBreakoutSortCol];
+      if (intradayBreakoutSortCol === 'sym') return intradayBreakoutSortDir * String(x).localeCompare(String(y));
+      if (intradayBreakoutSortCol === 'newHigh') return intradayBreakoutSortDir * ((x ? 1 : 0) - (y ? 1 : 0));
+      return intradayBreakoutSortDir * ((x == null ? -Infinity : x) - (y == null ? -Infinity : y));
+    });
+  }
+  candidates.forEach((c, idx) => { c.rank = idx + 1; });
 
   const caption = document.getElementById('intradayBreakoutCaption');
   if (caption) {
@@ -1414,15 +1419,18 @@ function renderIntradayBreakout(stocks) {
 
   el.innerHTML = candidates.length ? candidates.map(c => {
     const f = fund[c.sym] || {};
+    const rankCell = '<td>' + c.rank + '</td>';
     const offHighHtml = c.offHighToday == null ? '<span style="color:#6b7280">—</span>' :
       '<span style="font-weight:700;color:' + (c.offHighToday <= 1 ? '#0a9e5c' : c.offHighToday <= 3 ? '#6b7280' : '#e5484d') + '" title="How far below today\'s own intraday high the price currently sits — a large gap means the move has already faded from its peak. A SMALL gap does NOT mean more room to run - it can equally mean the move already happened and is just sitting flat near its ceiling. See Move vs Typical Day for that question instead.">-' + c.offHighToday.toFixed(1) + '%</span>';
     const moveVsAtrHtml = c.moveVsAtr == null ? '<span style="color:#6b7280">—</span>' :
       '<span style="font-weight:700;color:#374151" title="Today\'s move size divided by this stock\'s own typical daily range (ATR14). This is a MAGNITUDE measure only, not a directional signal - it does not mean the move is due to reverse. A stock already stretched relative to its own normal range can keep extending much further on a strong catalyst (e.g. earnings), or can reverse immediately - this number carries no information either way about which happens next. It only tells you how large today is FOR THIS STOCK compared to its own normal day, useful mainly for comparing across different tickers whose normal volatility differs a lot.">' + c.moveVsAtr.toFixed(1) + 'x</span>';
-    return '<tr><td><a class="tklink" href="' + rallyLink(c.sym) + '" target="_blank" rel="noopener noreferrer">' + c.sym + '</a></td>' +
+    return '<tr>' + rankCell + '<td><a class="tklink" href="' + rallyLink(c.sym) + '" target="_blank" rel="noopener noreferrer">' + c.sym + '</a></td>' +
       '<td>' + fmtPrice(c.price) + '</td>' +
       '<td>' + pctHtml(c.daily, {sign:true, dp:1}) + '</td>' +
       '<td>' + cmfBadge(c.cmf) + '</td>' +
       '<td><span style="font-weight:700;color:#6b7280">' + c.volRatio.toFixed(1) + 'x</span></td>' +
+      '<td>' + fmtVol(c.vol) + '</td>' +
+      '<td>' + fmtMcap(c.mcap) + '</td>' +
       '<td>' + moveVsAtrHtml + '</td>' +
       '<td>' + offHighHtml + '</td>' +
       '<td>' + premarketBadge(c.premkt, null) + '</td>' +
@@ -1431,7 +1439,7 @@ function renderIntradayBreakout(stocks) {
                  '<span style="color:#6b7280">—</span>') + '</td>' +
       '<td>' + (c.newHigh ? '<span style="color:#0a9e5c;font-weight:700">Yes</span>' : '<span style="color:#6b7280">no</span>') + '</td>' +
       '<td>' + rsiBadge(c.rsi) + '</td></tr>';
-  }).join('') : '<tr><td colspan="11" class="empty">No stocks currently meet both the ' + BREAKOUT_MIN_DAY_PCT + '%+ move and the CMF(20) > ' + CMF_MIN + ' buying-pressure condition.</td></tr>';
+  }).join('') : '<tr><td colspan="14" class="empty">No stocks currently meet both the ' + BREAKOUT_MIN_DAY_PCT + '%+ move and the CMF(20) > ' + CMF_MIN + ' buying-pressure condition.</td></tr>';
 }
 function setIntradayBreakoutSort(col) {
   if (intradayBreakoutSortCol === col) intradayBreakoutSortDir = -intradayBreakoutSortDir; else { intradayBreakoutSortCol = col; intradayBreakoutSortDir = col === 'sym' ? 1 : -1; }
@@ -1439,8 +1447,9 @@ function setIntradayBreakoutSort(col) {
 }
 
 const BULL_FLAG_COLS = [
-  ['sym','Ticker'], ['price','Price'], ['daily','Day %'], ['offHigh','Off 20D High'],
-  ['cmf','CMF(20)'], ['sellVolRatio','Selling Vol vs Normal'], ['rsi','RSI (14D)'], ['wrsi','Weekly RSI']
+  ['rank','#'], ['sym','Ticker'], ['price','Price'], ['daily','Day %'], ['offHigh','Off 20D High'],
+  ['cmf','CMF(20)'], ['sellVolRatio','Selling Vol vs Normal'], ['vol','Volume'], ['mcap','Market Cap'],
+  ['rsi','RSI (14D)'], ['wrsi','Weekly RSI']
 ];
 const BULL_FLAG_MIN_PULLBACK = 3;    // % off the 20-day high, lower bound
 const BULL_FLAG_MAX_PULLBACK = 14;   // % off the 20-day high, upper bound
@@ -1497,14 +1506,17 @@ function renderBullFlag(stocks) {
 
     if (d.rsi == null || d.rsi < BULL_FLAG_RSI_MIN || d.rsi > BULL_FLAG_RSI_MAX) continue;
 
-    candidates.push({ sym: t, price: d.price, daily: d.daily, offHigh: offHigh, cmf: cmf, sellVolRatio: sellVolRatio, rsi: d.rsi, wrsi: d.weeklyRsi });
+    candidates.push({ sym: t, price: d.price, daily: d.daily, offHigh: offHigh, cmf: cmf, sellVolRatio: sellVolRatio, vol: d.vol, mcap: (fund[t] ? fund[t].mcap : null), rsi: d.rsi, wrsi: d.weeklyRsi });
   }
 
-  candidates.sort((a, b) => {
-    const x = a[bullFlagSortCol], y = b[bullFlagSortCol];
-    if (bullFlagSortCol === 'sym') return bullFlagSortDir * String(x).localeCompare(String(y));
-    return bullFlagSortDir * ((x == null ? Infinity : x) - (y == null ? Infinity : y));
-  });
+  if (bullFlagSortCol !== 'rank') {
+    candidates.sort((a, b) => {
+      const x = a[bullFlagSortCol], y = b[bullFlagSortCol];
+      if (bullFlagSortCol === 'sym') return bullFlagSortDir * String(x).localeCompare(String(y));
+      return bullFlagSortDir * ((x == null ? Infinity : x) - (y == null ? Infinity : y));
+    });
+  }
+  candidates.forEach((c, idx) => { c.rank = idx + 1; });
 
   const caption = document.getElementById('bullFlagCaption');
   if (caption) {
@@ -1515,22 +1527,24 @@ function renderBullFlag(stocks) {
   }
 
   el.innerHTML = candidates.length ? candidates.map(c =>
-    '<tr><td><a class="tklink" href="' + rallyLink(c.sym) + '" target="_blank" rel="noopener noreferrer">' + c.sym + '</a></td>' +
+    '<tr><td>' + c.rank + '</td><td><a class="tklink" href="' + rallyLink(c.sym) + '" target="_blank" rel="noopener noreferrer">' + c.sym + '</a></td>' +
     '<td>' + fmtPrice(c.price) + '</td>' +
     '<td>' + pctHtml(c.daily, {sign:true, dp:1}) + '</td>' +
     '<td><span style="font-weight:700;color:#374151">-' + c.offHigh.toFixed(1) + '%</span></td>' +
     '<td>' + cmfBadge(c.cmf) + '</td>' +
     '<td><span style="font-weight:700;color:#6b7280">' + c.sellVolRatio.toFixed(2) + 'x</span></td>' +
+    '<td>' + fmtVol(c.vol) + '</td>' +
+    '<td>' + fmtMcap(c.mcap) + '</td>' +
     '<td>' + rsiBadge(c.rsi) + '</td>' +
     '<td>' + rsiBadge(c.wrsi) + '</td></tr>'
-  ).join('') : '<tr><td colspan="8" class="empty">No stocks currently meet all four bull flag conditions.</td></tr>';
+  ).join('') : '<tr><td colspan="11" class="empty">No stocks currently meet all four bull flag conditions.</td></tr>';
 }
 function setBullFlagSort(col) {
   if (bullFlagSortCol === col) bullFlagSortDir = -bullFlagSortDir; else { bullFlagSortCol = col; bullFlagSortDir = col === 'sym' ? 1 : -1; }
   render();
 }
 
-const CROSS_COLS = [['sym','Ticker'],['price','Price'],['ma50','MA50'],['ma200','MA200'],['gap','Gap %'],['ord','Status'],['target','Analyst Target'],['wrsi','Weekly RSI']];
+const CROSS_COLS = [['rank','#'],['sym','Ticker'],['price','Price'],['ma20','MA20'],['ma50','MA50'],['ma200','MA200'],['gap','Gap %'],['ord','Status'],['target','Analyst Target'],['vol','Volume'],['mcap','Market Cap'],['wrsi','Weekly RSI']];
 
 function renderCrossTable(stocks, kind, theadId, bodyId, captionId, sortCol, sortDir, setterName) {
   const el = document.getElementById(bodyId);
@@ -1550,14 +1564,18 @@ function renderCrossTable(stocks, kind, theadId, bodyId, captionId, sortCol, sor
     const d = data[t], c = d.cross, f = fund[t] || {};
     const targetUpside = (f.targetMean != null && d.price != null) ? pct(f.targetMean, d.price) : null;
     // ord: confirmed crosses sort by recency (0 = today), approaching sort after them by gap size
-    return { sym: t, price: d.price, ma50: c.ma50, ma200: c.ma200, gap: c.gapPct,
-             ord: c.status === 'crossed' ? c.barsAgo : 100 + Math.abs(c.gapPct), target: targetUpside, wrsi: d.weeklyRsi, _c: c };
+    return { sym: t, price: d.price, ma20: d.ma20, ma50: c.ma50, ma200: c.ma200, gap: c.gapPct,
+             ord: c.status === 'crossed' ? c.barsAgo : 100 + Math.abs(c.gapPct), target: targetUpside,
+             vol: d.vol, mcap: f.mcap != null ? f.mcap : null, wrsi: d.weeklyRsi, _c: c };
   });
-  rows.sort((a, b) => {
-    const x = a[sortCol], y = b[sortCol];
-    if (sortCol === 'sym') return sortDir * String(x).localeCompare(String(y));
-    return sortDir * ((x == null ? -Infinity : x) - (y == null ? -Infinity : y));
-  });
+  if (sortCol !== 'rank') {
+    rows.sort((a, b) => {
+      const x = a[sortCol], y = b[sortCol];
+      if (sortCol === 'sym') return sortDir * String(x).localeCompare(String(y));
+      return sortDir * ((x == null ? -Infinity : x) - (y == null ? -Infinity : y));
+    });
+  }
+  rows.forEach((r, idx) => { r.rank = idx + 1; });
 
   const caption = document.getElementById(captionId);
   const label = kind === 'golden' ? 'golden' : 'death';
@@ -1576,15 +1594,18 @@ function renderCrossTable(stocks, kind, theadId, bodyId, captionId, sortCol, sor
     const statusHtml = c.status === 'crossed'
       ? '<span style="font-weight:600;color:' + (kind === 'golden' ? '#166534' : '#991b1b') + '">CROSSED ' + (c.barsAgo === 0 ? 'today' : c.barsAgo + 'd ago') + '</span>'
       : '<span style="color:#92400e">APPROACHING</span>';
-    return '<tr><td><a class="tklink" href="' + rallyLink(row.sym) + '" target="_blank" rel="noopener noreferrer">' + row.sym + '</a></td>' +
+    return '<tr><td>' + row.rank + '</td><td><a class="tklink" href="' + rallyLink(row.sym) + '" target="_blank" rel="noopener noreferrer">' + row.sym + '</a></td>' +
       '<td>' + fmtPrice(row.price) + '</td>' +
+      '<td>' + fmtPrice(row.ma20) + '</td>' +
       '<td>' + fmtPrice(row.ma50) + '</td>' +
       '<td>' + fmtPrice(row.ma200) + '</td>' +
       '<td>' + pctHtml(row.gap, {arrow:false, sign:true, dp:2}) + '</td>' +
       '<td>' + statusHtml + '</td>' +
       '<td>' + targetHtml(row.sym, fund[row.sym], row.price) + '</td>' +
+      '<td>' + fmtVol(row.vol) + '</td>' +
+      '<td>' + fmtMcap(row.mcap) + '</td>' +
       '<td>' + rsiBadge(row.wrsi) + '</td></tr>';
-  }).join('') : '<tr><td colspan="8" class="empty">No stocks currently in the ' + label + ' cross zone (no MA50/MA200 cross in the last ' + CROSS_LOOKBACK + ' sessions, none approaching within ' + CROSS_APPROACH_GAP + '%).</td></tr>';
+  }).join('') : '<tr><td colspan="12" class="empty">No stocks currently in the ' + label + ' cross zone (no MA50/MA200 cross in the last ' + CROSS_LOOKBACK + ' sessions, none approaching within ' + CROSS_APPROACH_GAP + '%).</td></tr>';
 }
 
 
@@ -1612,11 +1633,13 @@ function computeRSDivergence(sym) {
   if (rsNow < rsMax) return null;             // RS must be at a new 63d high
   if (pxNow >= pxMax) return null;            // price must NOT be - that is the divergence
   const target = pxNow + RS_TARGET_ATR * d.atr;
+  const f = fund[sym] || {};
   return { sym: sym, price: pxNow, atr: d.atr, target: target,
            upside: (target / pxNow - 1) * 100,
            offHigh: (pxMax - pxNow) / pxMax * 100,
            rsGap: (rsNow / (rs.slice(0, -1).length ? Math.max(...rs.slice(0, -1)) : rsNow) - 1) * 100,
-           rsi: d.rsi, earnings: fund[sym] ? fund[sym].nextEarnings : null };
+           rsi: d.rsi, earnings: fund[sym] ? fund[sym].nextEarnings : null,
+           atgt: f.targetMean != null ? f.targetMean : null, vol: d.vol, mcap: f.mcap != null ? f.mcap : null };
 }
 let rsDivSortCol = 'upside', rsDivSortDir = -1;
 function setRSDivSort(col) {
@@ -1626,6 +1649,7 @@ function setRSDivSort(col) {
 }
 function renderRSDivergence(stocks) {
   const cols = [['sym','Ticker'],['price','Price'],['target','Target (1.5 ATR)'],['upside','Upside %'],
+                ['atgt','Analyst Target'],['vol','Volume'],['mcap','Market Cap'],
                 ['offHigh','Off 63d high'],['atr','ATR14'],['rsi','RSI'],['earnings','Next earnings']];
   const head = document.getElementById('rsDivTheadRow');
   const body = document.getElementById('rsDivBody');
@@ -1648,6 +1672,9 @@ function renderRSDivergence(stocks) {
     '<td>' + r.price.toFixed(2) + '</td>' +
     '<td style="font-weight:700">' + r.target.toFixed(2) + '</td>' +
     '<td style="color:#0a9e5c;font-weight:700">+' + r.upside.toFixed(1) + '%</td>' +
+    '<td>' + targetHtml(r.sym, fund[r.sym], r.price) + '</td>' +
+    '<td>' + fmtVol(data[r.sym] ? data[r.sym].vol : null) + '</td>' +
+    '<td>' + fmtMcap(fund[r.sym] ? fund[r.sym].mcap : null) + '</td>' +
     '<td>' + r.offHigh.toFixed(1) + '%</td>' +
     '<td>' + r.atr.toFixed(2) + '</td>' +
     '<td>' + (r.rsi != null ? r.rsi.toFixed(0) : '—') + '</td>' +
@@ -1683,7 +1710,7 @@ function renderWeeklyPicks(stocks) {
   const head = document.getElementById('weeklyPicksTheadRow');
   const body = document.getElementById('weeklyPicksBody');
   if (!head || !body) return;
-  const cols = ['#', 'Ticker', 'Entry (ref)', 'Target (+1.5 ATR)', 'Upside %', 'CMF(20)', 'Above MA200', 'ATR14', 'RSI', 'Next earnings'];
+  const cols = ['#', 'Ticker', 'Entry (ref)', 'Target (+1.5 ATR)', 'Upside %', 'Analyst Target', 'Volume', 'Market Cap', 'CMF(20)', 'Above MA200', 'ATR14', 'RSI', 'Next earnings'];
   head.innerHTML = cols.map(c => '<th>' + c + '</th>').join('');
   const res = computeWeeklyPicks(stocks);
   if (!res.picks.length) {
@@ -1696,6 +1723,9 @@ function renderWeeklyPicks(stocks) {
     '<td>' + p.price.toFixed(2) + '</td>' +
     '<td style="font-weight:700">' + p.target.toFixed(2) + '</td>' +
     '<td style="color:#0a9e5c;font-weight:700">+' + p.upside.toFixed(1) + '%</td>' +
+    '<td>' + targetHtml(p.sym, fund[p.sym], p.price) + '</td>' +
+    '<td>' + fmtVol(data[p.sym] ? data[p.sym].vol : null) + '</td>' +
+    '<td>' + fmtMcap(fund[p.sym] ? fund[p.sym].mcap : null) + '</td>' +
     '<td>' + cmfBadge(p.cmf) + '</td>' +
     '<td>+' + p.aboveMa200.toFixed(1) + '%</td>' +
     '<td>' + p.atr.toFixed(2) + '</td>' +
