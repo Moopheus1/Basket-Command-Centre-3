@@ -90,6 +90,26 @@
   .dstats .v { font-size: 12.5px; font-weight: 600; }
   .dcard-sector { border-top: 1px solid #f3f4f6; margin-top: 10px; padding-top: 8px; font-size: 11px; color: #6b7280; }
   .dcard-sector b { display: block; color: #16181d; font-size: 12.5px; }
+  /* Performance overview: freeze Ticker + Price so they stay readable while the rest
+     of the (18-column) table scrolls sideways, and mirror the horizontal scrollbar above
+     the table so it can be dragged without scrolling to the bottom first. */
+  .scroll-proxy { overflow-x: auto; overflow-y: hidden; height: 14px; margin-bottom: 2px; }
+  .scroll-proxy > div { height: 1px; }
+  #perfTable { border-collapse: separate; border-spacing: 0; }
+  #perfTable th, #perfTable td { border-bottom: 1px solid #f3f4f6; }
+  #perfTable th:nth-child(1), #perfTable td:nth-child(1) {
+    position: sticky; left: 0; z-index: 3; background: #fff;
+    text-align: left; min-width: 104px; max-width: 104px; }
+  #perfTable th:nth-child(2), #perfTable td:nth-child(2) {
+    position: sticky; left: 104px; z-index: 3; background: #fff;
+    min-width: 86px; max-width: 86px;
+    box-shadow: 1px 0 0 #e9eaee; }
+  #perfTable thead th:nth-child(1), #perfTable thead th:nth-child(2) { z-index: 4; background: #fff; }
+  #perfTable tbody tr:hover td:nth-child(1), #perfTable tbody tr:hover td:nth-child(2) { background: #fafafa; }
+  @media (max-width: 640px) {
+    #perfTable th:nth-child(1), #perfTable td:nth-child(1) { min-width: 78px; max-width: 78px; }
+    #perfTable th:nth-child(2), #perfTable td:nth-child(2) { left: 78px; min-width: 70px; max-width: 70px; }
+  }
   /* Weekly Picks is the widest table (14 cols) - tighten it so it fits one screen,
      and let the explanatory footnote row wrap onto several lines instead of one long line. */
   #weeklyPicksPanel table { font-size: 12px; table-layout: auto; }
@@ -249,8 +269,9 @@
     <a href="#top" class="jumpbar-inline" style="margin-top:0">↑ Back to top</a>
   </div>
   <div class="desc">Daily, WTD, MTD, YTD, and 1-year returns from daily closes. Click a column to sort.<br><br><strong>How to read the signal columns — and how much to trust them.</strong> <strong>Momentum</strong> and <strong>Persist</strong> are 0&ndash;100 composite scores, and <strong>Signal</strong> is the nine-tier verdict derived from them (STRONG BUY through SELL). <strong>These were backtested and the ladder does not hold.</strong> Measured over 20 sessions against a 52.8% baseline, WATCH — defined as momentum <em>below</em> 50 with persistence above 70 — was the best-performing label at a 60.9% win rate and +4.44% median, while CAUTION returned +4.49% and STRONG BUY only +2.20%, ranking sixth of nine. AVOID (+1.42%) beat HOLD (+0.20%). In short the colours have little monotonic relationship with what happened next, largely because short-term mean reversion swamps the momentum tilt and the beta and RSI sub-scores penalise exactly the names that run. Treat these three columns as description, not instruction. <strong>Health Score</strong> is supplied in the data feed and has never been tested here. <strong>Analyst Target</strong> deserves particular caution: on point-in-time consensus targets, hit rate within 3 months fell from 84.8% where implied upside was 0&ndash;10% to just 6.3% where it exceeded 100% — the bigger the claim, the less often it landed.<br><br><strong>How to read “vs EMA9/SMA20”.</strong> The word is where the last close sits relative to its 9-day EMA and 20-day SMA — <span style="color:#0a9e5c;font-weight:700">above</span> both, in the <span style="color:#f59e0b;font-weight:700">zone</span> between them, or <span style="color:#e5484d;font-weight:700">below</span> both. The number beside it is how far the close is from EMA9. <strong>Which of the three states a name is in carried no reliable edge</strong> in the backtest: across 241 combined signals, “above both” hit 77.5%, “in zone” 72.7% and “below both” 75.0% — a spread inside noise, with 88% of signals sitting on the pass side. The <em>number</em> is the part that mattered. On the 188 signals above both averages, median drawdown before the outcome was &minus;5.4% when the close was 3&ndash;5% over EMA9, &minus;8.8% at 5&ndash;8% and &minus;9.8% beyond 8%, with the 25th-percentile case falling from &minus;10.0% to &minus;17.0% (correlation &minus;0.308, p&lt;0.001). Hit rate barely moved (&minus;0.076, p=0.303). So <span style="color:#b45309;font-weight:700">⚠</span> above 5% and <span style="color:#e5484d;font-weight:700">⚠⚠</span> above 8% are <strong>drawdown warnings about entry timing, not quality warnings</strong> — an extended name is the same trade bought at a worse moment, and waiting for a pullback toward EMA9 historically gave the same odds with roughly half the pain.</div>
-  <div style="overflow-x:auto">
-    <table>
+  <div id="perfScrollTop" class="scroll-proxy"><div id="perfScrollTopInner"></div></div>
+  <div style="overflow-x:auto" id="perfScroll">
+    <table id="perfTable">
       <thead><tr id="theadRow"></tr></thead>
       <tbody id="tbody"></tbody>
     </table>
@@ -1323,6 +1344,37 @@ const COLS = [
   ['target', 'Analyst Target'], ['earnings', 'Next Earnings'], ['mcap', 'Market cap'], ['vol', 'Volume'],
   ['health', 'Health Score'], ['rsi', 'RSI (14D)']
 ];
+
+// Mirror the Performance table's horizontal scrollbar above the table. The proxy is an empty
+// div whose inner width matches the table, so dragging either bar moves the other. Re-measured
+// after every render because the column set (and therefore the width) can change.
+function syncPerfScrollbars() {
+  const top = document.getElementById('perfScrollTop');
+  const inner = document.getElementById('perfScrollTopInner');
+  const bottom = document.getElementById('perfScroll');
+  const table = document.getElementById('perfTable');
+  if (!top || !inner || !bottom || !table) return;
+  const w = table.scrollWidth;
+  inner.style.width = w + 'px';
+  // Hide the proxy when there is nothing to scroll. scrollWidth can read 0 or stale if this
+  // runs before layout settles, so only hide on a confident measurement and re-check on the
+  // next frame; otherwise the top bar can vanish on first paint and never come back.
+  if (w > 0 && bottom.clientWidth > 0) {
+    top.style.display = (w > bottom.clientWidth + 2) ? 'block' : 'none';
+  }
+  if (!top.dataset.wired) {
+    top.dataset.wired = '1';
+    let lock = false;
+    top.addEventListener('scroll', () => {
+      if (lock) return; lock = true; bottom.scrollLeft = top.scrollLeft; lock = false;
+    });
+    bottom.addEventListener('scroll', () => {
+      if (lock) return; lock = true; top.scrollLeft = bottom.scrollLeft; lock = false;
+    });
+    window.addEventListener('resize', syncPerfScrollbars);
+  }
+}
+
 function renderTable(spy, tickers) {
   document.getElementById('theadRow').innerHTML = COLS.map(c =>
     '<th onclick="setSort(\'' + c[0] + '\')">' + c[1] +
@@ -1374,6 +1426,9 @@ function renderTable(spy, tickers) {
     '<td>' + scoreBadge(r.health) + (r.f.healthGrade ? ' <span style="color:#9ca3af;font-size:11px">' + r.f.healthGrade + '</span>' : '') + '</td>' +
     '<td>' + rsiBadge(r.rsi) + '</td></tr>'
   ).join('') + extraRows;
+  syncPerfScrollbars();
+  if (typeof requestAnimationFrame === 'function') requestAnimationFrame(syncPerfScrollbars);  // re-measure once layout settles
+  else setTimeout(syncPerfScrollbars, 0);
 }
 function rrBadge(rr) {
   if (rr == null) return '<span style="color:#6b7280">—</span>';
