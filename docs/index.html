@@ -74,7 +74,7 @@
   .dcard-head .pxblock { text-align: right; }
   .dcard-head .px { font-weight: 700; font-size: 15px; }
   .dcard-head .dchg { font-size: 12px; font-weight: 600; }
-  .spark { width: 100%; height: 56px; margin: 8px 0 10px; display: block; }
+  .spark { width: 100%; height: 78px; margin: 8px 0 10px; display: block; }
   .chips3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 10px; }
   .rchip { border: 1px solid #e9eaee; border-radius: 9px; padding: 6px 8px; }
   .rchip .rlab { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; }
@@ -90,6 +90,15 @@
   .dstats .v { font-size: 12.5px; font-weight: 600; }
   .dcard-sector { border-top: 1px solid #f3f4f6; margin-top: 10px; padding-top: 8px; font-size: 11px; color: #6b7280; }
   .dcard-sector b { display: block; color: #16181d; font-size: 12.5px; }
+  /* Weekly Picks is the widest table (14 cols) - tighten it so it fits one screen,
+     and let the explanatory footnote row wrap onto several lines instead of one long line. */
+  #weeklyPicksPanel table { font-size: 12px; table-layout: auto; }
+  #weeklyPicksPanel th { padding: 6px 5px; font-size: 11px; }
+  #weeklyPicksPanel td { padding: 7px 5px; }
+  #weeklyPicksPanel td.wpnote { white-space: normal; text-align: left; line-height: 1.6; padding-top: 10px; }
+  #weeklyPicksPanel td.wpnote ul { margin: 6px 0 0; padding-left: 18px; }
+  #weeklyPicksPanel td.wpnote li { margin-bottom: 3px; }
+  #weeklyPicksPanel .wpsym { text-align: left; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th { text-align: right; font-weight: 600; color: #6b7280; font-size: 12px; padding: 8px 10px; border-bottom: 1px solid #e9eaee; cursor: pointer; user-select: none; white-space: nowrap; }
   th:first-child { text-align: left; }
@@ -650,6 +659,60 @@ function sparkSvg(closes) {
     '<polyline points="' + pts + '" fill="none" stroke="' + color + '" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 }
 
+
+// Card sparkline upgraded: close line + EMA9 + SMA20 + the same dynamic support/resistance
+// levels the Charts panel uses (computeSR). Falls back to the plain close line if a ticker
+// lacks the arrays (benchmarks/ETFs with short history). S/R here is the SAME function as the
+// big charts, so the two always agree - and carries the same caveat: it is a display aid,
+// never backtested, marking where price previously turned rather than where it must turn.
+function sparkSvgFull(sym, closes) {
+  const d = data[sym];
+  if (!closes || closes.length < 2) return '';
+  if (!d || d.error || !d.closes || d.closes.length < 25) return sparkSvg(closes);
+  const N = closes.length;
+  const full = d.closes, fn = full.length, st = Math.max(0, fn - N);
+  const e9full = ema9For(sym);
+  const e9 = e9full ? e9full.slice(st) : null;
+  const s20 = [];
+  for (let i = st; i < fn; i++) {
+    if (i < 19) { s20.push(null); continue; }
+    let sum = 0; for (let k = i - 19; k <= i; k++) sum += full[k];
+    s20.push(sum / 20);
+  }
+  const sr = computeSR(sym);
+  const w = 240, h = 78, pad = 4, PADR = 40;
+  const series = closes.concat(
+    e9 ? e9.filter(x => x != null) : [],
+    s20.filter(x => x != null),
+    sr ? [sr.R.price, sr.S.price] : []);
+  const min = Math.min.apply(null, series), max = Math.max.apply(null, series);
+  const span = (max - min) || 1;
+  const X = i => pad + i * (w - pad - PADR) / (N - 1);
+  const Y = v => h - pad - (v - min) / span * (h - 2 * pad);
+  const poly = (arr, col, width, dash) => {
+    const pts = [];
+    for (let i = 0; i < arr.length; i++) if (arr[i] != null) pts.push(X(i).toFixed(1) + ',' + Y(arr[i]).toFixed(1));
+    return pts.length > 1 ? '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + col +
+      '" stroke-width="' + width + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : '') + ' stroke-linejoin="round"/>' : '';
+  };
+  let out = '';
+  if (sr) {
+    const lvl = (v, col, tag) => {
+      const y = Y(v);
+      if (!isFinite(y)) return '';
+      return '<line x1="' + pad + '" y1="' + y.toFixed(1) + '" x2="' + (w - PADR) + '" y2="' + y.toFixed(1) +
+             '" stroke="' + col + '" stroke-width="1" stroke-dasharray="4 3" opacity="0.8"/>' +
+             '<text x="' + (w - PADR + 3) + '" y="' + (y + 3).toFixed(1) + '" font-size="8" fill="' + col + '" font-weight="700">' +
+             tag + ' ' + v.toFixed(v >= 100 ? 0 : 2) + '</text>';
+    };
+    out += lvl(sr.R.price, '#e5484d', 'R') + lvl(sr.S.price, '#0a9e5c', 'S');
+  }
+  out += poly(s20, '#2563eb', 1.1) + (e9 ? poly(e9, '#f59e0b', 1.1) : '');
+  const up = closes[N - 1] >= closes[0];
+  out += poly(closes, up ? '#0a9e5c' : '#e5484d', 1.7);
+  return '<svg class="spark" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">' + out + '</svg>';
+}
+
 function retChip(label, v, maxAbs) {
   const barColor = v == null || Math.abs(v) <= 0.005 ? '#d6d9de' : v > 0 ? '#0a9e5c' : '#e5484d';
   const width = v == null ? 0 : Math.max(6, Math.min(100, Math.abs(v) / maxAbs * 100));
@@ -775,6 +838,7 @@ function render() {
       rm + '<div class="tick"><a class="tklink" href="' + rallyLink(t) + '" target="_blank" rel="noopener noreferrer">' + t + '</a>' + (isB ? ' <span class="etf">BENCH</span>' : (ETF_TICKERS.has(t) ? ' <span class="etf">ETF</span>' : '')) + '</div>' + body + '</div>';
   }).join('') : '<div class="empty">No data yet. Run the "Update market data" workflow in GitHub Actions once, then reload.</div>';
 
+  clearDerivedCaches();
   renderDetailed(spy, tickers);
   renderTable(spy, tickers);
   renderRotationCandidates(stocks);
@@ -1190,7 +1254,12 @@ function renderDetailed(spy, tickers) {
     const rangePos = d.hi52 && d.hi52 > d.lo52 ? (d.price - d.lo52) / (d.hi52 - d.lo52) * 100 : null;
     const vsSpy = spy && t !== 'SPY' ? d.daily - spy.daily : (t === 'SPY' ? 0 : null);
 
-    let body = sparkSvg(d.spark);
+    let body = sparkSvgFull(t, d.spark);
+    body += '<div style="font-size:9px;color:#6b7280;margin:-6px 0 8px;line-height:1.5">' +
+      '<span style="color:#f59e0b;font-weight:700">—</span> EMA9 &nbsp;' +
+      '<span style="color:#2563eb;font-weight:700">—</span> SMA20 &nbsp;' +
+      '<span style="color:#e5484d;font-weight:700">- -</span> R &nbsp;' +
+      '<span style="color:#0a9e5c;font-weight:700">- -</span> S</div>';
     body += '<div class="chips3">' + retChip('1M', d.m1, maxAbs) + retChip('3M', d.m3, maxAbs) + retChip('1Y', d.y1, maxAbs) + '</div>';
     if (d.hi52 != null && rangePos != null) {
       body += '<div class="range-row"><b>' + fmtPrice(d.lo52) + '</b><span>52W range</span><b>' + fmtPrice(d.hi52) + '</b></div>' +
@@ -1702,6 +1771,13 @@ function renderRSDivergence(stocks) {
 // 20 sessions, avg +4.89%/trade, PF 3.55, equity x3.42, maxDD 11.7%.
 // IS (Jan-Apr) +4.99%/trade vs OOS (May-Aug) +4.77% - held up out-of-sample.
 // Ranking is ASCENDING on purpose: descending scored x2.20 vs x3.42.
+
+const WEEKLY_COL_TIPS = ['Rank by ascending CMF','Ticker','Last close. This doubles as the reference entry price, but the backtest bought at the NEXT session open, so your fill will differ.',
+  'Entry + 1.5 x ATR14','Distance from entry to target','Mean analyst price target and implied upside',
+  'Latest session volume','Market capitalisation','Chaikin Money Flow (20) — must exceed 0.20 to qualify',
+  'Position vs EMA9 and SMA20, and how far above EMA9. Flags when more than 5% extended.',
+  'The EMA9 price itself — the pullback level worth waiting for when the name is extended. Backtest: entering more than 5% above EMA9 roughly doubled median drawdown (-5.4% at 3-5% extension vs -8.8% at 5-8%) while the hit rate barely moved, so waiting for this level historically gave the same odds with far less pain. Shown in amber when price is more than 5% above it.',
+  'Percent above the 200-day moving average. Flags above 50%.','ATR(14)','RSI(14)','Next earnings date'];
 const WEEKLY_PICK_COUNT = 2, WEEKLY_CMF_MIN = 0.20, WEEKLY_TARGET_ATR = 1.5;
 const WEEKLY_SHOW_RUNNERUP = 1;   // display the next name(s) below the cut, greyed, for comparison
 function computeWeeklyPicks(stocks) {
@@ -1725,6 +1801,20 @@ function computeWeeklyPicks(stocks) {
            total: out.length };
 }
 
+
+
+// Per-symbol memo caches. computeSR / emaSeries are now called by the detailed cards, the
+// Charts panel and every maPosBadge in four tables, so without this the same pivot scan and
+// EMA pass runs a dozen times per symbol on every render. Cleared on each data load.
+let _srCache = {}, _ema9Cache = {};
+function clearDerivedCaches() { _srCache = {}; _ema9Cache = {}; }
+function ema9For(sym) {
+  if (sym in _ema9Cache) return _ema9Cache[sym];
+  const d = data[sym];
+  const v = (d && !d.error && d.closes) ? emaSeries(d.closes, 9) : null;
+  _ema9Cache[sym] = v;
+  return v;
+}
 
 // ---- Extension above MA200: sizing warning, NOT a quality warning ----
 // Tested on the 232 combined signals: above 50% over MA200 the hit rate is 76.7%,
@@ -1756,7 +1846,7 @@ function emaSeries(arr, n) {
 function maPosition(sym) {
   const d = data[sym];
   if (!d || d.error || !d.closes || d.closes.length < 20 || d.price == null) return null;
-  const e = emaSeries(d.closes, 9);
+  const e = ema9For(sym);
   if (!e) return null;
   const ema9 = e[e.length - 1];
   const sma20 = d.ma20;
@@ -1809,6 +1899,12 @@ function maPosBadge(sym) {
 // where price has previously turned, not to assert that it will turn there again.
 const SR_WINDOW = 120, SR_PIVOT_K = 3, SR_TOL_ATR = 0.75, SR_MAX_ATR = 3.0, SR_MIN_TOUCH = 2;
 function computeSR(sym) {
+  if (sym in _srCache) return _srCache[sym];
+  const r = _computeSRUncached(sym);
+  _srCache[sym] = r;
+  return r;
+}
+function _computeSRUncached(sym) {
   const d = data[sym];
   if (!d || d.error || !d.highs || !d.lows || !d.closes || !d.atr) return null;
   const n = d.closes.length, st = Math.max(0, n - SR_WINDOW);
@@ -1881,7 +1977,7 @@ function candleChartSvg(sym, sources) {
   const n = d.closes.length;
   const start = Math.max(0, n - CHART_BARS);
   const o = d.opens.slice(start), h = d.highs.slice(start), l = d.lows.slice(start), c = d.closes.slice(start);
-  const e9full = emaSeries(d.closes, 9) || [];
+  const e9full = ema9For(sym) || [];
   const e9 = e9full.slice(start);
   const s20 = [];
   for (let i = start; i < n; i++) {
@@ -1968,12 +2064,50 @@ function renderCharts(stocks) {
   el.innerHTML = rows.map(r => candleChartSvg(r[0], r[1])).join('');
 }
 
+
+// Compact variant of maPosBadge for the Weekly Picks table, which is the widest on the page.
+// Same data and same thresholds - shorter label so 14 columns fit one screen.
+
+// "Entry @ EMA9": the EMA9 price itself, i.e. the pullback level to wait for. Rationale is
+// the extension test on 188 signals above both MAs - median drawdown before the outcome was
+// -5.4% at 3-5% over EMA9 but -8.8% at 5-8% and -9.8% beyond, while hit rate was flat
+// (corr -0.076, p=0.303). So chasing an extended name buys the same odds at roughly twice
+// the drawdown; this column names the price at which that penalty goes away.
+function entryAtEma9(sym) {
+  const p = maPosition(sym);
+  if (!p) return '<span style="color:#6b7280">—</span>';
+  const wait = p.vsEma9 > EXT_EMA9_WARN;
+  const gap = p.vsEma9;
+  const col = wait ? '#b45309' : '#374151';
+  const note = gap > 0
+    ? 'price is ' + gap.toFixed(1) + '% above this level'
+    : 'price is already ' + Math.abs(gap).toFixed(1) + '% below EMA9 — no pullback needed';
+  return '<span style="color:' + col + ';font-weight:' + (wait ? '700' : '600') + '" title="EMA9 = ' +
+    p.ema9.toFixed(2) + '; ' + note + (wait ? '. More than 5% extended: waiting for this level historically halved the drawdown for the same hit rate.' : '') + '">' +
+    p.ema9.toFixed(2) + (wait ? ' ⌛' : '') + '</span>';
+}
+
+function maPosBadgeCompact(sym) {
+  const p = maPosition(sym);
+  if (!p) return '<span style="color:#6b7280">—</span>';
+  const col = p.zone === 'above both' ? '#0a9e5c' : p.zone === 'in zone' ? '#f59e0b' : '#e5484d';
+  const short = p.zone === 'above both' ? 'above' : p.zone === 'in zone' ? 'zone' : 'below';
+  const warn = p.vsEma9 > EXT_EMA9_HOT ? ' ⚠⚠' : p.vsEma9 > EXT_EMA9_WARN ? ' ⚠' : '';
+  const wcol = p.vsEma9 > EXT_EMA9_HOT ? '#e5484d' : '#b45309';
+  return '<span title="' + short + ' — price ' + (p.vsEma9 >= 0 ? '+' : '') + p.vsEma9.toFixed(1) +
+    '% vs EMA9 (' + p.ema9.toFixed(2) + '), SMA20 ' + p.sma20.toFixed(2) +
+    (warn ? '. More than 5% above EMA9: backtested median drawdown roughly doubles (-5.4% at 3-5% extension vs -8.8% at 5-8%), while the hit rate barely changes. A sizing/timing warning, not a reason to skip.' : '') + '">' +
+    '<span style="color:' + col + ';font-weight:700">' + short + '</span> ' +
+    '<span style="color:' + (warn ? wcol : '#6b7280') + ';font-weight:' + (warn ? '700' : '400') + '">' +
+    (p.vsEma9 >= 0 ? '+' : '') + p.vsEma9.toFixed(1) + '%' + warn + '</span></span>';
+}
+
 function renderWeeklyPicks(stocks) {
   const head = document.getElementById('weeklyPicksTheadRow');
   const body = document.getElementById('weeklyPicksBody');
   if (!head || !body) return;
-  const cols = ['#', 'Ticker', 'Entry (ref)', 'Target (+1.5 ATR)', 'Upside %', 'Analyst Target', 'Volume', 'Market Cap', 'CMF(20)', 'vs EMA9/SMA20', 'Above MA200', 'ATR14', 'RSI', 'Next earnings'];
-  head.innerHTML = cols.map(c => '<th>' + c + '</th>').join('');
+  const cols = ['#', 'Ticker', 'Price', 'Target', 'Upside', 'Analyst', 'Vol', 'Mkt cap', 'CMF', 'vs EMA9', 'Entry @ EMA9', '&gt;MA200', 'ATR', 'RSI', 'Earnings'];
+  head.innerHTML = cols.map((c, i) => '<th' + (i === 1 ? ' class="wpsym"' : '') + ' title="' + esc(WEEKLY_COL_TIPS[i] || '') + '">' + c + '</th>').join('');
   const res = computeWeeklyPicks(stocks);
   if (!res.picks.length) {
     body.innerHTML = '<tr><td colspan="' + cols.length + '" class="empty">No qualifiers this week &mdash; sit in cash. About 10% of weeks produced zero candidates in the backtest. An empty panel is a valid result, not a reason to relax the rule.</td></tr>';
@@ -1981,7 +2115,7 @@ function renderWeeklyPicks(stocks) {
   }
   body.innerHTML = res.picks.map((p, i) =>
     '<tr><td><strong>' + (i + 1) + '</strong></td>' +
-    '<td><strong>' + esc(p.sym) + '</strong></td>' +
+    '<td class="wpsym"><strong>' + esc(p.sym) + '</strong></td>' +
     '<td>' + p.price.toFixed(2) + '</td>' +
     '<td style="font-weight:700">' + p.target.toFixed(2) + '</td>' +
     '<td style="color:#0a9e5c;font-weight:700">+' + p.upside.toFixed(1) + '%</td>' +
@@ -1989,14 +2123,15 @@ function renderWeeklyPicks(stocks) {
     '<td>' + fmtVol(data[p.sym] ? data[p.sym].vol : null) + '</td>' +
     '<td>' + fmtMcap(fund[p.sym] ? fund[p.sym].mcap : null) + '</td>' +
     '<td>' + cmfBadge(p.cmf) + '</td>' +
-    '<td>' + maPosBadge(p.sym) + '</td>' +
+    '<td>' + maPosBadgeCompact(p.sym) + '</td>' +
+    '<td>' + entryAtEma9(p.sym) + '</td>' +
     '<td>' + extBadge(p.aboveMa200) + '</td>' +
     '<td>' + p.atr.toFixed(2) + '</td>' +
     '<td>' + (p.rsi != null ? p.rsi.toFixed(0) : '—') + '</td>' +
     '<td>' + (p.earnings ? esc(p.earnings) : '—') + '</td></tr>').join('') +
     (res.runnersUp || []).map((p, i) =>
       '<tr style="opacity:0.55;background:#fafafa"><td>' + (res.picks.length + i + 1) + '</td>' +
-      '<td>' + esc(p.sym) + ' <span style="font-size:10px;color:#b45309;font-weight:700">NOT TAKEN</span></td>' +
+      '<td class="wpsym">' + esc(p.sym) + ' <span style="font-size:10px;color:#b45309;font-weight:700">NOT TAKEN</span></td>' +
       '<td>' + p.price.toFixed(2) + '</td>' +
       '<td>' + p.target.toFixed(2) + '</td>' +
       '<td>+' + p.upside.toFixed(1) + '%</td>' +
@@ -2004,16 +2139,30 @@ function renderWeeklyPicks(stocks) {
       '<td>' + fmtVol(data[p.sym] ? data[p.sym].vol : null) + '</td>' +
       '<td>' + fmtMcap(fund[p.sym] ? fund[p.sym].mcap : null) + '</td>' +
       '<td>' + cmfBadge(p.cmf) + '</td>' +
-      '<td>' + maPosBadge(p.sym) + '</td>' +
+      '<td>' + maPosBadgeCompact(p.sym) + '</td>' +
+      '<td>' + entryAtEma9(p.sym) + '</td>' +
       '<td>' + extBadge(p.aboveMa200) + '</td>' +
       '<td>' + p.atr.toFixed(2) + '</td>' +
       '<td>' + (p.rsi != null ? p.rsi.toFixed(0) : '—') + '</td>' +
       '<td>' + (p.earnings ? esc(p.earnings) : '—') + '</td></tr>').join('') +
-    '<tr><td colspan="' + cols.length + '" style="font-size:12px;color:#6b7280;padding-top:8px">' +
-    res.total + ' name' + (res.total === 1 ? '' : 's') + ' qualified this week; the ' + res.picks.length +
-    ' with the LOWEST qualifying CMF are taken. Greyed row' + ((res.runnersUp || []).length === 1 ? ' is the next name' : 's are the next names') +
-    ' below the cut, shown for comparison only — the backtest did NOT trade them, and taking a 3rd position scored worse out-of-sample (+4.73%/trade vs +4.77% at top 2). ' +
-    'Entry is a reference price only — the backtest entered at the NEXT session\'s open.</td></tr>';
+    '<tr><td colspan="' + cols.length + '" class="wpnote" style="font-size:11px;color:#6b7280">' +
+      '<strong>' + res.total + ' name' + (res.total === 1 ? '' : 's') + ' qualified this week.</strong> ' +
+      'The ' + res.picks.length + ' with the lowest qualifying CMF are taken.' +
+      '<ul>' +
+        ((res.runnersUp || []).length
+          ? '<li><strong>Why the greyed row is not taken:</strong> it ranked below the cut on ascending CMF. ' +
+            'It is shown for comparison only — the backtest never traded it.</li>' +
+            '<li>Taking a 3rd position scored <em>worse</em> out-of-sample: +4.73% per trade at top 3 versus ' +
+            '+4.77% at top 2, and returns decay steadily as you add names (top 4 +4.12%, top 5 +3.59%, ' +
+            'every qualifier +1.39%). The ranking carries information at the very top and progressively less below it.</li>'
+          : '') +
+        '<li><strong>Price</strong> is the last close, and doubles as the reference entry. The backtest bought at the <em>next</em> session\'s open, ' +
+        'so your actual fill will differ from the figure shown.</li>' +
+        '<li><strong>Entry @ EMA9</strong> is the pullback level worth waiting for. Entering more than 5% above EMA9 ' +
+        'roughly doubled median drawdown in the backtest (&minus;5.4% at 3&ndash;5% extension vs &minus;8.8% at 5&ndash;8%) ' +
+        'while the hit rate barely changed, so an extended name is the same trade bought at a worse moment. ⌛ marks those.</li>' +
+        '<li>Hover any column header for what it measures and which thresholds are flagged.</li>' +
+      '</ul></td></tr>';
 }
 
 function renderGoldenCross(stocks) {
