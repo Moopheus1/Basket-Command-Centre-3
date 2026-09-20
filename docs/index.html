@@ -136,8 +136,8 @@
   <a href="#rotationPanel">↓ Rotation candidates</a>
   <a href="#deathPanel">↓ Death cross</a>
   <a href="#performancePanel">↓ Performance</a>
-  <a href="#watchlistPanel">↓ Watchlist</a>
   <a href="#detailedPanel">↓ Ticker cards</a>
+  <a href="#watchlistPanel">↓ Watchlist</a>
 </div>
 
 <div class="statgrid" id="stats"></div>
@@ -174,7 +174,8 @@
 
 <div class="panel" id="goldenPanel">
   <h2><span style="background:#0a9e5c;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">#1 &middot; 79.2% hit</span>Golden cross zone (MA50 &times; MA200)</h2>
-  <div class="desc" id="goldenCaption">Stocks whose MA50 crossed above MA200 within the last 20 sessions (bullish regime change), or where MA50 is still below MA200 but within 2% and converging over the last 5 sessions (approaching). A cross is a lagging confirmation, not an entry signal on its own. <strong>Backtest:</strong> highest hit rate of the four signal panels — 79.2% reached entry + 1.5&times;ATR14 within 20 sessions (n=53), median 5 sessions, median outcome +7.29%, worst month 66.7% (the most stable of any panel). Against a 62.3% random-entry baseline that is ~+17 points of edge. It is also the ONLY panel that survives a stop-loss system test (+0.35R expectancy, profit factor 1.83, 5.6R max drawdown). Small sample (53 signals, ~7.6/month) and one regime — it lost money in October in an earlier test.</div>
+  <div class="desc" id="goldenCaption" style="font-weight:600;color:#374151"></div>
+  <div class="desc" id="goldenExplain">Stocks whose MA50 crossed above MA200 within the last 20 sessions (bullish regime change), or where MA50 is still below MA200 but within 2% and converging over the last 5 sessions (approaching). A cross is a lagging confirmation, not an entry signal on its own. <strong>Backtest:</strong> highest hit rate of the four signal panels — 79.2% reached entry + 1.5&times;ATR14 within 20 sessions (n=53), median 5 sessions, median outcome +7.29%, worst month 66.7% (the most stable of any panel). Against a 62.3% random-entry baseline that is ~+17 points of edge. It is also the ONLY panel that survives a stop-loss system test (+0.35R expectancy, profit factor 1.83, 5.6R max drawdown). Small sample (53 signals, ~7.6/month) and one regime — it lost money in October in an earlier test.<br><br><strong>How to read “vs EMA9/SMA20”.</strong> The word is where the last close sits relative to its 9-day EMA and 20-day SMA — <span style="color:#0a9e5c;font-weight:700">above</span> both, in the <span style="color:#f59e0b;font-weight:700">zone</span> between them, or <span style="color:#e5484d;font-weight:700">below</span> both. The number beside it is how far the close is from EMA9. <strong>Which of the three states a name is in carried no reliable edge</strong> in the backtest: across 241 combined signals, “above both” hit 77.5%, “in zone” 72.7% and “below both” 75.0% — a spread inside noise, with 88% of signals sitting on the pass side. The <em>number</em> is the part that mattered. On the 188 signals above both averages, median drawdown before the outcome was &minus;5.4% when the close was 3&ndash;5% over EMA9, &minus;8.8% at 5&ndash;8% and &minus;9.8% beyond 8%, with the 25th-percentile case falling from &minus;10.0% to &minus;17.0% (correlation &minus;0.308, p&lt;0.001). Hit rate barely moved (&minus;0.076, p=0.303). So <span style="color:#b45309;font-weight:700">⚠</span> above 5% and <span style="color:#e5484d;font-weight:700">⚠⚠</span> above 8% are <strong>drawdown warnings about entry timing, not quality warnings</strong> — an extended name is the same trade bought at a worse moment, and waiting for a pullback toward EMA9 historically gave the same odds with roughly half the pain.</div>
   <div style="overflow-x:auto">
     <table>
       <thead><tr id="goldenTheadRow"></tr></thead>
@@ -196,7 +197,8 @@
 
 <div class="panel" id="bullFlagPanel">
   <h2><span style="background:#f59e0b;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">#3 &middot; 78.3% hit</span>Bull Flag Watch (uptrend pullback, selling volume drying up, 2-3 weeks view)</h2>
-  <div class="desc" id="bullFlagCaption">Stocks in a CONFIRMED uptrend (price above MA50, MA50 above MA200 - stacked averages) that have pulled back 3-14% from their own 20-day high, with SELLING volume drying up specifically (not just total volume - average volume on down-closing days over the last 5 sessions under 85% of the prior 20 sessions' down-day average), with RSI cooled to a neutral 40-60 band - not overbought, not washed out. "Selling volume" is a standard proxy (a day's whole volume counts as selling only if it closed lower than the day before), not true tick-level buy/sell data. This is the opposite framing from Intraday Breakout Watch: instead of chasing a move already underway, this looks for stocks resting inside an intact uptrend before the next potential move, on the theory that fading selling volume during a pullback suggests sellers losing conviction rather than a real reversal. The 3-14% pullback band and the volume/RSI thresholds are reasonable starting defaults calibrated to this basket's typical volatility (most names here run 3-5% daily ATR) - they have NOT been backtested for optimal forward returns, and a pullback meeting every condition here is not guaranteed to resume higher; it can just as easily break down further. A short or empty list on a given day is expected, not a bug - all four conditions holding at once is meant to be uncommon. <strong>CHANGED:</strong> the down-day selling-volume rule no longer filters this panel — it was replaced by CMF(20) &gt; 0.20 (sustained buying pressure). The old ratio is still shown in grey for reference but gates nothing. <strong>Backtest of the swap:</strong> hit rate 70.1% &rarr; <strong>78.3%</strong> (n=60), out-of-sample drift +4.2 &rarr; +0.4, median max-adverse-excursion &minus;9.19% &rarr; &minus;6.60%, and the worst month lifted from 33.3% (below the random baseline) to 60.0%. Cost: signal count falls from 154 to 60, so expect a shorter list.</div>
+  <div class="desc" id="bullFlagCaption" style="font-weight:600;color:#374151"></div>
+  <div class="desc" id="bullFlagExplain">Stocks in a CONFIRMED uptrend (price above MA50, MA50 above MA200 - stacked averages) that have pulled back 3-14% from their own 20-day high, with SELLING volume drying up specifically (not just total volume - average volume on down-closing days over the last 5 sessions under 85% of the prior 20 sessions' down-day average), with RSI cooled to a neutral 40-60 band - not overbought, not washed out. "Selling volume" is a standard proxy (a day's whole volume counts as selling only if it closed lower than the day before), not true tick-level buy/sell data. This is the opposite framing from Intraday Breakout Watch: instead of chasing a move already underway, this looks for stocks resting inside an intact uptrend before the next potential move, on the theory that fading selling volume during a pullback suggests sellers losing conviction rather than a real reversal. The 3-14% pullback band and the volume/RSI thresholds are reasonable starting defaults calibrated to this basket's typical volatility (most names here run 3-5% daily ATR) - they have NOT been backtested for optimal forward returns, and a pullback meeting every condition here is not guaranteed to resume higher; it can just as easily break down further. A short or empty list on a given day is expected, not a bug - all four conditions holding at once is meant to be uncommon. <strong>CHANGED:</strong> the down-day selling-volume rule no longer filters this panel — it was replaced by CMF(20) &gt; 0.20 (sustained buying pressure). The old ratio is still shown in grey for reference but gates nothing. <strong>Backtest of the swap:</strong> hit rate 70.1% &rarr; <strong>78.3%</strong> (n=60), out-of-sample drift +4.2 &rarr; +0.4, median max-adverse-excursion &minus;9.19% &rarr; &minus;6.60%, and the worst month lifted from 33.3% (below the random baseline) to 60.0%. Cost: signal count falls from 154 to 60, so expect a shorter list.</div>
   <div style="overflow-x:auto">
     <table>
       <thead><tr id="bullFlagTheadRow"></tr></thead>
@@ -207,7 +209,8 @@
 
 <div class="panel" id="intradayBreakoutPanel">
   <h2><span style="background:#f59e0b;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">#4 &middot; 74.6% hit</span>Intraday Breakout Watch (volume-confirmed, 5%+ in the green, 1 week / short-term view)</h2>
-  <div class="desc" id="intradayBreakoutCaption">Stocks currently up 5%+ on the day AND trading at least 2x their trailing 20-day MEDIAN volume (median, not mean, so one past outlier day like an earnings spike can't quietly inflate the baseline). Neither the day% threshold nor "Off Today's High" tells you whether a move is already used up — a stock sitting near its own intraday high can mean it's still climbing, OR that it already popped once and has been flat near that ceiling ever since with nothing forcing it further; the two look identical on that metric alone. "Move vs Typical Day" compares today's move to the stock's own normal daily range (ATR14) as a MAGNITUDE-only read — deliberately shown in one neutral color, not red/green, because a large number here does not mean "due to reverse" or "cut here." A stock already at 5x its typical day can absolutely run to 8x or 10x on a strong catalyst (an earnings beat, for instance) just as easily as it can pull back — this number carries no directional information either way, it only says how large today is for THIS stock compared to its own normal, which is mainly useful for comparing across tickers whose normal volatility differs a lot. None of the columns here predict what happens next. This is DESCRIPTIVE, not predictive: it only flags a move already underway. Before market close, "Volume vs 20d median" is pace-adjusted for how much of the session has elapsed, so it's an extrapolation, not a guarantee it holds through the close. <strong>CHANGED:</strong> the 2x-median volume rule no longer filters this panel — it was replaced by CMF(20) &gt; 0.20. The volume ratio is still shown in grey for reference but gates nothing; the 5%+ day rule is unchanged. <strong>Backtest of the swap:</strong> hit rate 68.5% &rarr; <strong>74.6%</strong> (n=118), and out-of-sample drift flipped from &minus;8.9 to +1.7 — it stops decaying. Median max-adverse-excursion improves &minus;13.72% &rarr; &minus;11.14%, still the deepest of the four panels. This remains the weakest panel and it is still DESCRIPTIVE: holding past day 1 showed no edge in the original test (+0.90% median day 1 decaying to +0.09% by day 5).</div>
+  <div class="desc" id="intradayBreakoutCaption" style="font-weight:600;color:#374151"></div>
+  <div class="desc" id="intradayBreakoutExplain">Stocks currently up 5%+ on the day AND trading at least 2x their trailing 20-day MEDIAN volume (median, not mean, so one past outlier day like an earnings spike can't quietly inflate the baseline). Neither the day% threshold nor "Off Today's High" tells you whether a move is already used up — a stock sitting near its own intraday high can mean it's still climbing, OR that it already popped once and has been flat near that ceiling ever since with nothing forcing it further; the two look identical on that metric alone. "Move vs Typical Day" compares today's move to the stock's own normal daily range (ATR14) as a MAGNITUDE-only read — deliberately shown in one neutral color, not red/green, because a large number here does not mean "due to reverse" or "cut here." A stock already at 5x its typical day can absolutely run to 8x or 10x on a strong catalyst (an earnings beat, for instance) just as easily as it can pull back — this number carries no directional information either way, it only says how large today is for THIS stock compared to its own normal, which is mainly useful for comparing across tickers whose normal volatility differs a lot. None of the columns here predict what happens next. This is DESCRIPTIVE, not predictive: it only flags a move already underway. Before market close, "Volume vs 20d median" is pace-adjusted for how much of the session has elapsed, so it's an extrapolation, not a guarantee it holds through the close. <strong>CHANGED:</strong> the 2x-median volume rule no longer filters this panel — it was replaced by CMF(20) &gt; 0.20. The volume ratio is still shown in grey for reference but gates nothing; the 5%+ day rule is unchanged. <strong>Backtest of the swap:</strong> hit rate 68.5% &rarr; <strong>74.6%</strong> (n=118), and out-of-sample drift flipped from &minus;8.9 to +1.7 — it stops decaying. Median max-adverse-excursion improves &minus;13.72% &rarr; &minus;11.14%, still the deepest of the four panels. This remains the weakest panel and it is still DESCRIPTIVE: holding past day 1 showed no edge in the original test (+0.90% median day 1 decaying to +0.09% by day 5).</div>
   <div style="overflow-x:auto">
     <table>
       <thead><tr id="intradayBreakoutTheadRow"></tr></thead>
@@ -229,7 +232,8 @@
 
 <div class="panel" id="deathPanel">
   <h2>Death cross zone (MA50 &times; MA200)</h2>
-  <div class="desc" id="deathCaption">Stocks whose MA50 crossed below MA200 within the last 20 sessions (bearish regime change), or where MA50 is still above MA200 but within 2% and converging over the last 5 sessions (approaching). Same lagging-indicator caveat applies.</div>
+  <div class="desc" id="deathCaption" style="font-weight:600;color:#374151"></div>
+  <div class="desc" id="deathExplain">Stocks whose MA50 crossed below MA200 within the last 20 sessions (bearish regime change), or where MA50 is still above MA200 but within 2% and converging over the last 5 sessions (approaching). Same lagging-indicator caveat applies.</div>
   <div style="overflow-x:auto">
     <table>
       <thead><tr id="deathTheadRow"></tr></thead>
@@ -244,7 +248,7 @@
     <h2>Performance overview</h2>
     <a href="#top" class="jumpbar-inline" style="margin-top:0">↑ Back to top</a>
   </div>
-  <div class="desc">Daily, WTD, MTD, YTD, and 1-year returns from daily closes. Click a column to sort.</div>
+  <div class="desc">Daily, WTD, MTD, YTD, and 1-year returns from daily closes. Click a column to sort.<br><br><strong>How to read the signal columns — and how much to trust them.</strong> <strong>Momentum</strong> and <strong>Persist</strong> are 0&ndash;100 composite scores, and <strong>Signal</strong> is the nine-tier verdict derived from them (STRONG BUY through SELL). <strong>These were backtested and the ladder does not hold.</strong> Measured over 20 sessions against a 52.8% baseline, WATCH — defined as momentum <em>below</em> 50 with persistence above 70 — was the best-performing label at a 60.9% win rate and +4.44% median, while CAUTION returned +4.49% and STRONG BUY only +2.20%, ranking sixth of nine. AVOID (+1.42%) beat HOLD (+0.20%). In short the colours have little monotonic relationship with what happened next, largely because short-term mean reversion swamps the momentum tilt and the beta and RSI sub-scores penalise exactly the names that run. Treat these three columns as description, not instruction. <strong>Health Score</strong> is supplied in the data feed and has never been tested here. <strong>Analyst Target</strong> deserves particular caution: on point-in-time consensus targets, hit rate within 3 months fell from 84.8% where implied upside was 0&ndash;10% to just 6.3% where it exceeded 100% — the bigger the claim, the less often it landed.<br><br><strong>How to read “vs EMA9/SMA20”.</strong> The word is where the last close sits relative to its 9-day EMA and 20-day SMA — <span style="color:#0a9e5c;font-weight:700">above</span> both, in the <span style="color:#f59e0b;font-weight:700">zone</span> between them, or <span style="color:#e5484d;font-weight:700">below</span> both. The number beside it is how far the close is from EMA9. <strong>Which of the three states a name is in carried no reliable edge</strong> in the backtest: across 241 combined signals, “above both” hit 77.5%, “in zone” 72.7% and “below both” 75.0% — a spread inside noise, with 88% of signals sitting on the pass side. The <em>number</em> is the part that mattered. On the 188 signals above both averages, median drawdown before the outcome was &minus;5.4% when the close was 3&ndash;5% over EMA9, &minus;8.8% at 5&ndash;8% and &minus;9.8% beyond 8%, with the 25th-percentile case falling from &minus;10.0% to &minus;17.0% (correlation &minus;0.308, p&lt;0.001). Hit rate barely moved (&minus;0.076, p=0.303). So <span style="color:#b45309;font-weight:700">⚠</span> above 5% and <span style="color:#e5484d;font-weight:700">⚠⚠</span> above 8% are <strong>drawdown warnings about entry timing, not quality warnings</strong> — an extended name is the same trade bought at a worse moment, and waiting for a pullback toward EMA9 historically gave the same odds with roughly half the pain.</div>
   <div style="overflow-x:auto">
     <table>
       <thead><tr id="theadRow"></tr></thead>
@@ -254,16 +258,16 @@
   <a href="#top" class="jumpbar-inline">↑ Back to top</a>
 </div>
 
-<div class="panel" id="watchlistPanel">
-  <h2>Watchlist</h2>
-  <div class="desc">Hide a ticker with the &times; on its card. To track a NEW ticker or restore a hidden one, edit <b>tickers.txt</b> or re-run the workflow in the GitHub repo.</div>
-  <div class="cards" id="cards"></div>
-</div>
-
 <div class="panel" id="detailedPanel">
   <h2>Detailed ticker cards</h2>
   <div class="desc">Last close, 3-month daily trend line, 1M/3M/1Y returns, 52-week range position, market cap, beta, volume vs 20-day average, daily RSI(14), weekly RSI(14), sector, and industry.</div>
   <div class="dcards" id="dcards"></div>
+</div>
+
+<div class="panel" id="watchlistPanel">
+  <h2>Watchlist</h2>
+  <div class="desc">Hide a ticker with the &times; on its card. To track a NEW ticker or restore a hidden one, edit <b>tickers.txt</b> or re-run the workflow in the GitHub repo.</div>
+  <div class="cards" id="cards"></div>
 </div>
 
 <div class="jumpbar" style="margin:14px 0 20px">
@@ -271,8 +275,8 @@
   <a href="#goldenPanel">Golden cross</a>
   <a href="#deathPanel">Death cross</a>
   <a href="#performancePanel">Performance</a>
-  <a href="#watchlistPanel">Watchlist</a>
   <a href="#detailedPanel">Ticker cards</a>
+  <a href="#watchlistPanel">Watchlist</a>
 </div>
 
 <script>
@@ -1287,7 +1291,7 @@ function renderDetailed(spy, tickers) {
 }
 const COLS = [
   ['sym', 'Ticker'], ['price', 'Price'], ['daily', 'Daily'], ['wtd', 'WTD'], ['mtd', 'MTD'],
-  ['ytd', 'YTD'], ['y1', '1Y'], ['vsSpy', 'vs SPY'], ['mom', 'Momentum'], ['per', 'Persist'], ['sig', 'Signal'],
+  ['ytd', 'YTD'], ['y1', '1Y'], ['vsSpy', 'vs SPY'], ['mapos', 'vs EMA9/SMA20'], ['mom', 'Momentum'], ['per', 'Persist'], ['sig', 'Signal'],
   ['target', 'Analyst Target'], ['earnings', 'Next Earnings'], ['mcap', 'Market cap'], ['vol', 'Volume'],
   ['health', 'Health Score'], ['rsi', 'RSI (14D)']
 ];
@@ -1302,7 +1306,8 @@ function renderTable(spy, tickers) {
     const f = fund[t] || {};
     const targetUpside = (f.targetMean != null && d.price != null) ? pct(f.targetMean, d.price) : null;
     return { sym: t, price: d.price, daily: d.daily, wtd: d.wtd, mtd: d.mtd, ytd: d.ytd, y1: d.y1,
-             vsSpy: spy ? d.daily - spy.daily : null, mom: d.momScore, per: d.perScore, sig: d.signal,
+             vsSpy: spy ? d.daily - spy.daily : null, mapos: (maPosition(t) ? maPosition(t).vsEma9 : null),
+             mom: d.momScore, per: d.perScore, sig: d.signal,
              target: targetUpside, earnings: f.nextEarnings, f: f,
              mcap: f.mcap != null ? f.mcap : null, vol: d.vol, health: f.healthScore, rsi: d.rsi };
   });
@@ -1317,7 +1322,7 @@ function renderTable(spy, tickers) {
   });
 
   const extraRows = tickers.filter(t => data[t] && data[t].error).map(t =>
-    '<tr><td>' + t + '</td><td colspan="16" style="text-align:left"><span class="down">no data: ' +
+    '<tr><td>' + t + '</td><td colspan="17" style="text-align:left"><span class="down">no data: ' +
     esc(data[t].error).slice(0, 40) + '</span></td></tr>'
   ).join('');
 
@@ -1330,6 +1335,7 @@ function renderTable(spy, tickers) {
     '<td>' + pctHtml(r.ytd) + '</td>' +
     '<td>' + pctHtml(r.y1) + '</td>' +
     '<td>' + pctHtml(r.vsSpy, {sign:true, arrow:false, dp:2}) + '</td>' +
+    '<td>' + maPosBadgeCompact(r.sym) + '</td>' +
     '<td>' + scoreBadge(r.mom) + '</td>' +
     '<td>' + scoreBadge(r.per) + '</td>' +
     '<td>' + signalBadge(r.sig) + '</td>' +
@@ -1773,10 +1779,10 @@ function renderRSDivergence(stocks) {
 // Ranking is ASCENDING on purpose: descending scored x2.20 vs x3.42.
 
 const WEEKLY_COL_TIPS = ['Rank by ascending CMF','Ticker','Last close. This doubles as the reference entry price, but the backtest bought at the NEXT session open, so your fill will differ.',
+  'The EMA9 price itself — the pullback level worth waiting for when the name is extended. Backtest: entering more than 5% above EMA9 roughly doubled median drawdown (-5.4% at 3-5% extension vs -8.8% at 5-8%) while the hit rate barely moved, so waiting for this level historically gave the same odds with far less pain. Marked ⌛ when price is more than 5% above it.',
   'Entry + 1.5 x ATR14','Distance from entry to target','Mean analyst price target and implied upside',
   'Latest session volume','Market capitalisation','Chaikin Money Flow (20) — must exceed 0.20 to qualify',
   'Position vs EMA9 and SMA20, and how far above EMA9. Flags when more than 5% extended.',
-  'The EMA9 price itself — the pullback level worth waiting for when the name is extended. Backtest: entering more than 5% above EMA9 roughly doubled median drawdown (-5.4% at 3-5% extension vs -8.8% at 5-8%) while the hit rate barely moved, so waiting for this level historically gave the same odds with far less pain. Shown in amber when price is more than 5% above it.',
   'Percent above the 200-day moving average. Flags above 50%.','ATR(14)','RSI(14)','Next earnings date'];
 const WEEKLY_PICK_COUNT = 2, WEEKLY_CMF_MIN = 0.20, WEEKLY_TARGET_ATR = 1.5;
 const WEEKLY_SHOW_RUNNERUP = 1;   // display the next name(s) below the cut, greyed, for comparison
@@ -2106,7 +2112,7 @@ function renderWeeklyPicks(stocks) {
   const head = document.getElementById('weeklyPicksTheadRow');
   const body = document.getElementById('weeklyPicksBody');
   if (!head || !body) return;
-  const cols = ['#', 'Ticker', 'Price', 'Target', 'Upside', 'Analyst', 'Vol', 'Mkt cap', 'CMF', 'vs EMA9', 'Entry @ EMA9', '&gt;MA200', 'ATR', 'RSI', 'Earnings'];
+  const cols = ['#', 'Ticker', 'Price', 'Entry @ EMA9', 'Target', 'Upside', 'Analyst', 'Vol', 'Mkt cap', 'CMF', 'vs EMA9', '&gt;MA200', 'ATR', 'RSI', 'Earnings'];
   head.innerHTML = cols.map((c, i) => '<th' + (i === 1 ? ' class="wpsym"' : '') + ' title="' + esc(WEEKLY_COL_TIPS[i] || '') + '">' + c + '</th>').join('');
   const res = computeWeeklyPicks(stocks);
   if (!res.picks.length) {
@@ -2117,6 +2123,7 @@ function renderWeeklyPicks(stocks) {
     '<tr><td><strong>' + (i + 1) + '</strong></td>' +
     '<td class="wpsym"><strong>' + esc(p.sym) + '</strong></td>' +
     '<td>' + p.price.toFixed(2) + '</td>' +
+    '<td>' + entryAtEma9(p.sym) + '</td>' +
     '<td style="font-weight:700">' + p.target.toFixed(2) + '</td>' +
     '<td style="color:#0a9e5c;font-weight:700">+' + p.upside.toFixed(1) + '%</td>' +
     '<td>' + targetHtml(p.sym, fund[p.sym], p.price) + '</td>' +
@@ -2124,7 +2131,6 @@ function renderWeeklyPicks(stocks) {
     '<td>' + fmtMcap(fund[p.sym] ? fund[p.sym].mcap : null) + '</td>' +
     '<td>' + cmfBadge(p.cmf) + '</td>' +
     '<td>' + maPosBadgeCompact(p.sym) + '</td>' +
-    '<td>' + entryAtEma9(p.sym) + '</td>' +
     '<td>' + extBadge(p.aboveMa200) + '</td>' +
     '<td>' + p.atr.toFixed(2) + '</td>' +
     '<td>' + (p.rsi != null ? p.rsi.toFixed(0) : '—') + '</td>' +
@@ -2133,6 +2139,7 @@ function renderWeeklyPicks(stocks) {
       '<tr style="opacity:0.55;background:#fafafa"><td>' + (res.picks.length + i + 1) + '</td>' +
       '<td class="wpsym">' + esc(p.sym) + ' <span style="font-size:10px;color:#b45309;font-weight:700">NOT TAKEN</span></td>' +
       '<td>' + p.price.toFixed(2) + '</td>' +
+      '<td>' + entryAtEma9(p.sym) + '</td>' +
       '<td>' + p.target.toFixed(2) + '</td>' +
       '<td>+' + p.upside.toFixed(1) + '%</td>' +
       '<td>' + targetHtml(p.sym, fund[p.sym], p.price) + '</td>' +
@@ -2140,7 +2147,6 @@ function renderWeeklyPicks(stocks) {
       '<td>' + fmtMcap(fund[p.sym] ? fund[p.sym].mcap : null) + '</td>' +
       '<td>' + cmfBadge(p.cmf) + '</td>' +
       '<td>' + maPosBadgeCompact(p.sym) + '</td>' +
-      '<td>' + entryAtEma9(p.sym) + '</td>' +
       '<td>' + extBadge(p.aboveMa200) + '</td>' +
       '<td>' + p.atr.toFixed(2) + '</td>' +
       '<td>' + (p.rsi != null ? p.rsi.toFixed(0) : '—') + '</td>' +
