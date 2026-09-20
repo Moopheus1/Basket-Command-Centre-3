@@ -167,7 +167,7 @@
   <div class="desc">
     Last 60 sessions for every name currently appearing in <strong>Weekly Picks</strong>, <strong>Golden Cross Zone</strong> or <strong>RS Leaders</strong> that is either in the EMA9/SMA20 zone or above EMA9. Green candles close up, red close down; the orange line is EMA9, the blue line is SMA20.
     <br><br>
-    Charts are drawn straight from the same OHLC bars in data.json that every panel uses &mdash; no separate feed, so what you see here matches the tables exactly. The EMA9/SMA20 position is shown because it is useful for judging entry timing, <strong>not because it was shown to work</strong>: across the 241 combined signals, "above both" hit 77.5%, "in zone" 72.7% and "below both" 75.0%, a spread well inside noise, and 88% of signals sit on the pass side. Treat these charts as a look at what you are buying, not as confirmation.<br><br>The dashed red line is the nearest <strong>resistance</strong> and the dashed green line the nearest <strong>support</strong>, found by clustering swing pivots (a bar that tops the three bars either side) within 0.75&times;ATR and requiring at least 2 touches. Levels more than 3&times;ATR away are skipped as not actionable over a ~20-session hold; where nothing qualifies &mdash; common for a stock making new highs &mdash; the chart falls back to the window high, the 60-session low, or &plusmn;2&times;ATR, and says which under the chart. Support and resistance are a judgement call, not a formula: <strong>none of this has been backtested</strong>, and a level marks where price previously turned, not where it must turn again.<br><br><strong>Entry extension:</strong> where a name sits more than 5% above its EMA9 the tables flag it <span style="color:#b45309;font-weight:700">⚠ extended</span> (more than 8%, <span style="color:#e5484d;font-weight:700">⚠⚠</span>). Across the 188 backtested signals that were above both moving averages, median drawdown before the outcome was &minus;5.4% at 3&ndash;5% extension, &minus;8.8% at 5&ndash;8% and &minus;9.8% beyond 8%, with the 25th-percentile case falling from &minus;10.0% to &minus;17.0%. The hit rate does <em>not</em> drop materially (p=0.303), so an extended name is not a worse trade &mdash; it is the same trade bought at a worse moment.
+    Charts are drawn straight from the same OHLC bars in data.json that every panel uses &mdash; no separate feed, so what you see here matches the tables exactly. The EMA9/SMA20 position is shown because it is useful for judging entry timing, <strong>not because it was shown to work</strong>: across the 241 combined signals, "above both" hit 77.5%, "in zone" 72.7% and "below both" 75.0%, a spread well inside noise, and 88% of signals sit on the pass side. Treat these charts as a look at what you are buying, not as confirmation.<br><br>The dashed red line is the nearest <strong>resistance</strong> and the dashed green line the nearest <strong>support</strong>, found by clustering swing pivots (a bar that tops the three bars either side) within 0.75&times;ATR and requiring at least 2 touches. Levels beyond the reach cap &mdash; whichever is larger, 3&times;ATR or 12% of price &mdash; are skipped as not actionable over a ~20-session hold (the percentage floor exists because ATR/price varies from about 2% to 8% across the basket, so an ATR-only cap reaches far too little on low-volatility names); levels are taken in tiers: a cluster with 2+ touches first, then a single-touch pivot inside the band, then the window high / 60-session low, and only if nothing at all is within 3&times;ATR does it fall back to &plusmn;2&times;ATR. The tier used is printed under each chart. The second tier exists because the 2-touch rule misfires in a downtrend &mdash; a falling stock sets each lower high at a different price, so no cluster ever reaches two touches near the current level and the most relevant pivot gets discarded. Support and resistance are a judgement call, not a formula: <strong>none of this has been backtested</strong>, and a level marks where price previously turned, not where it must turn again.<br><br><strong>Entry extension:</strong> where a name sits more than 5% above its EMA9 the tables flag it <span style="color:#b45309;font-weight:700">⚠ extended</span> (more than 8%, <span style="color:#e5484d;font-weight:700">⚠⚠</span>). Across the 188 backtested signals that were above both moving averages, median drawdown before the outcome was &minus;5.4% at 3&ndash;5% extension, &minus;8.8% at 5&ndash;8% and &minus;9.8% beyond 8%, with the 25th-percentile case falling from &minus;10.0% to &minus;17.0%. The hit rate does <em>not</em> drop materially (p=0.303), so an extended name is not a worse trade &mdash; it is the same trade bought at a worse moment.
   </div>
   <div id="chartsBody" style="display:flex;flex-wrap:wrap;gap:14px;margin-top:12px"></div>
 </div>
@@ -1259,11 +1259,39 @@ function renderDetailed(spy, tickers) {
     const vsSpy = spy && t !== 'SPY' ? d.daily - spy.daily : (t === 'SPY' ? 0 : null);
 
     let body = sparkSvgFull(t, d.spark);
-    body += '<div style="font-size:9px;color:#6b7280;margin:-6px 0 8px;line-height:1.5">' +
+    body += '<div style="font-size:9px;color:#6b7280;margin:-6px 0 2px;line-height:1.5">' +
       '<span style="color:#f59e0b;font-weight:700">—</span> EMA9 &nbsp;' +
       '<span style="color:#2563eb;font-weight:700">—</span> SMA20 &nbsp;' +
       '<span style="color:#e5484d;font-weight:700">- -</span> R &nbsp;' +
       '<span style="color:#0a9e5c;font-weight:700">- -</span> S</div>';
+    // Values line, directly under the legend: the actual levels the four lines sit at, so the
+    // numbers are readable without cluttering the chart itself with labels.
+    (function () {
+      const mp = maPosition(t), srv = computeSR(t);
+      const bits = [];
+      if (mp) {
+        bits.push('<span style="color:#f59e0b;font-weight:700">EMA9</span> ' + fmtPrice(mp.ema9).replace('$', ''));
+        bits.push('<span style="color:#2563eb;font-weight:700">SMA20</span> ' + fmtPrice(mp.sma20).replace('$', ''));
+      }
+      if (srv) {
+        bits.push('<span style="color:#e5484d;font-weight:700">R</span> ' + fmtPrice(srv.R.price).replace('$', ''));
+        bits.push('<span style="color:#0a9e5c;font-weight:700">S</span> ' + fmtPrice(srv.S.price).replace('$', ''));
+      }
+      if (bits.length) {
+        let tail = '';
+        if (mp) {
+          const zc = mp.zone === 'above both' ? '#0a9e5c' : mp.zone === 'in zone' ? '#f59e0b' : '#e5484d';
+          const warn = mp.vsEma9 > EXT_EMA9_HOT ? ' ⚠⚠' : mp.vsEma9 > EXT_EMA9_WARN ? ' ⚠' : '';
+          tail = ' &nbsp;·&nbsp; <span style="color:' + zc + ';font-weight:700">' + mp.zone + '</span>' +
+                 '<span style="color:' + (warn ? (mp.vsEma9 > EXT_EMA9_HOT ? '#e5484d' : '#b45309') : '#6b7280') +
+                 ';font-weight:' + (warn ? '700' : '400') + '"> ' +
+                 (mp.vsEma9 >= 0 ? '+' : '') + mp.vsEma9.toFixed(1) + '% vs EMA9' + warn + '</span>';
+        }
+        body += '<div style="font-size:10px;color:#374151;margin:0 0 8px;line-height:1.6" ' +
+          'title="Levels the four chart lines sit at. EMA9/SMA20 are the moving averages; R and S are the nearest swing-pivot resistance and support (see the Charts panel for method). ⚠ above 5% over EMA9, ⚠⚠ above 8% — a drawdown warning about entry timing, not a quality warning.">' +
+          bits.join(' &nbsp;·&nbsp; ') + tail + '</div>';
+      }
+    })();
     body += '<div class="chips3">' + retChip('1M', d.m1, maxAbs) + retChip('3M', d.m3, maxAbs) + retChip('1Y', d.y1, maxAbs) + '</div>';
     if (d.hi52 != null && rangePos != null) {
       body += '<div class="range-row"><b>' + fmtPrice(d.lo52) + '</b><span>52W range</span><b>' + fmtPrice(d.hi52) + '</b></div>' +
@@ -1904,6 +1932,13 @@ function maPosBadge(sym) {
 // None of this has been backtested. S/R is a judgement call; these lines are drawn to show you
 // where price has previously turned, not to assert that it will turn there again.
 const SR_WINDOW = 120, SR_PIVOT_K = 3, SR_TOL_ATR = 0.75, SR_MAX_ATR = 3.0, SR_MIN_TOUCH = 2;
+// Reach cap. A fixed ATR multiple alone is too rigid because ATR/price varies hugely across the
+// basket: BABA's ATR is ~2.3% of price so 3xATR reaches only ~7%, while AXTI's is ~8% so 3xATR
+// reaches ~24%. With the ATR-only cap BABA rejected a real swing high at +7.9% (3.5 ATR) and
+// substituted a synthetic +2xATR level that corresponds to nothing. The cap is therefore the
+// MORE PERMISSIVE of 3xATR or 12% of price, so low-volatility names can still reach a genuine level.
+const SR_MAX_PCT = 0.12;
+function srReach(px, atr) { return Math.max(SR_MAX_ATR * atr, SR_MAX_PCT * px); }
 function computeSR(sym) {
   if (sym in _srCache) return _srCache[sym];
   const r = _computeSRUncached(sym);
@@ -1941,22 +1976,36 @@ function _computeSRUncached(sym) {
     out.push(cur);
     return out.map(g => ({ price: g.reduce((s, v) => s + v, 0) / g.length, touches: g.length }));
   };
-  const above = clump(ph).filter(x => x.price > px + 0.15 * atr && x.touches >= SR_MIN_TOUCH && (x.price - px) <= SR_MAX_ATR * atr)
+  const reach = srReach(px, atr);
+  const above = clump(ph).filter(x => x.price > px + 0.15 * atr && x.touches >= SR_MIN_TOUCH && (x.price - px) <= reach)
                          .sort((a, b) => a.price - b.price);
-  const below = clump(pl).filter(x => x.price < px - 0.15 * atr && x.touches >= SR_MIN_TOUCH && (px - x.price) <= SR_MAX_ATR * atr)
+  const below = clump(pl).filter(x => x.price < px - 0.15 * atr && x.touches >= SR_MIN_TOUCH && (px - x.price) <= reach)
                          .sort((a, b) => b.price - a.price);
-  let R = above[0] ? { price: above[0].price, touches: above[0].touches, src: 'pivot' } : null;
-  let S = below[0] ? { price: below[0].price, touches: below[0].touches, src: 'pivot' } : null;
+  // Single-touch pivots inside the band, as a second tier. The >=2-touch rule filters noise
+  // in a range, but in a TREND every swing high (or low) prints at a different price, so no
+  // cluster ever reaches two touches near the current price and the level that actually matters
+  // gets discarded — AXTI had a swing high 1.0 ATR overhead that was thrown out in favour of a
+  // 120-session high 13.6 ATR away. A nearby single touch beats a distant one, so it is used
+  // when no 2-touch level qualifies, and labelled so you can see which tier produced it.
+  const above1 = clump(ph).filter(x => x.price > px + 0.15 * atr && (x.price - px) <= reach)
+                          .sort((a, b) => a.price - b.price);
+  const below1 = clump(pl).filter(x => x.price < px - 0.15 * atr && (px - x.price) <= reach)
+                          .sort((a, b) => b.price - a.price);
+  let R = above[0] ? { price: above[0].price, touches: above[0].touches, src: 'pivot' }
+        : above1[0] ? { price: above1[0].price, touches: above1[0].touches, src: 'pivot (1 touch)' } : null;
+  let S = below[0] ? { price: below[0].price, touches: below[0].touches, src: 'pivot' }
+        : below1[0] ? { price: below1[0].price, touches: below1[0].touches, src: 'pivot (1 touch)' } : null;
   if (!R) {
     const wh = Math.max.apply(null, h);
-    R = (wh > px + 0.15 * atr) ? { price: wh, touches: 1, src: 'window high' }
-                               : { price: px + 2 * atr, touches: 0, src: 'at highs, +2xATR' };
+    R = (wh > px + 0.15 * atr && (wh - px) <= reach)
+        ? { price: wh, touches: 1, src: 'window high' }
+        : { price: px + 2 * atr, touches: 0, src: 'no level in reach, +2xATR' };
   }
   if (!S) {
     const w60 = l.slice(-60), wl = Math.min.apply(null, w60);
-    S = (wl < px - 0.15 * atr && (px - wl) <= SR_MAX_ATR * atr)
+    S = (wl < px - 0.15 * atr && (px - wl) <= reach)
         ? { price: wl, touches: 1, src: '60d low' }
-        : { price: px - 2 * atr, touches: 0, src: 'no level nearby, -2xATR' };
+        : { price: px - 2 * atr, touches: 0, src: 'no level in reach, -2xATR' };
   }
   R.dist = (R.price / px - 1) * 100; S.dist = (S.price / px - 1) * 100;
   return { R: R, S: S, price: px, atr: atr };
