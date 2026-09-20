@@ -158,7 +158,7 @@
   <div class="desc">
     Last 60 sessions for every name currently appearing in <strong>Weekly Picks</strong>, <strong>Golden Cross Zone</strong> or <strong>RS Leaders</strong> that is either in the EMA9/SMA20 zone or above EMA9. Green candles close up, red close down; the orange line is EMA9, the blue line is SMA20.
     <br><br>
-    Charts are drawn straight from the same OHLC bars in data.json that every panel uses &mdash; no separate feed, so what you see here matches the tables exactly. The EMA9/SMA20 position is shown because it is useful for judging entry timing, <strong>not because it was shown to work</strong>: across the 241 combined signals, "above both" hit 77.5%, "in zone" 72.7% and "below both" 75.0%, a spread well inside noise, and 88% of signals sit on the pass side. Treat these charts as a look at what you are buying, not as confirmation.<br><br>The dashed red line is the nearest <strong>resistance</strong> and the dashed green line the nearest <strong>support</strong>, found by clustering swing pivots (a bar that tops the three bars either side) within 0.75&times;ATR and requiring at least 2 touches. Levels more than 3&times;ATR away are skipped as not actionable over a ~20-session hold; where nothing qualifies &mdash; common for a stock making new highs &mdash; the chart falls back to the window high, the 60-session low, or &plusmn;2&times;ATR, and says which under the chart. Support and resistance are a judgement call, not a formula: <strong>none of this has been backtested</strong>, and a level marks where price previously turned, not where it must turn again.
+    Charts are drawn straight from the same OHLC bars in data.json that every panel uses &mdash; no separate feed, so what you see here matches the tables exactly. The EMA9/SMA20 position is shown because it is useful for judging entry timing, <strong>not because it was shown to work</strong>: across the 241 combined signals, "above both" hit 77.5%, "in zone" 72.7% and "below both" 75.0%, a spread well inside noise, and 88% of signals sit on the pass side. Treat these charts as a look at what you are buying, not as confirmation.<br><br>The dashed red line is the nearest <strong>resistance</strong> and the dashed green line the nearest <strong>support</strong>, found by clustering swing pivots (a bar that tops the three bars either side) within 0.75&times;ATR and requiring at least 2 touches. Levels more than 3&times;ATR away are skipped as not actionable over a ~20-session hold; where nothing qualifies &mdash; common for a stock making new highs &mdash; the chart falls back to the window high, the 60-session low, or &plusmn;2&times;ATR, and says which under the chart. Support and resistance are a judgement call, not a formula: <strong>none of this has been backtested</strong>, and a level marks where price previously turned, not where it must turn again.<br><br><strong>Entry extension:</strong> where a name sits more than 5% above its EMA9 the tables flag it <span style="color:#b45309;font-weight:700">⚠ extended</span> (more than 8%, <span style="color:#e5484d;font-weight:700">⚠⚠</span>). Across the 188 backtested signals that were above both moving averages, median drawdown before the outcome was &minus;5.4% at 3&ndash;5% extension, &minus;8.8% at 5&ndash;8% and &minus;9.8% beyond 8%, with the 25th-percentile case falling from &minus;10.0% to &minus;17.0%. The hit rate does <em>not</em> drop materially (p=0.303), so an extended name is not a worse trade &mdash; it is the same trade bought at a worse moment.
   </div>
   <div id="chartsBody" style="display:flex;flex-wrap:wrap;gap:14px;margin-top:12px"></div>
 </div>
@@ -1703,6 +1703,7 @@ function renderRSDivergence(stocks) {
 // IS (Jan-Apr) +4.99%/trade vs OOS (May-Aug) +4.77% - held up out-of-sample.
 // Ranking is ASCENDING on purpose: descending scored x2.20 vs x3.42.
 const WEEKLY_PICK_COUNT = 2, WEEKLY_CMF_MIN = 0.20, WEEKLY_TARGET_ATR = 1.5;
+const WEEKLY_SHOW_RUNNERUP = 1;   // display the next name(s) below the cut, greyed, for comparison
 function computeWeeklyPicks(stocks) {
   const out = [];
   for (const t of stocks) {
@@ -1719,7 +1720,26 @@ function computeWeeklyPicks(stocks) {
                rsi: d.rsi, earnings: fund[t] ? fund[t].nextEarnings : null });
   }
   out.sort((a, b) => a.cmf - b.cmf);                    // ASCENDING - lowest qualifying CMF first
-  return { picks: out.slice(0, WEEKLY_PICK_COUNT), total: out.length };
+  return { picks: out.slice(0, WEEKLY_PICK_COUNT),
+           runnersUp: out.slice(WEEKLY_PICK_COUNT, WEEKLY_PICK_COUNT + WEEKLY_SHOW_RUNNERUP),
+           total: out.length };
+}
+
+
+// ---- Extension above MA200: sizing warning, NOT a quality warning ----
+// Tested on the 232 combined signals: above 50% over MA200 the hit rate is 76.7%,
+// below it 76.8% - identical, and correlation with hit rate is +0.03 (p=0.69), i.e. none.
+// Average RETURN is actually higher when extended (+3.83% vs +1.85%). What changes is the
+// hole you sit through: median max-adverse-excursion goes from -3.84% to -10.16%. So the
+// flag means "same odds, roughly triple the drawdown - size smaller", not "less likely to work".
+const EXT_CAUTION = 50;
+function extBadge(pct) {
+  if (pct == null) return '<span style="color:#6b7280">—</span>';
+  const txt = (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
+  if (pct < EXT_CAUTION) return txt;
+  return '<span style="color:#b45309;font-weight:700" title="More than ' + EXT_CAUTION +
+    '% above MA200. Backtested: hit rate is UNCHANGED at this extension (76.7% vs 76.8%) and average return is higher, but median max-adverse-excursion roughly triples, from -3.8% to -10.2%. Treat as a position-sizing warning, not a reason to skip the trade.">' +
+    txt + ' ⚠</span>';
 }
 
 // ---- EMA9 / SMA20 position: displayed context, NOT a validated filter ----
@@ -1751,15 +1771,29 @@ function maPosition(sym) {
            vsEma9: (px / ema9 - 1) * 100, vsSma20: (px / sma20 - 1) * 100,
            pass: (zone === 'in zone' || px > ema9) };
 }
+// Entry-extension warning. Tested on the 188 signals that were above BOTH EMA9 and SMA20:
+// median max-adverse-excursion roughly DOUBLES once price sits more than 5% over EMA9
+// (3-5% band: -5.44%; 5-8%: -8.77%; >8%: -9.75%), and the 25th percentile goes -9.98% -> -16.97%.
+// corr(% above EMA9, MAE) = -0.308, p<0.001. Hit rate does NOT meaningfully fall
+// (corr -0.076, p=0.303), so this is a DRAWDOWN warning about entry timing, not a
+// reason to skip the name: chasing it means sitting through roughly twice the hole.
+const EXT_EMA9_WARN = 5, EXT_EMA9_HOT = 8;
 function maPosBadge(sym) {
   const p = maPosition(sym);
   if (!p) return '<span style="color:#6b7280">—</span>';
   const col = p.zone === 'above both' ? '#0a9e5c' : p.zone === 'in zone' ? '#f59e0b' : '#e5484d';
   const label = p.zone === 'above both' ? 'above both' : p.zone === 'in zone' ? 'in zone' : 'below both';
+  let ext = '<span style="font-size:11px;color:#6b7280">' +
+            (p.vsEma9 >= 0 ? '+' : '') + p.vsEma9.toFixed(1) + '% vs EMA9</span>';
+  if (p.vsEma9 > EXT_EMA9_WARN) {
+    const hot = p.vsEma9 > EXT_EMA9_HOT;
+    ext = '<span style="font-size:11px;font-weight:700;color:' + (hot ? '#e5484d' : '#b45309') +
+          '" title="Price is ' + p.vsEma9.toFixed(1) + '% above EMA9. Backtest on 188 signals above both MAs: median drawdown before the outcome was -5.4% when 3-5% extended, -8.8% at 5-8%, and -9.8% above 8% — roughly double. The 25th-percentile case goes from -10.0% to -17.0%. Hit rate barely changes (p=0.303), so this is about the hole you sit through, not the odds. Waiting for a pullback toward EMA9 historically gave the same result with far less pain.">' +
+          (p.vsEma9 >= 0 ? '+' : '') + p.vsEma9.toFixed(1) + '% vs EMA9 ' + (hot ? '⚠⚠ extended' : '⚠ extended') + '</span>';
+  }
   return '<span style="font-weight:700;color:' + col + '" title="Price vs EMA9 (' + p.ema9.toFixed(2) +
-         ') and SMA20 (' + p.sma20.toFixed(2) + '). Context for entry timing only — backtested spread between these states was inside noise.">' +
-         label + '</span> <span style="font-size:11px;color:#6b7280">' +
-         (p.vsEma9 >= 0 ? '+' : '') + p.vsEma9.toFixed(1) + '% vs EMA9</span>';
+         ') and SMA20 (' + p.sma20.toFixed(2) + '). Which of the three states a stock is in showed no reliable edge in the backtest; the EXTENSION figure beside it did.">' +
+         label + '</span> ' + ext;
 }
 
 
@@ -1956,13 +1990,30 @@ function renderWeeklyPicks(stocks) {
     '<td>' + fmtMcap(fund[p.sym] ? fund[p.sym].mcap : null) + '</td>' +
     '<td>' + cmfBadge(p.cmf) + '</td>' +
     '<td>' + maPosBadge(p.sym) + '</td>' +
-    '<td>+' + p.aboveMa200.toFixed(1) + '%</td>' +
+    '<td>' + extBadge(p.aboveMa200) + '</td>' +
     '<td>' + p.atr.toFixed(2) + '</td>' +
     '<td>' + (p.rsi != null ? p.rsi.toFixed(0) : '—') + '</td>' +
     '<td>' + (p.earnings ? esc(p.earnings) : '—') + '</td></tr>').join('') +
+    (res.runnersUp || []).map((p, i) =>
+      '<tr style="opacity:0.55;background:#fafafa"><td>' + (res.picks.length + i + 1) + '</td>' +
+      '<td>' + esc(p.sym) + ' <span style="font-size:10px;color:#b45309;font-weight:700">NOT TAKEN</span></td>' +
+      '<td>' + p.price.toFixed(2) + '</td>' +
+      '<td>' + p.target.toFixed(2) + '</td>' +
+      '<td>+' + p.upside.toFixed(1) + '%</td>' +
+      '<td>' + targetHtml(p.sym, fund[p.sym], p.price) + '</td>' +
+      '<td>' + fmtVol(data[p.sym] ? data[p.sym].vol : null) + '</td>' +
+      '<td>' + fmtMcap(fund[p.sym] ? fund[p.sym].mcap : null) + '</td>' +
+      '<td>' + cmfBadge(p.cmf) + '</td>' +
+      '<td>' + maPosBadge(p.sym) + '</td>' +
+      '<td>' + extBadge(p.aboveMa200) + '</td>' +
+      '<td>' + p.atr.toFixed(2) + '</td>' +
+      '<td>' + (p.rsi != null ? p.rsi.toFixed(0) : '—') + '</td>' +
+      '<td>' + (p.earnings ? esc(p.earnings) : '—') + '</td></tr>').join('') +
     '<tr><td colspan="' + cols.length + '" style="font-size:12px;color:#6b7280;padding-top:8px">' +
     res.total + ' name' + (res.total === 1 ? '' : 's') + ' qualified this week; the ' + res.picks.length +
-    ' with the LOWEST qualifying CMF are shown. Entry is a reference price only — the backtest entered at the NEXT session\'s open.</td></tr>';
+    ' with the LOWEST qualifying CMF are taken. Greyed row' + ((res.runnersUp || []).length === 1 ? ' is the next name' : 's are the next names') +
+    ' below the cut, shown for comparison only — the backtest did NOT trade them, and taking a 3rd position scored worse out-of-sample (+4.73%/trade vs +4.77% at top 2). ' +
+    'Entry is a reference price only — the backtest entered at the NEXT session\'s open.</td></tr>';
 }
 
 function renderGoldenCross(stocks) {
