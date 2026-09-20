@@ -119,6 +119,7 @@
 
 <div class="jumpbar">
   <a href="#weeklyPicksPanel">↓ Weekly Picks (top 2)</a>
+  <a href="#chartsPanel">↓ Charts</a>
   <a href="#goldenPanel">↓ Golden cross &middot; #1</a>
   <a href="#rsDivPanel">↓ RS Leaders &middot; #2</a>
   <a href="#bullFlagPanel">↓ Bull Flag Watch &middot; #3</a>
@@ -150,6 +151,16 @@
       <tbody id="weeklyPicksBody"></tbody>
     </table>
   </div>
+</div>
+
+<div class="panel" id="chartsPanel">
+  <h2><span style="background:#0f766e;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">CHARTS</span>Candles &mdash; signalled names with EMA9 / SMA20</h2>
+  <div class="desc">
+    Last 60 sessions for every name currently appearing in <strong>Weekly Picks</strong>, <strong>Golden Cross Zone</strong> or <strong>RS Leaders</strong> that is either in the EMA9/SMA20 zone or above EMA9. Green candles close up, red close down; the orange line is EMA9, the blue line is SMA20.
+    <br><br>
+    Charts are drawn straight from the same OHLC bars in data.json that every panel uses &mdash; no separate feed, so what you see here matches the tables exactly. The EMA9/SMA20 position is shown because it is useful for judging entry timing, <strong>not because it was shown to work</strong>: across the 241 combined signals, "above both" hit 77.5%, "in zone" 72.7% and "below both" 75.0%, a spread well inside noise, and 88% of signals sit on the pass side. Treat these charts as a look at what you are buying, not as confirmation.<br><br>The dashed red line is the nearest <strong>resistance</strong> and the dashed green line the nearest <strong>support</strong>, found by clustering swing pivots (a bar that tops the three bars either side) within 0.75&times;ATR and requiring at least 2 touches. Levels more than 3&times;ATR away are skipped as not actionable over a ~20-session hold; where nothing qualifies &mdash; common for a stock making new highs &mdash; the chart falls back to the window high, the 60-session low, or &plusmn;2&times;ATR, and says which under the chart. Support and resistance are a judgement call, not a formula: <strong>none of this has been backtested</strong>, and a level marks where price previously turned, not where it must turn again.
+  </div>
+  <div id="chartsBody" style="display:flex;flex-wrap:wrap;gap:14px;margin-top:12px"></div>
 </div>
 
 <div class="panel" id="goldenPanel">
@@ -492,6 +503,7 @@ function computeMetrics(rawBars) {
     volumes: bars.map(b => b.volume),
     highs: bars.map(b => b.high),
     lows: bars.map(b => b.low),
+    opens: bars.map(b => b.open),
     swingLow: swingLow
   };
 }
@@ -767,6 +779,7 @@ function render() {
   renderTable(spy, tickers);
   renderRotationCandidates(stocks);
   renderWeeklyPicks(stocks);
+  renderCharts(stocks);
   renderRSDivergence(stocks);
   renderIntradayBreakout(stocks);
   renderBullFlag(stocks);
@@ -1544,7 +1557,7 @@ function setBullFlagSort(col) {
   render();
 }
 
-const CROSS_COLS = [['rank','#'],['sym','Ticker'],['price','Price'],['ma20','MA20'],['ma50','MA50'],['ma200','MA200'],['gap','Gap %'],['ord','Status'],['target','Analyst Target'],['vol','Volume'],['mcap','Market Cap'],['wrsi','Weekly RSI']];
+const CROSS_COLS = [['rank','#'],['sym','Ticker'],['price','Price'],['ma20','MA20'],['ma50','MA50'],['ma200','MA200'],['gap','Gap %'],['ord','Status'],['target','Analyst Target'],['vol','Volume'],['mcap','Market Cap'],['mapos','vs EMA9/SMA20'],['wrsi','Weekly RSI']];
 
 function renderCrossTable(stocks, kind, theadId, bodyId, captionId, sortCol, sortDir, setterName) {
   const el = document.getElementById(bodyId);
@@ -1604,8 +1617,9 @@ function renderCrossTable(stocks, kind, theadId, bodyId, captionId, sortCol, sor
       '<td>' + targetHtml(row.sym, fund[row.sym], row.price) + '</td>' +
       '<td>' + fmtVol(row.vol) + '</td>' +
       '<td>' + fmtMcap(row.mcap) + '</td>' +
+      '<td>' + maPosBadge(row.sym) + '</td>' +
       '<td>' + rsiBadge(row.wrsi) + '</td></tr>';
-  }).join('') : '<tr><td colspan="12" class="empty">No stocks currently in the ' + label + ' cross zone (no MA50/MA200 cross in the last ' + CROSS_LOOKBACK + ' sessions, none approaching within ' + CROSS_APPROACH_GAP + '%).</td></tr>';
+  }).join('') : '<tr><td colspan="13" class="empty">No stocks currently in the ' + label + ' cross zone (no MA50/MA200 cross in the last ' + CROSS_LOOKBACK + ' sessions, none approaching within ' + CROSS_APPROACH_GAP + '%).</td></tr>';
 }
 
 
@@ -1650,7 +1664,7 @@ function setRSDivSort(col) {
 function renderRSDivergence(stocks) {
   const cols = [['sym','Ticker'],['price','Price'],['target','Target (1.5 ATR)'],['upside','Upside %'],
                 ['atgt','Analyst Target'],['vol','Volume'],['mcap','Market Cap'],
-                ['offHigh','Off 63d high'],['atr','ATR14'],['rsi','RSI'],['earnings','Next earnings']];
+                ['mapos','vs EMA9/SMA20'],['offHigh','Off 63d high'],['atr','ATR14'],['rsi','RSI'],['earnings','Next earnings']];
   const head = document.getElementById('rsDivTheadRow');
   const body = document.getElementById('rsDivBody');
   if (!head || !body) return;
@@ -1675,6 +1689,7 @@ function renderRSDivergence(stocks) {
     '<td>' + targetHtml(r.sym, fund[r.sym], r.price) + '</td>' +
     '<td>' + fmtVol(data[r.sym] ? data[r.sym].vol : null) + '</td>' +
     '<td>' + fmtMcap(fund[r.sym] ? fund[r.sym].mcap : null) + '</td>' +
+    '<td>' + maPosBadge(r.sym) + '</td>' +
     '<td>' + r.offHigh.toFixed(1) + '%</td>' +
     '<td>' + r.atr.toFixed(2) + '</td>' +
     '<td>' + (r.rsi != null ? r.rsi.toFixed(0) : '—') + '</td>' +
@@ -1706,11 +1721,224 @@ function computeWeeklyPicks(stocks) {
   out.sort((a, b) => a.cmf - b.cmf);                    // ASCENDING - lowest qualifying CMF first
   return { picks: out.slice(0, WEEKLY_PICK_COUNT), total: out.length };
 }
+
+// ---- EMA9 / SMA20 position: displayed context, NOT a validated filter ----
+// Backtested on the 241 combined Weekly Picks / Golden Cross / RS Leaders signals:
+// "above both" 77.5% hit, "in zone" 72.7%, "below both" 75.0%. The spread is inside
+// noise and 88% of signals sit on the pass side, so this is shown as INFORMATION for
+// entry timing, not used to include or exclude anything.
+function emaSeries(arr, n) {
+  if (!arr || arr.length < n) return null;
+  const k = 2 / (n + 1); const out = new Array(arr.length); out[0] = arr[0];
+  for (let i = 1; i < arr.length; i++) out[i] = arr[i] * k + out[i - 1] * (1 - k);
+  return out;
+}
+function maPosition(sym) {
+  const d = data[sym];
+  if (!d || d.error || !d.closes || d.closes.length < 20 || d.price == null) return null;
+  const e = emaSeries(d.closes, 9);
+  if (!e) return null;
+  const ema9 = e[e.length - 1];
+  const sma20 = d.ma20;
+  if (ema9 == null || sma20 == null) return null;
+  const lo = Math.min(ema9, sma20), hi = Math.max(ema9, sma20);
+  const px = d.price;
+  let zone;
+  if (px > hi) zone = 'above both';
+  else if (px >= lo) zone = 'in zone';
+  else zone = 'below both';
+  return { zone: zone, ema9: ema9, sma20: sma20,
+           vsEma9: (px / ema9 - 1) * 100, vsSma20: (px / sma20 - 1) * 100,
+           pass: (zone === 'in zone' || px > ema9) };
+}
+function maPosBadge(sym) {
+  const p = maPosition(sym);
+  if (!p) return '<span style="color:#6b7280">—</span>';
+  const col = p.zone === 'above both' ? '#0a9e5c' : p.zone === 'in zone' ? '#f59e0b' : '#e5484d';
+  const label = p.zone === 'above both' ? 'above both' : p.zone === 'in zone' ? 'in zone' : 'below both';
+  return '<span style="font-weight:700;color:' + col + '" title="Price vs EMA9 (' + p.ema9.toFixed(2) +
+         ') and SMA20 (' + p.sma20.toFixed(2) + '). Context for entry timing only — backtested spread between these states was inside noise.">' +
+         label + '</span> <span style="font-size:11px;color:#6b7280">' +
+         (p.vsEma9 >= 0 ? '+' : '') + p.vsEma9.toFixed(1) + '% vs EMA9</span>';
+}
+
+
+
+// ---- Support / resistance: swing-pivot clustering. DISPLAY AID, NOT A TESTED SIGNAL ----
+// Method: a swing high is a bar whose high tops the 3 bars either side (swing low inverted).
+// Nearby pivots are merged into one level when they sit within 0.75xATR of each other, and a
+// level needs >=2 touches to count. Resistance = nearest qualifying level above price,
+// support = nearest below. Levels further than 3xATR away are ignored as not actionable over
+// a ~20-session hold. If nothing qualifies (common for a stock at highs) the chart falls back
+// to the 120-session window high, the 60-session low, or +/-2xATR, and LABELS which it used.
+// None of this has been backtested. S/R is a judgement call; these lines are drawn to show you
+// where price has previously turned, not to assert that it will turn there again.
+const SR_WINDOW = 120, SR_PIVOT_K = 3, SR_TOL_ATR = 0.75, SR_MAX_ATR = 3.0, SR_MIN_TOUCH = 2;
+function computeSR(sym) {
+  const d = data[sym];
+  if (!d || d.error || !d.highs || !d.lows || !d.closes || !d.atr) return null;
+  const n = d.closes.length, st = Math.max(0, n - SR_WINDOW);
+  const h = d.highs.slice(st), l = d.lows.slice(st), c = d.closes.slice(st);
+  if (h.length < 30) return null;
+  const px = c[c.length - 1], atr = d.atr;
+  if (!(atr > 0)) return null;
+  const ph = [], pl = [];
+  for (let i = SR_PIVOT_K; i < h.length - SR_PIVOT_K; i++) {
+    let isH = true, isL = true;
+    for (let k = i - SR_PIVOT_K; k <= i + SR_PIVOT_K; k++) {
+      if (h[k] > h[i]) isH = false;
+      if (l[k] < l[i]) isL = false;
+    }
+    if (isH) ph.push(h[i]);
+    if (isL) pl.push(l[i]);
+  }
+  const tol = atr * SR_TOL_ATR;
+  const clump = arr => {
+    if (!arr.length) return [];
+    const a = arr.slice().sort((x, y) => x - y), out = [];
+    let cur = [a[0]];
+    for (let i = 1; i < a.length; i++) {
+      const mean = cur.reduce((s, v) => s + v, 0) / cur.length;
+      if (Math.abs(a[i] - mean) <= tol) cur.push(a[i]);
+      else { out.push(cur); cur = [a[i]]; }
+    }
+    out.push(cur);
+    return out.map(g => ({ price: g.reduce((s, v) => s + v, 0) / g.length, touches: g.length }));
+  };
+  const above = clump(ph).filter(x => x.price > px + 0.15 * atr && x.touches >= SR_MIN_TOUCH && (x.price - px) <= SR_MAX_ATR * atr)
+                         .sort((a, b) => a.price - b.price);
+  const below = clump(pl).filter(x => x.price < px - 0.15 * atr && x.touches >= SR_MIN_TOUCH && (px - x.price) <= SR_MAX_ATR * atr)
+                         .sort((a, b) => b.price - a.price);
+  let R = above[0] ? { price: above[0].price, touches: above[0].touches, src: 'pivot' } : null;
+  let S = below[0] ? { price: below[0].price, touches: below[0].touches, src: 'pivot' } : null;
+  if (!R) {
+    const wh = Math.max.apply(null, h);
+    R = (wh > px + 0.15 * atr) ? { price: wh, touches: 1, src: 'window high' }
+                               : { price: px + 2 * atr, touches: 0, src: 'at highs, +2xATR' };
+  }
+  if (!S) {
+    const w60 = l.slice(-60), wl = Math.min.apply(null, w60);
+    S = (wl < px - 0.15 * atr && (px - wl) <= SR_MAX_ATR * atr)
+        ? { price: wl, touches: 1, src: '60d low' }
+        : { price: px - 2 * atr, touches: 0, src: 'no level nearby, -2xATR' };
+  }
+  R.dist = (R.price / px - 1) * 100; S.dist = (S.price / px - 1) * 100;
+  return { R: R, S: S, price: px, atr: atr };
+}
+
+// ---- Candlestick charts (inline SVG, no library) for signalled names ----
+const CHART_BARS = 60, CHART_W = 340, CHART_H = 190;
+function signalledSymbols(stocks) {
+  const set = new Map();  // sym -> [sources]
+  const wp = computeWeeklyPicks(stocks);
+  wp.picks.forEach(p => set.set(p.sym, ['Weekly Pick']));
+  for (const t of stocks) {
+    const d = data[t];
+    if (!d || d.error) continue;
+    const c = d.cross;
+    if (c && c.type === 'golden') set.set(t, (set.get(t) || []).concat('Golden Cross'));
+    if (computeRSDivergence(t)) set.set(t, (set.get(t) || []).concat('RS Leader'));
+  }
+  return set;
+}
+function candleChartSvg(sym, sources) {
+  const d = data[sym];
+  if (!d || !d.closes || !d.opens || !d.highs || !d.lows) return '';
+  const n = d.closes.length;
+  const start = Math.max(0, n - CHART_BARS);
+  const o = d.opens.slice(start), h = d.highs.slice(start), l = d.lows.slice(start), c = d.closes.slice(start);
+  const e9full = emaSeries(d.closes, 9) || [];
+  const e9 = e9full.slice(start);
+  const s20 = [];
+  for (let i = start; i < n; i++) {
+    if (i < 19) { s20.push(null); continue; }
+    let sum = 0; for (let k = i - 19; k <= i; k++) sum += d.closes[k];
+    s20.push(sum / 20);
+  }
+  const sr = computeSR(sym);
+  const vals = [].concat(h, l, e9.filter(x => x != null), s20.filter(x => x != null),
+                         sr ? [sr.R.price, sr.S.price] : []);
+  const lo = Math.min(...vals), hi = Math.max(...vals);
+  const pad = (hi - lo) * 0.08 || 1;
+  const yMin = lo - pad, yMax = hi + pad;
+  const PADL = 4, PADR = 46, PADT = 22, PADB = 14;
+  const plotW = CHART_W - PADL - PADR, plotH = CHART_H - PADT - PADB;
+  const X = i => PADL + (i + 0.5) * (plotW / o.length);
+  const Y = v => PADT + (yMax - v) / (yMax - yMin) * plotH;
+  const bw = Math.max(1.5, plotW / o.length * 0.62);
+  let out = '';
+  for (let i = 0; i < o.length; i++) {
+    const up = c[i] >= o[i];
+    const col = up ? '#0a9e5c' : '#e5484d';
+    const x = X(i);
+    out += '<line x1="' + x.toFixed(1) + '" y1="' + Y(h[i]).toFixed(1) + '" x2="' + x.toFixed(1) + '" y2="' + Y(l[i]).toFixed(1) + '" stroke="' + col + '" stroke-width="1"/>';
+    const yTop = Y(Math.max(o[i], c[i])), yBot = Y(Math.min(o[i], c[i]));
+    out += '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + yTop.toFixed(1) + '" width="' + bw.toFixed(1) +
+           '" height="' + Math.max(0.8, yBot - yTop).toFixed(1) + '" fill="' + col + '"/>';
+  }
+  const line = (arr, col) => {
+    const pts = [];
+    for (let i = 0; i < arr.length; i++) if (arr[i] != null) pts.push(X(i).toFixed(1) + ',' + Y(arr[i]).toFixed(1));
+    return pts.length > 1 ? '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + col + '" stroke-width="1.6"/>' : '';
+  };
+  if (sr) {
+    const drawSR = (lv, col, tag) => {
+      const y = Y(lv.price);
+      if (!isFinite(y)) return '';
+      return '<line x1="' + PADL + '" y1="' + y.toFixed(1) + '" x2="' + (CHART_W - PADR) + '" y2="' + y.toFixed(1) +
+             '" stroke="' + col + '" stroke-width="1.2" stroke-dasharray="5 3" opacity="0.85"/>' +
+             '<text x="' + (PADL + 3) + '" y="' + (y - 3).toFixed(1) + '" font-size="9" fill="' + col + '" font-weight="700">' +
+             tag + ' ' + lv.price.toFixed(2) + ' (' + (lv.dist >= 0 ? '+' : '') + lv.dist.toFixed(1) + '%)' +
+             (lv.touches >= 2 ? ' · ' + lv.touches + 'x' : '') + '</text>';
+    };
+    out += drawSR(sr.R, '#e5484d', 'R') + drawSR(sr.S, '#0a9e5c', 'S');
+  }
+  out += line(s20, '#2563eb') + line(e9, '#f59e0b');
+  const px = c[c.length - 1];
+  const lastE9 = e9[e9.length - 1], lastS20 = s20[s20.length - 1];
+  const rt = (v, col, dy) => v == null ? '' :
+    '<text x="' + (CHART_W - PADR + 4) + '" y="' + (Y(v) + dy).toFixed(1) + '" font-size="9" fill="' + col + '">' + v.toFixed(2) + '</text>';
+  out += rt(px, '#111827', 3) + rt(lastE9, '#f59e0b', 3) + rt(lastS20, '#2563eb', 3);
+  const p = maPosition(sym);
+  const zcol = !p ? '#6b7280' : p.zone === 'above both' ? '#0a9e5c' : p.zone === 'in zone' ? '#f59e0b' : '#e5484d';
+  return '<div style="border:1px solid #e9eaee;border-radius:12px;padding:10px;background:#fff;width:' + CHART_W + 'px">' +
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px">' +
+      '<strong style="font-size:14px">' + esc(sym) + '</strong>' +
+      '<span style="font-size:11px;color:' + zcol + ';font-weight:700">' + (p ? p.zone : '—') + '</span></div>' +
+    '<div style="font-size:11px;color:#6b7280;margin-bottom:4px">' + esc(sources.join(' + ')) + '</div>' +
+    '<svg viewBox="0 0 ' + CHART_W + ' ' + CHART_H + '" width="100%" style="display:block">' + out + '</svg>' +
+    '<div style="font-size:10px;color:#6b7280;margin-top:2px">' +
+      '<span style="color:#f59e0b;font-weight:700">—</span> EMA9 &nbsp; ' +
+      '<span style="color:#2563eb;font-weight:700">—</span> SMA20 &nbsp; ' +
+      '<span style="color:#e5484d;font-weight:700">- -</span> resistance &nbsp; ' +
+      '<span style="color:#0a9e5c;font-weight:700">- -</span> support &nbsp; last ' + o.length + ' sessions</div>' +
+      (sr ? '<div style="font-size:10px;color:#6b7280;margin-top:3px">R ' + sr.R.price.toFixed(2) + ' (' +
+            esc(sr.R.src) + ', ' + (sr.R.dist >= 0 ? '+' : '') + sr.R.dist.toFixed(1) + '%) &nbsp;·&nbsp; S ' +
+            sr.S.price.toFixed(2) + ' (' + esc(sr.S.src) + ', ' + sr.S.dist.toFixed(1) + '%)</div>' : '') +
+      '</div>';
+}
+function renderCharts(stocks) {
+  const el = document.getElementById('chartsBody');
+  if (!el) return;
+  const sig = signalledSymbols(stocks);
+  const rows = [];
+  sig.forEach((sources, sym) => {
+    const p = maPosition(sym);
+    if (p && p.pass) rows.push([sym, sources]);
+  });
+  if (!rows.length) {
+    el.innerHTML = '<div class="empty" style="padding:10px">No signalled names are currently in the EMA9/SMA20 zone or above EMA9. If the panels above are also empty, that is simply a quiet week — it is not an error.</div>';
+    return;
+  }
+  rows.sort((a, b) => a[0].localeCompare(b[0]));
+  el.innerHTML = rows.map(r => candleChartSvg(r[0], r[1])).join('');
+}
+
 function renderWeeklyPicks(stocks) {
   const head = document.getElementById('weeklyPicksTheadRow');
   const body = document.getElementById('weeklyPicksBody');
   if (!head || !body) return;
-  const cols = ['#', 'Ticker', 'Entry (ref)', 'Target (+1.5 ATR)', 'Upside %', 'Analyst Target', 'Volume', 'Market Cap', 'CMF(20)', 'Above MA200', 'ATR14', 'RSI', 'Next earnings'];
+  const cols = ['#', 'Ticker', 'Entry (ref)', 'Target (+1.5 ATR)', 'Upside %', 'Analyst Target', 'Volume', 'Market Cap', 'CMF(20)', 'vs EMA9/SMA20', 'Above MA200', 'ATR14', 'RSI', 'Next earnings'];
   head.innerHTML = cols.map(c => '<th>' + c + '</th>').join('');
   const res = computeWeeklyPicks(stocks);
   if (!res.picks.length) {
@@ -1727,6 +1955,7 @@ function renderWeeklyPicks(stocks) {
     '<td>' + fmtVol(data[p.sym] ? data[p.sym].vol : null) + '</td>' +
     '<td>' + fmtMcap(fund[p.sym] ? fund[p.sym].mcap : null) + '</td>' +
     '<td>' + cmfBadge(p.cmf) + '</td>' +
+    '<td>' + maPosBadge(p.sym) + '</td>' +
     '<td>+' + p.aboveMa200.toFixed(1) + '%</td>' +
     '<td>' + p.atr.toFixed(2) + '</td>' +
     '<td>' + (p.rsi != null ? p.rsi.toFixed(0) : '—') + '</td>' +
