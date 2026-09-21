@@ -278,12 +278,10 @@ def apply_prior_premarket_watch(tickers_dict, existing):
 
 
 def is_premarket_check_window(now_et):
-    """True in any of four short windows, each aligned to an actual
-    existing cron firing time so no new cron entry is needed: ~9:00,
-    ~9:10, ~9:20 ET (from "0,10,20 9 * * 1-5") and ~9:30 ET (the first
-    firing of the next block, "30,35,... 9 * * 1-5" - which also happens
-    to be the moment the market opens, so that last check captures the
-    actual opening print rather than a pre-open estimate).
+    """True for any run between 8:27 and 9:35 ET on a weekday - i.e. the
+    8:30, 8:40, 8:50, 9:00, 9:10, 9:20 and 9:30 firings. The 9:30 run lands at
+    the open, so the last check captures the actual opening print rather than
+    a pre-open estimate.
     Deliberately wall-clock-based rather than matching a cron string:
     GitHub Actions' github.event.schedule is identical for every firing
     within the same cron expression (e.g. 9:00, 9:10, AND 9:20 ET all
@@ -292,8 +290,16 @@ def is_premarket_check_window(now_et):
     if now_et.weekday() >= 5:  # Sat/Sun
         return False
     minutes = now_et.hour * 60 + now_et.minute
-    targets = [9 * 60, 9 * 60 + 10, 9 * 60 + 20, 9 * 60 + 30]  # 9:00, 9:10, 9:20, 9:30 ET
-    return any(abs(minutes - t) <= 3 for t in targets)
+    # CHANGED (BCC3): a continuous window, 8:27-9:35 ET, instead of four exact
+    # targets with +/-3 min tolerance. The old test silently skipped the gap check
+    # whenever a run started more than 3 minutes late - and GitHub's scheduler
+    # routinely lags that much at busy times - so a run scheduled for 9:10 that
+    # began at 9:14 produced no pre-market data at all. Every run inside the window
+    # now does the check. That is no costlier than before: there is one run per
+    # 10 minutes either way, and each check overwrites the previous one, so the
+    # value that persists for the rest of the day is still the last check near the
+    # 9:30 open. The window now also opens at 8:30 to match the earlier schedule.
+    return 8 * 60 + 27 <= minutes <= 9 * 60 + 35
 
 
 def main():
