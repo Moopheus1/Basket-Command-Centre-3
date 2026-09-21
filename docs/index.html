@@ -2147,7 +2147,12 @@ function candleChartSvg(sym, sources) {
   return '<div style="border:1px solid ' + (isNotTaken ? '#e5e7eb' : '#e9eaee') + ';border-radius:12px;padding:10px;background:' +
     (isNotTaken ? '#fafafa' : '#fff') + ';width:' + CHART_W + 'px' + (isNotTaken ? ';opacity:0.8' : '') + '">' +
     '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px">' +
-      '<strong style="font-size:14px">' + esc(sym) + '</strong>' +
+      '<span><strong style="font-size:14px">' + '<a class="tklink" href="' + rallyLink(sym) + '" target="_blank" rel="noopener noreferrer">' + esc(sym) + '</a>' + '</strong>' +
+        (d.price != null
+          ? ' <span style="font-size:13px;font-weight:700;color:#111827;margin-left:6px">' + fmtPrice(d.price) + '</span>' +
+            ' <span style="font-size:11px;margin-left:3px">' + pctHtml(d.daily, {sign:true, arrow:false, dp:2}) + '</span>'
+          : '') +
+      '</span>' +
       '<span style="font-size:11px;color:' + zcol + ';font-weight:700">' + (p ? p.zone : '—') + '</span></div>' +
     '<div style="font-size:11px;color:' + (isNotTaken ? '#b45309' : '#6b7280') + ';margin-bottom:4px;font-weight:' + (isNotTaken ? '700' : '400') + '">' +
       esc(sources.join(' + ')) + (isNotTaken ? ' — comparison only' : '') + '</div>' +
@@ -2212,7 +2217,7 @@ function entryAtEma9(sym) {
     : 'price is already ' + Math.abs(gap).toFixed(1) + '% below EMA9 — no pullback needed';
   return '<span style="color:' + col + ';font-weight:' + (wait ? '700' : '600') + '" title="EMA9 = ' +
     p.ema9.toFixed(2) + '; ' + note + (wait ? '. More than 5% extended: waiting for this level historically halved the drawdown for the same hit rate.' : '') + '">' +
-    p.ema9.toFixed(2) + (wait ? ' ⌛' : '') + '</span>';
+    fmtNum2(p.ema9) + (wait ? ' ⌛' : '') + '</span>';
 }
 
 
@@ -2254,6 +2259,13 @@ function weeklyNotTakenRationale(p, rank, total, cutoff) {
   return reason + context;
 }
 
+
+// Same rounding as fmtPrice (locale-aware, correct half-cent rounding), without the $.
+// Weekly Picks previously used toFixed(2), which rounds from the BINARY value: a close of
+// exactly 117.725 is stored as 117.72499999..., so toFixed gave 117.72 while every other
+// panel showed 117.73. Using one formatter everywhere removes that one-cent disagreement.
+function fmtNum2(v) { return v == null ? '—' : v.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+
 function maPosBadgeCompact(sym) {
   const p = maPosition(sym);
   if (!p) return '<span style="color:#6b7280">—</span>';
@@ -2282,10 +2294,10 @@ function renderWeeklyPicks(stocks) {
   }
   body.innerHTML = res.picks.map((p, i) =>
     '<tr><td><strong>' + (i + 1) + '</strong></td>' +
-    '<td class="wpsym"><strong>' + esc(p.sym) + '</strong></td>' +
-    '<td>' + p.price.toFixed(2) + '</td>' +
+    '<td class="wpsym"><strong>' + '<a class="tklink" href="' + rallyLink(p.sym) + '" target="_blank" rel="noopener noreferrer">' + esc(p.sym) + '</a>' + '</strong></td>' +
+    '<td>' + fmtNum2(p.price) + '</td>' +
     '<td>' + entryAtEma9(p.sym) + '</td>' +
-    '<td style="font-weight:700">' + p.target.toFixed(2) + '</td>' +
+    '<td style="font-weight:700">' + fmtNum2(p.target) + '</td>' +
     '<td style="color:#0a9e5c;font-weight:700">+' + p.upside.toFixed(1) + '%</td>' +
     '<td>' + targetHtml(p.sym, fund[p.sym], p.price) + '</td>' +
     '<td>' + fmtVol(data[p.sym] ? data[p.sym].vol : null) + '</td>' +
@@ -2298,10 +2310,10 @@ function renderWeeklyPicks(stocks) {
     '<td>' + (p.earnings ? esc(p.earnings) : '—') + '</td></tr>').join('') +
     (res.runnersUp || []).map((p, i) =>
       '<tr style="opacity:0.55;background:#fafafa"><td>' + (res.picks.length + i + 1) + '</td>' +
-      '<td class="wpsym">' + esc(p.sym) + ' <span style="font-size:10px;color:#b45309;font-weight:700">NOT TAKEN</span></td>' +
-      '<td>' + p.price.toFixed(2) + '</td>' +
+      '<td class="wpsym">' + '<a class="tklink" href="' + rallyLink(p.sym) + '" target="_blank" rel="noopener noreferrer">' + esc(p.sym) + '</a>' + ' <span style="font-size:10px;color:#b45309;font-weight:700">NOT TAKEN</span></td>' +
+      '<td>' + fmtNum2(p.price) + '</td>' +
       '<td>' + entryAtEma9(p.sym) + '</td>' +
-      '<td>' + p.target.toFixed(2) + '</td>' +
+      '<td>' + fmtNum2(p.target) + '</td>' +
       '<td>+' + p.upside.toFixed(1) + '%</td>' +
       '<td>' + targetHtml(p.sym, fund[p.sym], p.price) + '</td>' +
       '<td>' + fmtVol(data[p.sym] ? data[p.sym].vol : null) + '</td>' +
