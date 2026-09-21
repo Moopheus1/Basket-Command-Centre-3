@@ -2,36 +2,24 @@ name: Update market data
 
 on:
   schedule:
-    # --- Early ping: single lightweight run well before premarket volume
-    # ramps up. Mostly a no-op for anything outside mega-caps (few market
-    # makers active this early), but cheap enough (~83 fetches) to be worth
-    # catching the rare overnight earnings surprise / M&A headline ---
-    - cron: "0 4 * * 1-5"
+    # --- 8:30am ET: first run of the day. Does three jobs at once: the daily
+    # health-score refresh, an intraday fetch, and the first pre-market gap check.
+    # KEEP THIS EXACT STRING - the "Determine health-check run" step below matches
+    # "30 8 * * 1-5" literally. It must stay a SEPARATE cron entry: GitHub reports
+    # the whole cron expression as github.event.schedule, so if 8:30 were folded into
+    # the 10-min block every run in that block would look identical and the health
+    # check would fire 7 times a morning instead of once.
+    - cron: "30 8 * * 1-5"
       timezone: "America/New_York"
-    # --- Premarket: 6:00-9:30am ET, every 10 min (21 runs). Expect SKIPs in
-    # the logs for thinner names before real premarket volume shows up -
-    # fetch_today_bar() already handles that gracefully, not an error ---
-    - cron: "0,10,20,30,40,50 6,7,8 * * 1-5"
+    # --- Rest of pre-market: 8:40, 8:50
+    - cron: "40,50 8 * * 1-5"
       timezone: "America/New_York"
-    - cron: "0,10,20 9 * * 1-5"
+    # --- 9:00am to 3:50pm ET every 10 min (42 runs). 9:00-9:20 finish the pre-market
+    # window, 9:30 is the open, 3:50 is the last snapshot before the 4:00 close.
+    - cron: "0,10,20,30,40,50 9-15 * * 1-5"
       timezone: "America/New_York"
-    # --- Open: 9:30-11:30am ET, every 5 min (24 runs) - this is where
-    # volume/volatility actually concentrate, so it gets the densest cadence ---
-    - cron: "30,35,40,45,50,55 9 * * 1-5"
-      timezone: "America/New_York"
-    - cron: "0,5,10,15,20,25,30,35,40,45,50,55 10 * * 1-5"
-      timezone: "America/New_York"
-    - cron: "0,5,10,15,20,25 11 * * 1-5"
-      timezone: "America/New_York"
-    # --- Lull: 11:30am-2:30pm ET, every 15 min (13 runs) - midday volume
-    # taper, lower cadence is enough here ---
-    - cron: "30,45 11 * * 1-5"
-      timezone: "America/New_York"
-    - cron: "0,15,30,45 12,13 * * 1-5"
-      timezone: "America/New_York"
-    - cron: "0,15,30 14 * * 1-5"
-      timezone: "America/New_York"
-    # --- EOD: single run at 4:30pm ET, after close settles (unchanged) ---
+    # --- EOD: 4:30pm ET after the close settles. KEEP THIS EXACT STRING -
+    # the "Determine fetch mode" step matches "30 16 * * 1-5" literally to select eod mode.
     - cron: "30 16 * * 1-5"
       timezone: "America/New_York"
   workflow_dispatch:
@@ -65,7 +53,8 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 8   # kill hung runs well before the next 10-min trigger fires
+    timeout-minutes: 15  # EOD + health-score runs can take ~7 min; 8 left only ~1 min of headroom.
+                         # Overlap is not a risk: the concurrency block makes new runs wait, not race.
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -92,13 +81,11 @@ jobs:
         id: healthcheck
         run: |
           # Health scores (Equity Lens) run on their OWN once-daily
-          # schedule, deliberately separate from FETCH_MODE - they used
-          # to piggyback on the 16:30 ET EOD run, moved to the 4am ET
-          # early-ping cron instead so scores are fresh before the
-          # trading day starts rather than sitting there from the
-          # previous afternoon. Also fires on a manual eod-mode dispatch,
+          # schedule, deliberately separate from FETCH_MODE. They fire on
+          # the 8:30am ET cron (moved from 4am) - still an hour before the
+          # open, so scores are fresh for the trading day. Also fires on a manual eod-mode dispatch,
           # so testing this doesn't require waiting for 4am ET.
-          if [ "${{ github.event.schedule }}" = "0 4 * * 1-5" ] || [ "${{ github.event.inputs.mode }}" = "eod" ]; then
+          if [ "${{ github.event.schedule }}" = "30 8 * * 1-5" ] || [ "${{ github.event.inputs.mode }}" = "eod" ]; then
             echo "healthcheck=true" >> "$GITHUB_OUTPUT"
           else
             echo "healthcheck=false" >> "$GITHUB_OUTPUT"
