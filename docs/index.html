@@ -185,7 +185,7 @@
 <div class="panel" id="chartsPanel">
   <h2><span style="background:#0f766e;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">CHARTS</span>Candles &mdash; signalled names with EMA9 / SMA20</h2>
   <div class="desc">
-    Last 60 sessions for every name currently appearing in <strong>Weekly Picks</strong>, <strong>Golden Cross Zone</strong> or <strong>RS Leaders</strong> that is either in the EMA9/SMA20 zone or above EMA9. Green candles close up, red close down; the orange line is EMA9, the blue line is SMA20.
+    Last 60 sessions for every name currently appearing in <strong>Weekly Picks</strong> (plus, greyed and labelled <em>not taken</em>, up to three qualifiers that ranked just below the cut — shown so you can compare them against the picks directly). Every Weekly name is charted regardless of where it sits against EMA9, so the comparison is always complete; <strong>Golden Cross Zone</strong> or <strong>RS Leaders</strong> that is either in the EMA9/SMA20 zone or above EMA9. Green candles close up, red close down; the orange line is EMA9, the blue line is SMA20.
     <br><br>
     Charts are drawn straight from the same OHLC bars in data.json that every panel uses &mdash; no separate feed, so what you see here matches the tables exactly. The EMA9/SMA20 position is shown because it is useful for judging entry timing, <strong>not because it was shown to work</strong>: across the 241 combined signals, "above both" hit 77.5%, "in zone" 72.7% and "below both" 75.0%, a spread well inside noise, and 88% of signals sit on the pass side. Treat these charts as a look at what you are buying, not as confirmation.<br><br>The dashed red line is the nearest <strong>resistance</strong> and the dashed green line the nearest <strong>support</strong>, found by clustering swing pivots (a bar that tops the three bars either side) within 0.75&times;ATR and requiring at least 2 touches. Levels beyond the reach cap &mdash; whichever is larger, 3&times;ATR or 12% of price &mdash; are skipped as not actionable over a ~20-session hold (the percentage floor exists because ATR/price varies from about 2% to 8% across the basket, so an ATR-only cap reaches far too little on low-volatility names); levels are taken in tiers: a cluster with 2+ touches first, then a single-touch pivot inside the band, then the window high / 60-session low, and only if nothing at all is within 3&times;ATR does it fall back to &plusmn;2&times;ATR. The tier used is printed under each chart. The second tier exists because the 2-touch rule misfires in a downtrend &mdash; a falling stock sets each lower high at a different price, so no cluster ever reaches two touches near the current level and the most relevant pivot gets discarded. Support and resistance are a judgement call, not a formula: <strong>none of this has been backtested</strong>, and a level marks where price previously turned, not where it must turn again.<br><br><strong>Entry extension:</strong> where a name sits more than 5% above its EMA9 the tables flag it <span style="color:#b45309;font-weight:700">⚠ extended</span> (more than 8%, <span style="color:#e5484d;font-weight:700">⚠⚠</span>). Across the 188 backtested signals that were above both moving averages, median drawdown before the outcome was &minus;5.4% at 3&ndash;5% extension, &minus;8.8% at 5&ndash;8% and &minus;9.8% beyond 8%, with the 25th-percentile case falling from &minus;10.0% to &minus;17.0%. The hit rate does <em>not</em> drop materially (p=0.303), so an extended name is not a worse trade &mdash; it is the same trade bought at a worse moment.
   </div>
@@ -1868,7 +1868,7 @@ const WEEKLY_COL_TIPS = ['Rank by ascending CMF','Ticker','Last close. This doub
   'Position vs EMA9 and SMA20, and how far above EMA9. Flags when more than 5% extended.',
   'Percent above the 200-day moving average. Flags above 50%.','ATR(14)','RSI(14)','Next earnings date'];
 const WEEKLY_PICK_COUNT = 2, WEEKLY_CMF_MIN = 0.20, WEEKLY_TARGET_ATR = 1.5;
-const WEEKLY_SHOW_RUNNERUP = 1;   // display the next name(s) below the cut, greyed, for comparison
+const WEEKLY_SHOW_RUNNERUP = 3;   // display up to 3 names below the cut, greyed, each with its rationale
 function computeWeeklyPicks(stocks) {
   const out = [];
   for (const t of stocks) {
@@ -2071,7 +2071,9 @@ const CHART_BARS = 60, CHART_W = 340, CHART_H = 190;
 function signalledSymbols(stocks) {
   const set = new Map();  // sym -> [sources]
   const wp = computeWeeklyPicks(stocks);
-  wp.picks.forEach(p => set.set(p.sym, ['Weekly Pick']));
+  wp.picks.forEach((p, i) => set.set(p.sym, ['Weekly Pick #' + (i + 1)]));
+  // Qualifiers that ranked below the cut, charted alongside the picks for comparison.
+  wp.runnersUp.forEach((p, i) => set.set(p.sym, ['Weekly — not taken (#' + (wp.picks.length + i + 1) + ')']));
   for (const t of stocks) {
     const d = data[t];
     if (!d || d.error) continue;
@@ -2141,11 +2143,14 @@ function candleChartSvg(sym, sources) {
   out += rt(px, '#111827', 3) + rt(lastE9, '#f59e0b', 3) + rt(lastS20, '#2563eb', 3);
   const p = maPosition(sym);
   const zcol = !p ? '#6b7280' : p.zone === 'above both' ? '#0a9e5c' : p.zone === 'in zone' ? '#f59e0b' : '#e5484d';
-  return '<div style="border:1px solid #e9eaee;border-radius:12px;padding:10px;background:#fff;width:' + CHART_W + 'px">' +
+  const isNotTaken = sources.some(x => x.indexOf('not taken') >= 0);
+  return '<div style="border:1px solid ' + (isNotTaken ? '#e5e7eb' : '#e9eaee') + ';border-radius:12px;padding:10px;background:' +
+    (isNotTaken ? '#fafafa' : '#fff') + ';width:' + CHART_W + 'px' + (isNotTaken ? ';opacity:0.8' : '') + '">' +
     '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px">' +
       '<strong style="font-size:14px">' + esc(sym) + '</strong>' +
       '<span style="font-size:11px;color:' + zcol + ';font-weight:700">' + (p ? p.zone : '—') + '</span></div>' +
-    '<div style="font-size:11px;color:#6b7280;margin-bottom:4px">' + esc(sources.join(' + ')) + '</div>' +
+    '<div style="font-size:11px;color:' + (isNotTaken ? '#b45309' : '#6b7280') + ';margin-bottom:4px;font-weight:' + (isNotTaken ? '700' : '400') + '">' +
+      esc(sources.join(' + ')) + (isNotTaken ? ' — comparison only' : '') + '</div>' +
     '<svg viewBox="0 0 ' + CHART_W + ' ' + CHART_H + '" width="100%" style="display:block">' + out + '</svg>' +
     '<div style="font-size:10px;color:#6b7280;margin-top:2px">' +
       '<span style="color:#f59e0b;font-weight:700">—</span> EMA9 &nbsp; ' +
@@ -2164,13 +2169,26 @@ function renderCharts(stocks) {
   const rows = [];
   sig.forEach((sources, sym) => {
     const p = maPosition(sym);
-    if (p && p.pass) rows.push([sym, sources]);
+    // Every Weekly qualifier is always charted - taken AND not taken. The point is a side-by-
+    // side comparison, so hiding a pick (e.g. ZETA, which sits below both EMA9 and SMA20) while
+    // showing the names it beat would defeat the purpose. The EMA9 zone filter still applies
+    // to Golden Cross / RS Leaders names, which are not part of that comparison.
+    const isWeekly = sources.some(x => x.indexOf('Weekly') >= 0);
+    if ((p && p.pass) || isWeekly) rows.push([sym, sources]);
   });
   if (!rows.length) {
     el.innerHTML = '<div class="empty" style="padding:10px">No signalled names are currently in the EMA9/SMA20 zone or above EMA9. If the panels above are also empty, that is simply a quiet week — it is not an error.</div>';
     return;
   }
-  rows.sort((a, b) => a[0].localeCompare(b[0]));
+  const order = r => {
+    const s0 = r[1].join(' ');
+    const pk = s0.match(/Weekly Pick #(\d+)/);
+    if (pk) return parseInt(pk[1], 10);                    // picks: 1, 2
+    const m = s0.match(/not taken \(#(\d+)\)/);
+    if (m) return parseInt(m[1], 10);                      // not taken: 3, 4, 5
+    return 100;                                            // Golden Cross / RS Leaders after
+  };
+  rows.sort((a, b) => order(a) - order(b) || a[0].localeCompare(b[0]));
   el.innerHTML = rows.map(r => candleChartSvg(r[0], r[1])).join('');
 }
 
@@ -2195,6 +2213,45 @@ function entryAtEma9(sym) {
   return '<span style="color:' + col + ';font-weight:' + (wait ? '700' : '600') + '" title="EMA9 = ' +
     p.ema9.toFixed(2) + '; ' + note + (wait ? '. More than 5% extended: waiting for this level historically halved the drawdown for the same hit rate.' : '') + '">' +
     p.ema9.toFixed(2) + (wait ? ' ⌛' : '') + '</span>';
+}
+
+
+// Rationale for a qualifier that was NOT taken. Deliberately split into two parts:
+//   REASON  - the actual cause. The ONLY selection rule is rank on ascending CMF, so the
+//             only true reason is "ranked below #2", stated with the exact margin.
+//   CONTEXT - other flags worth knowing, explicitly labelled as NOT the reason, because
+//             none of them influenced the selection and presenting them as reasons would
+//             invent a rationale the rule does not have.
+const WEEKLY_TIE_MARGIN = 0.01;   // a CMF gap below this is treated as a statistical tie
+function weeklyNotTakenRationale(p, rank, total, cutoff) {
+  const gap = p.cmf - cutoff.cmf;
+  let reason = '<strong>Why not taken:</strong> ranked #' + rank + ' of ' + total +
+    ' on ascending CMF. Its CMF of ' + p.cmf.toFixed(4) + ' is ' + gap.toFixed(4) +
+    ' above ' + esc(cutoff.sym) + ' (' + cutoff.cmf.toFixed(4) + '), the last name taken at #' + WEEKLY_PICK_COUNT + '.';
+  if (gap < WEEKLY_TIE_MARGIN) {
+    reason += ' <span style="color:#b45309;font-weight:700">That is effectively a tie</span> — a gap this small is noise, ' +
+      'so this name missed the cut on a coin-flip, not because the setup is weaker.';
+  }
+  reason += ' The cut sits at ' + WEEKLY_PICK_COUNT + ' because that was the tested configuration: out-of-sample returns were ' +
+    '+4.77% per trade at top 2 versus +4.73% at top 3 — near-identical — so the limit is about concentration and ' +
+    'position slots, not a judgement that this trade is bad.';
+  const ctx = [];
+  const f = fund[p.sym] || {};
+  if (f.mcap == null && f.targetMean == null) ctx.push('an ETF or fund — no market cap or analyst coverage');
+  const mp = maPosition(p.sym);
+  if (mp && mp.vsEma9 > EXT_EMA9_HOT) ctx.push('more than 8% above EMA9 (⚠⚠ — backtested drawdown roughly double)');
+  else if (mp && mp.vsEma9 > EXT_EMA9_WARN) ctx.push('more than 5% above EMA9 (⚠ — backtested drawdown roughly double)');
+  else if (mp && mp.zone === 'below both') ctx.push('below both EMA9 and SMA20');
+  if (p.aboveMa200 >= EXT_CAUTION) ctx.push('over ' + EXT_CAUTION + '% above MA200 (same odds, deeper drawdowns)');
+  if (f.targetMean != null && p.price >= f.targetMean) ctx.push('already at or above its analyst target');
+  if (p.earnings) {
+    const days = Math.round((new Date(p.earnings) - new Date()) / 86400000);
+    if (days >= 0 && days <= 14) ctx.push('reports earnings in ' + days + ' day' + (days === 1 ? '' : 's'));
+  }
+  const context = ctx.length
+    ? '<br><strong>Context (not the reason):</strong> ' + ctx.join('; ') + '.'
+    : '<br><strong>Context:</strong> no additional flags — nothing besides rank separates it from the picks.';
+  return reason + context;
 }
 
 function maPosBadgeCompact(sym) {
@@ -2254,14 +2311,19 @@ function renderWeeklyPicks(stocks) {
       '<td>' + extBadge(p.aboveMa200) + '</td>' +
       '<td>' + p.atr.toFixed(2) + '</td>' +
       '<td>' + (p.rsi != null ? p.rsi.toFixed(0) : '—') + '</td>' +
-      '<td>' + (p.earnings ? esc(p.earnings) : '—') + '</td></tr>').join('') +
+      '<td>' + (p.earnings ? esc(p.earnings) : '—') + '</td></tr>' +
+      '<tr style="background:#fafafa"><td></td><td colspan="' + (cols.length - 1) + '" class="wpnote" ' +
+        'style="font-size:11px;color:#4b5563;padding-top:4px;padding-bottom:10px;border-bottom:1px solid #e5e7eb">' +
+        weeklyNotTakenRationale(p, res.picks.length + i + 1, res.total, res.picks[res.picks.length - 1]) +
+      '</td></tr>').join('') +
     '<tr><td colspan="' + cols.length + '" class="wpnote" style="font-size:11px;color:#6b7280">' +
       '<strong>' + res.total + ' name' + (res.total === 1 ? '' : 's') + ' qualified this week.</strong> ' +
       'The ' + res.picks.length + ' with the lowest qualifying CMF are taken.' +
       '<ul>' +
         ((res.runnersUp || []).length
-          ? '<li><strong>Why the greyed row is not taken:</strong> it ranked below the cut on ascending CMF. ' +
-            'It is shown for comparison only — the backtest never traded it.</li>' +
+          ? '<li><strong>Greyed rows</strong> are qualifiers that ranked below the cut. Each carries its own rationale ' +
+            'underneath: the reason (rank, with the exact CMF margin) and, separately, any context flags. Shown for ' +
+            'comparison only — the backtest never traded them.</li>' +
             '<li>Taking a 3rd position scored <em>worse</em> out-of-sample: +4.73% per trade at top 3 versus ' +
             '+4.77% at top 2, and returns decay steadily as you add names (top 4 +4.12%, top 5 +3.59%, ' +
             'every qualifier +1.39%). The ranking carries information at the very top and progressively less below it.</li>'
