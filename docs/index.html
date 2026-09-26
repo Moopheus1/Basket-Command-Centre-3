@@ -153,6 +153,7 @@
   <a href="#rsDivPanel">↓ RS Leaders &middot; #2</a>
   <a href="#bullFlagPanel">↓ Bull Flag Watch &middot; #3</a>
   <a href="#intradayBreakoutPanel">↓ Intraday Breakout &middot; #4</a>
+  <a href="#tradePlansPanel">↓ Trade plans</a>
   <a href="#rotationPanel">↓ Rotation candidates</a>
   <a href="#deathPanel">↓ Death cross</a>
   <a href="#performancePanel">↓ Performance</a>
@@ -237,6 +238,16 @@
       <tbody id="intradayBreakoutBody"></tbody>
     </table>
   </div>
+</div>
+
+<div class="panel" id="tradePlansPanel">
+  <h2><span style="background:#111827;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">PLANS</span>Trade plans &mdash; entry, stop, targets, sellers, volume, trend</h2>
+  <div class="desc" id="tradePlansCaption" style="font-weight:600;color:#374151"></div>
+  <div class="desc">One card per name in Weekly Picks and the four ranked panels (click the <strong>Plan</strong> chip in any panel to jump here). Everything is computed from <strong>completed</strong> daily bars &mdash; while the US session is open, today's unfinished bar is ignored, because every backtest on this page used finished bars.<br><br>
+  <strong>What is tested and what is not.</strong> Only two things here carry backtest evidence: the <strong>Target</strong> row (entry + 1.5&times;ATR14, the target every panel's hit rate is measured against) and the <strong>EMA9 stretch</strong> figure (more than 5% above EMA9 roughly doubled drawdown without changing the hit rate). Everything else &mdash; entry zones, stops, TP1/TP2, "where sellers are parked", the pullback label, the trend label and the exhaustion checklist &mdash; is a rule of thumb that turns a chart reading into numbers. <strong>None of it has been backtested.</strong> Every panel except Golden Cross was tested with <em>no stop</em>; adding one makes it a different strategy.<br><br>
+  <strong>How the pieces are built.</strong> <em>Support/resistance</em>: swing highs/lows (the extreme of the 3 bars either side) over ~1 year, merged when within 0.5 ATR. <em>Where sellers are parked</em>: price bands above today's price where unusually heavy volume traded (each day's volume spread across its high&ndash;low range), plus swing highs where price was turned back &mdash; buyers stuck there tend to sell as price returns to their cost. <em>Pullback</em>: <span style="color:#0a9e5c;font-weight:700">slight</span> = selling on below-average volume, at most 1 distribution day, depth &le; 2.2 ATR; <span style="color:#e5484d;font-weight:700">distribution</span> = 3+ distribution days (down close on above-average volume) in 10 sessions, or heavy down-day volume on a pullback deeper than 1 ATR. <em>Trend</em>: price vs EMA20 and MA50, and whether MA50 is rising; "broke support" = closed below the most recent swing low. <em>Stop</em>: just under the nearest swing low if it sits 0.5&ndash;1.5 ATR below entry (closer is inside one day's noise); otherwise entry &minus; 1.5 ATR, the distance used in the page's only stop tests. <em>Verdict</em>: BUY ZONE when the name is &le; 5% over EMA9, has no resistance within 1 ATR overhead and no reversal candle; otherwise WAIT for the EMA9 pullback zone; AVOID when the trend or support is broken.<br><br>
+  <strong>Exit when the target is reached.</strong> How stretched a name is on arrival depends on how fast it got there. A fast run (more than ~6% over EMA9 on arrival) &mdash; take the full exit; a slow grind &mdash; take most, trail a small runner under EMA9. (Untested.)</div>
+  <div id="tradePlansBody" style="display:flex;flex-wrap:wrap;gap:14px;margin-top:12px"></div>
 </div>
 
 <div class="panel" id="rotationPanel">
@@ -874,6 +885,7 @@ function render() {
   renderBullFlag(stocks);
   renderGoldenCross(stocks);
   renderDeathCross(stocks);
+  renderTradePlans();
 }
 
 // Structural filter, not a validated signal (see rotationPanel .desc for the
@@ -1493,7 +1505,7 @@ function cmfBadge(v) {
 const INTRADAY_BREAKOUT_COLS = [
   ['rank','#'], ['sym','Ticker'], ['price','Price'], ['daily','Day %'], ['cmf','CMF(20)'], ['volRatio','Vol vs 20d Median'],
   ['vol','Volume'], ['mcap','Market Cap'],
-  ['moveVsAtr','Move vs Typical Day'], ['offHighToday','Off Today\'s High'], ['premkt','Pre-Mkt Gap'], ['earningsFlag','Earnings'], ['newHigh','New 20D High'], ['rsi','RSI (14D)']
+  ['moveVsAtr','Move vs Typical Day'], ['offHighToday','Off Today\'s High'], ['premkt','Pre-Mkt Gap'], ['earningsFlag','Earnings'], ['newHigh','New 20D High'], ['rsi','RSI (14D)'], ['plan','Plan']
 ];
 const BREAKOUT_MIN_DAY_PCT = 5;      // must be up at least this much today
 const BREAKOUT_MIN_VOL_RATIO = 2;    // display only - NO LONGER a filter (see CMF_MIN, which replaced it)
@@ -1571,6 +1583,7 @@ function renderIntradayBreakout(stocks) {
     });
   }
   candidates.forEach((c, idx) => { c.rank = idx + 1; });
+  candidates.forEach(c => addMember(c.sym, 'Intraday Breakout'));
 
   const caption = document.getElementById('intradayBreakoutCaption');
   if (caption) {
@@ -1609,8 +1622,8 @@ function renderIntradayBreakout(stocks) {
                  c.earningsFlag === 'today' ? '<span style="color:#f59e0b;font-weight:700" title="Scheduled to report earnings today">Today</span>' :
                  '<span style="color:#6b7280">—</span>') + '</td>' +
       '<td>' + (c.newHigh ? '<span style="color:#0a9e5c;font-weight:700">Yes</span>' : '<span style="color:#6b7280">no</span>') + '</td>' +
-      '<td>' + rsiBadge(c.rsi) + '</td></tr>';
-  }).join('') : '<tr><td colspan="14" class="empty">No stocks currently meet both the ' + BREAKOUT_MIN_DAY_PCT + '%+ move and the CMF(20) > ' + CMF_MIN + ' buying-pressure condition.</td></tr>';
+      '<td>' + rsiBadge(c.rsi) + '</td><td>' + planChip(c.sym) + '</td></tr>';
+  }).join('') : '<tr><td colspan="15" class="empty">No stocks currently meet both the ' + BREAKOUT_MIN_DAY_PCT + '%+ move and the CMF(20) > ' + CMF_MIN + ' buying-pressure condition.</td></tr>';
 }
 function setIntradayBreakoutSort(col) {
   if (intradayBreakoutSortCol === col) intradayBreakoutSortDir = -intradayBreakoutSortDir; else { intradayBreakoutSortCol = col; intradayBreakoutSortDir = col === 'sym' ? 1 : -1; }
@@ -1620,7 +1633,7 @@ function setIntradayBreakoutSort(col) {
 const BULL_FLAG_COLS = [
   ['rank','#'], ['sym','Ticker'], ['price','Price'], ['daily','Day %'], ['offHigh','Off 20D High'],
   ['cmf','CMF(20)'], ['sellVolRatio','Selling Vol vs Normal'], ['vol','Volume'], ['mcap','Market Cap'],
-  ['rsi','RSI (14D)'], ['wrsi','Weekly RSI']
+  ['rsi','RSI (14D)'], ['wrsi','Weekly RSI'], ['plan','Plan']
 ];
 const BULL_FLAG_MIN_PULLBACK = 3;    // % off the 20-day high, lower bound
 const BULL_FLAG_MAX_PULLBACK = 14;   // % off the 20-day high, upper bound
@@ -1688,6 +1701,7 @@ function renderBullFlag(stocks) {
     });
   }
   candidates.forEach((c, idx) => { c.rank = idx + 1; });
+  candidates.forEach(c => addMember(c.sym, 'Bull Flag'));
 
   const caption = document.getElementById('bullFlagCaption');
   if (caption) {
@@ -1707,8 +1721,8 @@ function renderBullFlag(stocks) {
     '<td>' + fmtVol(c.vol) + '</td>' +
     '<td>' + fmtMcap(c.mcap) + '</td>' +
     '<td>' + rsiBadge(c.rsi) + '</td>' +
-    '<td>' + rsiBadge(c.wrsi) + '</td></tr>'
-  ).join('') : '<tr><td colspan="11" class="empty">No stocks currently meet all four bull flag conditions.</td></tr>';
+    '<td>' + rsiBadge(c.wrsi) + '</td><td>' + planChip(c.sym) + '</td></tr>'
+  ).join('') : '<tr><td colspan="12" class="empty">No stocks currently meet all four bull flag conditions.</td></tr>';
 }
 function setBullFlagSort(col) {
   if (bullFlagSortCol === col) bullFlagSortDir = -bullFlagSortDir; else { bullFlagSortCol = col; bullFlagSortDir = col === 'sym' ? 1 : -1; }
@@ -1721,8 +1735,9 @@ function renderCrossTable(stocks, kind, theadId, bodyId, captionId, sortCol, sor
   const el = document.getElementById(bodyId);
   if (!el) return;
   const theadEl = document.getElementById(theadId);
+  const XCOLS = kind === 'golden' ? CROSS_COLS.concat([['plan', 'Plan']]) : CROSS_COLS;
   if (theadEl) {
-    theadEl.innerHTML = CROSS_COLS.map(c =>
+    theadEl.innerHTML = XCOLS.map(c =>
       '<th onclick="' + setterName + '(\'' + c[0] + '\')">' + c[1] +
       (sortCol === c[0] ? ' <span class="arrow">' + (sortDir > 0 ? '▲' : '▼') + '</span>' : '') + '</th>'
     ).join('');
@@ -1747,6 +1762,7 @@ function renderCrossTable(stocks, kind, theadId, bodyId, captionId, sortCol, sor
     });
   }
   rows.forEach((r, idx) => { r.rank = idx + 1; });
+  if (kind === 'golden') rows.forEach(r => addMember(r.sym, 'Golden Cross'));
 
   const caption = document.getElementById(captionId);
   const label = kind === 'golden' ? 'golden' : 'death';
@@ -1776,8 +1792,8 @@ function renderCrossTable(stocks, kind, theadId, bodyId, captionId, sortCol, sor
       '<td>' + fmtVol(row.vol) + '</td>' +
       '<td>' + fmtMcap(row.mcap) + '</td>' +
       '<td>' + maPosBadge(row.sym) + '</td>' +
-      '<td>' + rsiBadge(row.wrsi) + '</td></tr>';
-  }).join('') : '<tr><td colspan="13" class="empty">No stocks currently in the ' + label + ' cross zone (no MA50/MA200 cross in the last ' + CROSS_LOOKBACK + ' sessions, none approaching within ' + CROSS_APPROACH_GAP + '%).</td></tr>';
+      '<td>' + rsiBadge(row.wrsi) + '</td>' + (kind === 'golden' ? '<td>' + planChip(row.sym) + '</td>' : '') + '</tr>';
+  }).join('') : '<tr><td colspan="' + XCOLS.length + '" class="empty">No stocks currently in the ' + label + ' cross zone (no MA50/MA200 cross in the last ' + CROSS_LOOKBACK + ' sessions, none approaching within ' + CROSS_APPROACH_GAP + '%).</td></tr>';
 }
 
 
@@ -1822,7 +1838,7 @@ function setRSDivSort(col) {
 function renderRSDivergence(stocks) {
   const cols = [['sym','Ticker'],['price','Price'],['target','Target (1.5 ATR)'],['upside','Upside %'],
                 ['atgt','Analyst Target'],['vol','Volume'],['mcap','Market Cap'],
-                ['mapos','vs EMA9/SMA20'],['offHigh','Off 63d high'],['atr','ATR14'],['rsi','RSI'],['earnings','Next earnings']];
+                ['mapos','vs EMA9/SMA20'],['offHigh','Off 63d high'],['atr','ATR14'],['rsi','RSI'],['earnings','Next earnings'],['plan','Plan']];
   const head = document.getElementById('rsDivTheadRow');
   const body = document.getElementById('rsDivBody');
   if (!head || !body) return;
@@ -1830,6 +1846,7 @@ function renderRSDivergence(stocks) {
     '<th style="cursor:pointer" onclick="setRSDivSort(\'' + c[0] + '\')">' + c[1] +
     (rsDivSortCol === c[0] ? (rsDivSortDir === 1 ? ' ▲' : ' ▼') : '') + '</th>').join('');
   let rows = stocks.map(computeRSDivergence).filter(Boolean);
+  rows.forEach(r => addMember(r.sym, 'RS Leader'));
   rows.sort((a, b) => {
     const x = a[rsDivSortCol], y = b[rsDivSortCol];
     if (x == null) return 1; if (y == null) return -1;
@@ -1851,7 +1868,7 @@ function renderRSDivergence(stocks) {
     '<td>' + r.offHigh.toFixed(1) + '%</td>' +
     '<td>' + r.atr.toFixed(2) + '</td>' +
     '<td>' + (r.rsi != null ? r.rsi.toFixed(0) : '—') + '</td>' +
-    '<td>' + (r.earnings ? esc(r.earnings) : '—') + '</td></tr>').join('');
+    '<td>' + (r.earnings ? esc(r.earnings) : '—') + '</td><td>' + planChip(r.sym) + '</td></tr>').join('');
 }
 
 
@@ -1866,7 +1883,7 @@ const WEEKLY_COL_TIPS = ['Rank by ascending CMF','Ticker','Last close. This doub
   'Entry + 1.5 x ATR14','Distance from entry to target','Mean analyst price target and implied upside',
   'Latest session volume','Market capitalisation','Chaikin Money Flow (20) — must exceed 0.20 to qualify',
   'Position vs EMA9 and SMA20, and how far above EMA9. Flags when more than 5% extended.',
-  'Percent above the 200-day moving average. Flags above 50%.','ATR(14)','RSI(14)','Next earnings date'];
+  'Percent above the 200-day moving average. Flags above 50%.','ATR(14)','RSI(14)','Next earnings date','Verdict from the trade-plan card (entry, stop, targets, sellers, volume, trend). Click to jump to the full plan.'];
 const WEEKLY_PICK_COUNT = 2, WEEKLY_CMF_MIN = 0.20, WEEKLY_TARGET_ATR = 1.5;
 const WEEKLY_SHOW_RUNNERUP = 3;   // display up to 3 names below the cut, greyed, each with its rationale
 function computeWeeklyPicks(stocks) {
@@ -1896,7 +1913,7 @@ function computeWeeklyPicks(stocks) {
 // Charts panel and every maPosBadge in four tables, so without this the same pivot scan and
 // EMA pass runs a dozen times per symbol on every render. Cleared on each data load.
 let _srCache = {}, _ema9Cache = {};
-function clearDerivedCaches() { _srCache = {}; _ema9Cache = {}; }
+function clearDerivedCaches() { _srCache = {}; _ema9Cache = {}; _planCache = {}; panelMembers = new Map(); }
 function ema9For(sym) {
   if (sym in _ema9Cache) return _ema9Cache[sym];
   const d = data[sym];
@@ -2285,9 +2302,10 @@ function renderWeeklyPicks(stocks) {
   const head = document.getElementById('weeklyPicksTheadRow');
   const body = document.getElementById('weeklyPicksBody');
   if (!head || !body) return;
-  const cols = ['#', 'Ticker', 'Price', 'Entry @ EMA9', 'Target', 'Upside', 'Analyst', 'Vol', 'Mkt cap', 'CMF', 'vs EMA9', '&gt;MA200', 'ATR', 'RSI', 'Earnings'];
+  const cols = ['#', 'Ticker', 'Price', 'Entry @ EMA9', 'Target', 'Upside', 'Analyst', 'Vol', 'Mkt cap', 'CMF', 'vs EMA9', '&gt;MA200', 'ATR', 'RSI', 'Earnings', 'Plan'];
   head.innerHTML = cols.map((c, i) => '<th' + (i === 1 ? ' class="wpsym"' : '') + ' title="' + esc(WEEKLY_COL_TIPS[i] || '') + '">' + c + '</th>').join('');
   const res = computeWeeklyPicks(stocks);
+  res.picks.forEach((p, i) => addMember(p.sym, 'Weekly Pick #' + (i + 1)));
   if (!res.picks.length) {
     body.innerHTML = '<tr><td colspan="' + cols.length + '" class="empty">No qualifiers this week &mdash; sit in cash. About 10% of weeks produced zero candidates in the backtest. An empty panel is a valid result, not a reason to relax the rule.</td></tr>';
     return;
@@ -2307,7 +2325,7 @@ function renderWeeklyPicks(stocks) {
     '<td>' + extBadge(p.aboveMa200) + '</td>' +
     '<td>' + p.atr.toFixed(2) + '</td>' +
     '<td>' + (p.rsi != null ? p.rsi.toFixed(0) : '—') + '</td>' +
-    '<td>' + (p.earnings ? esc(p.earnings) : '—') + '</td></tr>').join('') +
+    '<td>' + (p.earnings ? esc(p.earnings) : '—') + '</td><td>' + planChip(p.sym) + '</td></tr>').join('') +
     (res.runnersUp || []).map((p, i) =>
       '<tr style="opacity:0.55;background:#fafafa"><td>' + (res.picks.length + i + 1) + '</td>' +
       '<td class="wpsym">' + '<a class="tklink" href="' + rallyLink(p.sym) + '" target="_blank" rel="noopener noreferrer">' + esc(p.sym) + '</a>' + ' <span style="font-size:10px;color:#b45309;font-weight:700">NOT TAKEN</span></td>' +
@@ -2323,7 +2341,7 @@ function renderWeeklyPicks(stocks) {
       '<td>' + extBadge(p.aboveMa200) + '</td>' +
       '<td>' + p.atr.toFixed(2) + '</td>' +
       '<td>' + (p.rsi != null ? p.rsi.toFixed(0) : '—') + '</td>' +
-      '<td>' + (p.earnings ? esc(p.earnings) : '—') + '</td></tr>' +
+      '<td>' + (p.earnings ? esc(p.earnings) : '—') + '</td><td>—</td></tr>' +
       '<tr style="background:#fafafa"><td></td><td colspan="' + (cols.length - 1) + '" class="wpnote" ' +
         'style="font-size:11px;color:#4b5563;padding-top:4px;padding-bottom:10px;border-bottom:1px solid #e5e7eb">' +
         weeklyNotTakenRationale(p, res.picks.length + i + 1, res.total, res.picks[res.picks.length - 1]) +
@@ -2373,6 +2391,412 @@ function hideTicker(sym) {
   hidden.add(sym);
   saveHidden();
   render();
+}
+
+
+// =====================================================================================
+// ---- TRADE PLANS: entry / stop / support-resistance / sellers / volume / trend ----
+// One read-out per ticker that appears in Weekly Picks or any of the four ranked panels.
+// Built ONLY from COMPLETED daily bars: while the US session is running, today's partial
+// bar is dropped, because every backtest on this page was measured on finished bars.
+//
+// WHAT IS TESTED AND WHAT IS NOT - read before trusting any number here:
+//   Tested  : the 1.5xATR14 target (every panel's hit rate is measured against it) and the
+//             EMA9-extension drawdown figures (see maPosition / EXT_EMA9_WARN).
+//   NOT tested: entry zones, stops, support/resistance, "sellers parked" zones, the pullback
+//             classification (healthy / mixed / distribution), the trend label and the
+//             exhaustion checklist. They are rules of thumb that turn the chart reading into
+//             numbers so you do not have to screenshot every name. Treat them as a checklist,
+//             not as a signal. Every panel except Golden Cross was backtested WITHOUT a stop.
+// =====================================================================================
+const TP_LOOKBACK = 250;        // ~1 year of daily bars for levels and the volume profile
+const TP_PIVOT_K = 3;           // swing high/low = extreme of the 3 bars either side
+const TP_CLUSTER_ATR = 0.5;     // pivots within 0.5xATR merge into one level
+const TP_REACH_ATR = 5;         // ignore levels further than 5xATR away
+const TP_BIN_ATR = 0.5;         // volume-profile bin width
+const TP_HEAVY = 1.3, TP_THIN = 0.6;   // bin volume vs the median bin
+const TP_EARNINGS_DAYS = 28;    // ~20 sessions: an earnings date inside the hold window
+let panelMembers = new Map();
+let _planCache = {};
+function addMember(sym, tag) {
+  if (!panelMembers.has(sym)) panelMembers.set(sym, []);
+  const a = panelMembers.get(sym);
+  if (!a.includes(tag)) a.push(tag);
+}
+function tpBarDate(t) { return new Date(t * 1000).toISOString().slice(0, 10); }
+function tpTodayET() {
+  const e = nowET();
+  return e.getFullYear() + '-' + String(e.getMonth() + 1).padStart(2, '0') + '-' + String(e.getDate()).padStart(2, '0');
+}
+function tpMean(a) { return a.length ? a.reduce((s, x) => s + x, 0) / a.length : null; }
+function tpFmt(v) { return v == null || !isFinite(v) ? '—' : fmtNum2(v); }
+function tpDateShort(t) { return new Date(t * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric', timeZone: 'UTC' }); }
+
+function computeTradePlan(sym) {
+  if (sym in _planCache) return _planCache[sym];
+  let r = null;
+  try { r = _computeTradePlan(sym); } catch (e) { r = null; }
+  _planCache[sym] = r;
+  return r;
+}
+
+function _computeTradePlan(sym) {
+  const d = data[sym];
+  if (!d || d.error || !d.closes || d.closes.length < 60 || !d.opens) return null;
+  let n = d.closes.length, partial = false;
+  if (tpBarDate(d.times[n - 1]) === tpTodayET()) {
+    const e = nowET(), m = e.getHours() * 60 + e.getMinutes();
+    if (m < SESSION_CLOSE_MIN + 20) { n--; partial = true; }
+  }
+  const o = d.opens.slice(0, n), h = d.highs.slice(0, n), l = d.lows.slice(0, n),
+        c = d.closes.slice(0, n), v = d.volumes.slice(0, n), t = d.times.slice(0, n);
+  const px = c[n - 1];
+
+  // --- core series ---
+  const atrS = [h[0] - l[0]];
+  for (let i = 1; i < n; i++) {
+    const tr = Math.max(h[i] - l[i], Math.abs(h[i] - c[i - 1]), Math.abs(l[i] - c[i - 1]));
+    atrS.push(atrS[i - 1] + (tr - atrS[i - 1]) / 14);
+  }
+  const atr = atrS[n - 1];
+  if (!(atr > 0)) return null;
+  const e9 = emaSeries(c, 9), e20 = emaSeries(c, 20), e12 = emaSeries(c, 12), e26 = emaSeries(c, 26);
+  const macd = c.map((_, i) => e12[i] - e26[i]);
+  const sig = emaSeries(macd, 9);
+  const hist = macd.map((x, i) => x - sig[i]);
+  const rsiS = new Array(n).fill(null);
+  { let ag = 0, al = 0;
+    for (let i = 1; i < n; i++) {
+      const ch = c[i] - c[i - 1];
+      ag += ((ch > 0 ? ch : 0) - ag) / 14; al += ((ch < 0 ? -ch : 0) - al) / 14;
+      rsiS[i] = al === 0 ? 100 : 100 - 100 / (1 + ag / al);
+    } }
+  const smaAt = (k, end) => end >= k ? tpMean(c.slice(end - k, end)) : null;
+  const ma50 = smaAt(50, n), ma50Prev = smaAt(50, n - 10), ma200 = smaAt(200, n);
+  const ema9 = e9[n - 1], ema20 = e20[n - 1];
+  const ext9 = (px / ema9 - 1) * 100, xAtr20 = (px - ema20) / atr;
+
+  // --- volume vs average ---
+  const avgVol20 = tpMean(v.slice(Math.max(0, n - 21), n - 1));
+  const avgVol5 = tpMean(v.slice(n - 5));
+  const lastVol = v[n - 1];
+  const volRatio = avgVol20 ? lastVol / avgVol20 : null;
+  const vol5Ratio = avgVol20 ? avgVol5 / avgVol20 : null;
+
+  // --- swing pivots (the last K bars may still be pivots if everything after them is lower/higher) ---
+  const st = Math.max(0, n - TP_LOOKBACK);
+  const ph = [], pl = [];
+  for (let i = st + TP_PIVOT_K; i < n; i++) {
+    const r0 = Math.min(n - 1, i + TP_PIVOT_K);
+    if (r0 === i) continue;                         // need at least one bar after it
+    let isH = true, isL = true;
+    for (let k = i - TP_PIVOT_K; k <= r0; k++) {
+      if (k === i) continue;
+      if (h[k] >= h[i]) isH = false;
+      if (l[k] <= l[i]) isL = false;
+    }
+    if (isH) ph.push({ price: h[i], i: i });
+    if (isL) pl.push({ price: l[i], i: i });
+  }
+  const tol = atr * TP_CLUSTER_ATR;
+  const clump = arr => {
+    const a = arr.slice().sort((x, y) => x.price - y.price), out = [];
+    for (const p of a) {
+      const g = out[out.length - 1];
+      if (g && Math.abs(p.price - g.sum / g.pts.length) <= tol) { g.pts.push(p); g.sum += p.price; }
+      else out.push({ pts: [p], sum: p.price });
+    }
+    return out.map(g => ({ price: g.sum / g.pts.length, lo: Math.min(...g.pts.map(x => x.price)), hi: Math.max(...g.pts.map(x => x.price)),
+                           touches: g.pts.length, lastI: Math.max(...g.pts.map(x => x.i)), dates: g.pts.map(x => x.i).sort((a, b) => a - b) }));
+  };
+  const reach = TP_REACH_ATR * atr;
+  const resLv = clump(ph).filter(x => x.price > px + 0.1 * atr && x.price - px <= reach).sort((a, b) => a.price - b.price);
+  const supLv = clump(pl).filter(x => x.price < px - 0.1 * atr && px - x.price <= reach).sort((a, b) => b.price - a.price);
+
+  // --- volume-at-price (each bar's volume spread evenly across its high-low range) ---
+  const binW = TP_BIN_ATR * atr;
+  const pLo = px - reach, nb = Math.ceil(2 * reach / binW);
+  const bins = new Array(nb).fill(0);
+  for (let i = st; i < n; i++) {
+    const rg = h[i] - l[i];
+    if (!(rg > 0) || !v[i]) continue;
+    const b0 = Math.max(0, Math.floor((l[i] - pLo) / binW)), b1 = Math.min(nb - 1, Math.floor((h[i] - pLo) / binW));
+    for (let b = b0; b <= b1; b++) {
+      const bl = pLo + b * binW, bh = bl + binW;
+      const ov = Math.min(h[i], bh) - Math.max(l[i], bl);
+      if (ov > 0) bins[b] += v[i] * ov / rg;
+    }
+  }
+  const nz = bins.filter(x => x > 0).sort((a, b) => a - b);
+  const medBin = nz.length ? nz[Math.floor(nz.length / 2)] : 0;
+  const pxBin = Math.floor((px - pLo) / binW);
+  const zones = (dir) => {          // contiguous heavy (or thin) runs above / below price
+    const out = [];
+    const rng = dir > 0 ? [...Array(nb).keys()].filter(b => b > pxBin) : [...Array(nb).keys()].filter(b => b < pxBin).reverse();
+    let cur = null;
+    for (const b of rng) {
+      const kind = medBin && bins[b] >= TP_HEAVY * medBin ? 'heavy' : medBin && bins[b] <= TP_THIN * medBin ? 'thin' : 'mid';
+      if (cur && cur.kind === kind) { cur.b.push(b); }
+      else { if (cur) out.push(cur); cur = { kind: kind, b: [b] }; }
+    }
+    if (cur) out.push(cur);
+    return out.filter(z => z.kind !== 'mid').map(z => {
+      const lo = pLo + Math.min(...z.b) * binW, hi = pLo + (Math.max(...z.b) + 1) * binW;
+      return { kind: z.kind, lo: lo, hi: hi, vol: z.b.reduce((s, b) => s + bins[b], 0), rel: z.b.reduce((s, b) => s + bins[b], 0) / z.b.length / (medBin || 1) };
+    });
+  };
+  const zUp = zones(1), zDn = zones(-1);
+  const sumRange = (a, b) => { let s = 0; for (let k = Math.max(0, a); k <= Math.min(nb - 1, b); k++) s += bins[k]; return s; };
+  const span = Math.round(2 / TP_BIN_ATR);   // 2 ATR either side
+  const volAbove = sumRange(pxBin + 1, pxBin + span), volBelow = sumRange(pxBin - span, pxBin - 1);
+  const overheadRatio = volBelow > 0 ? volAbove / volBelow : null;
+
+  // Sellers parked: heavy-volume zones above price, annotated with swing highs (rejections) inside them.
+  const sellers = zUp.filter(z => z.kind === 'heavy').slice(0, 2).map(z => {
+    const rej = resLv.filter(r => r.price >= z.lo - 0.25 * atr && r.price <= z.hi + 0.25 * atr);
+    return { lo: z.lo, hi: z.hi, rel: z.rel, rejections: rej.reduce((s, r) => s + r.touches, 0),
+             rejDates: [].concat(...rej.map(r => r.dates)).sort((a, b) => a - b).map(i => tpDateShort(t[i])) };
+  });
+  // Swing-high rejection levels above price that are NOT inside a heavy zone are sellers too.
+  const lone = resLv.filter(r => !sellers.some(s => r.price >= s.lo - 0.25 * atr && r.price <= s.hi + 0.25 * atr)).slice(0, 2);
+  const thinAbove = zUp.find(z => z.kind === 'thin' && z.lo < px + 3 * atr) || null;
+  const demand = zDn.filter(z => z.kind === 'heavy').slice(0, 1);
+  const thinBelow = zDn.find(z => z.kind === 'thin' && z.hi > px - 2 * atr) || null;
+
+  // --- trend state ---
+  const ma50Slope = (ma50 != null && ma50Prev != null) ? (ma50 - ma50Prev) / ma50Prev * 100 : null;
+  const recentLows = pl.filter(p => p.i >= n - 30 && p.i < n - 1);
+  const lastSwingLow = recentLows.length ? recentLows[recentLows.length - 1] : null;
+  let trend, trendCol;
+  if (lastSwingLow && px < lastSwingLow.price) {
+    trend = 'BROKE SUPPORT — closed below the last swing low ' + tpFmt(lastSwingLow.price) + ' (' + tpDateShort(t[lastSwingLow.i]) + ')'; trendCol = '#e5484d';
+  } else if (ma50 != null && ma50Slope != null && px > ema20 && ema20 > ma50 && ma50Slope > 0) {
+    trend = 'UPTREND — price > EMA20 > rising MA50'; trendCol = '#0a9e5c';
+  } else if (ma50 != null && ma50Slope != null && px > ma50 && ma50Slope > 0) {
+    trend = 'UPTREND, PULLING BACK — below EMA20 (' + tpFmt(ema20) + '), still above rising MA50 (' + tpFmt(ma50) + ')'; trendCol = '#b45309';
+  } else if (ma50 != null && ma50Slope != null && px > ma50 && ma50Slope <= 0) {
+    trend = 'REBOUND IN A DOWNTREND — above MA50 but MA50 is still falling (' + ma50Slope.toFixed(1) + '% over 10 sessions)'; trendCol = '#b45309';
+  } else if (ma50 != null && ma50Slope != null && px < ma50 && ma50Slope < 0) {
+    trend = 'DOWNTREND — below a falling MA50 (' + tpFmt(ma50) + ')'; trendCol = '#e5484d';
+  } else {
+    trend = 'UNDER PRESSURE — below MA50 (' + tpFmt(ma50) + ') while MA50 is still rising'; trendCol = '#b45309';
+  }
+  const brokeSupport = trendCol === '#e5484d';   // only BROKE SUPPORT and DOWNTREND veto a signal
+
+  // --- pullback character: slight dip vs distribution ---
+  const w20s = Math.max(0, n - 10);   // pullback measured from the 10-session high, so a rebound is not scored against a pre-crash peak
+  let hiI = w20s; for (let i = w20s; i < n; i++) if (h[i] >= h[hiI]) hiI = i;
+  const hi20 = h[hiI];
+  const pullPct = (hi20 - px) / hi20 * 100, pullAtr = (hi20 - px) / atr;
+  const base50 = tpMean(v.slice(Math.max(0, n - 51), n - 1));
+  let distDays = 0;
+  for (let i = Math.max(1, n - 10); i < n; i++) if (c[i] < c[i - 1] && v[i] > base50) distDays++;
+  const pbIdx = []; for (let i = hiI + 1; i < n; i++) pbIdx.push(i);
+  const downIdx = pbIdx.filter(i => c[i] < c[i - 1]);
+  const upBefore = []; for (let i = Math.max(1, hiI - 9); i <= hiI; i++) if (c[i] > c[i - 1]) upBefore.push(v[i]);
+  const downVolRatio = downIdx.length && avgVol20 ? tpMean(downIdx.map(i => v[i])) / avgVol20 : null;
+  const upVolAdv = upBefore.length && avgVol20 ? tpMean(upBefore) / avgVol20 : null;
+  const cmf10 = (() => { let mf = 0, vv = 0; for (let i = n - 10; i < n; i++) { const rg = h[i] - l[i]; if (rg > 0) { mf += ((c[i] - l[i]) - (h[i] - c[i])) / rg * v[i]; vv += v[i]; } } return vv ? mf / vv : null; })();
+  let pullback, pullCol, pullWhy;
+  if (pullAtr < 0.5) {
+    pullback = 'NO PULLBACK — at or near the 10-session high'; pullCol = '#374151';
+    pullWhy = 'Within 0.5 ATR of the 10-session high (' + tpFmt(hi20) + '). ' + distDays + ' distribution day' + (distDays === 1 ? '' : 's') + ' in the last 10 sessions.';
+  } else {
+    const heavyDown = downVolRatio != null && downVolRatio > 1.25;
+    const lightDown = downVolRatio != null && downVolRatio < 0.9;
+    if (distDays >= 3 || (heavyDown && pullAtr > 1) || (pullAtr > 2.5 && px < ema20 && cmf10 != null && cmf10 < 0)) {
+      pullback = 'DISTRIBUTION — sellers are leaving with size'; pullCol = '#e5484d';
+    } else if (lightDown && distDays <= 1 && pullAtr <= 2.2) {
+      pullback = 'SLIGHT PULLBACK — light selling, no sign of distribution'; pullCol = '#0a9e5c';
+    } else {
+      pullback = 'MIXED — not clean either way'; pullCol = '#b45309';
+    }
+    pullWhy = 'Off the 10-session high (' + tpFmt(hi20) + ', ' + tpDateShort(t[hiI]) + ') by ' + pullPct.toFixed(1) + '% = ' + pullAtr.toFixed(1) + ' ATR. ' +
+      (downVolRatio != null ? 'Down-day volume in the pullback ' + downVolRatio.toFixed(2) + '× the 20-day average' + (upVolAdv != null ? ' vs up-day volume ' + upVolAdv.toFixed(2) + '× on the way up' : '') + '. ' : 'No down days since the high. ') +
+      distDays + ' distribution day' + (distDays === 1 ? '' : 's') + ' (down close on above-average volume) in the last 10 sessions. CMF(10) ' + (cmf10 != null ? cmf10.toFixed(2) : '—') + '.';
+  }
+
+  // --- exhaustion checklist (5 signals; 3+ = exhausted by that checklist's own rule, untested) ---
+  const phRecent = ph.filter(p => p.i >= n - 60);
+  const lastPH = phRecent[phRecent.length - 1], prevPH = phRecent.length > 1 ? phRecent[phRecent.length - 2] : null;
+  const atHighNow = lastPH && lastPH.i >= n - 10;
+  const div = (lastPH && prevPH && atHighNow && lastPH.price > prevPH.price);
+  const ex = {
+    rsiDiv: !!(div && rsiS[lastPH.i] < rsiS[prevPH.i]),
+    macdDiv: !!(div && hist[lastPH.i] < hist[prevPH.i]),
+    volDiv: !!(div && v[lastPH.i] < v[prevPH.i]),
+    reversal: (() => { const rg = h[n - 1] - l[n - 1]; return rg > 0.8 * atr && (c[n - 1] - l[n - 1]) / rg < 0.33 && (h[n - 1] - Math.max(o[n - 1], c[n - 1])) / rg > 0.4; })(),
+    stretched: xAtr20 > 2
+  };
+  const exCount = Object.values(ex).filter(Boolean).length;
+
+  // --- entry / stop / targets ---
+  // Stop: just under the nearest swing low if that sits 0.5-1.5 ATR below entry. Closer than 0.5 ATR is
+  // inside one day's normal noise; further than 1.5 ATR, the stop falls back to entry - 1.5 ATR, which is
+  // the distance used in the page's only stop-loss tests (Golden Cross +0.35R; RS Leaders failed it).
+  const stopFor = E => {
+    const s = supLv.filter(x => x.price < E - 0.5 * atr)[0];
+    if (s && E - (s.price - 0.15 * atr) <= 1.5 * atr)
+      return { price: s.price - 0.15 * atr, why: 'just under swing-low level ' + tpFmt(s.price) + (s.touches > 1 ? ' (' + s.touches + ' touches)' : '') };
+    return { price: E - 1.5 * atr, why: '1.5 ATR (the tested stop distance)' + (s ? '; nearest swing low ' + tpFmt(s.price) + ' is further' : '; no swing low below') };
+  };
+  const resAbove = x => resLv.filter(r => r.price > x + 0.3 * atr);
+  const planFor = (E, label) => {
+    const stop = stopFor(E);
+    const risk = E - stop.price;
+    const tested = E + 1.5 * atr;
+    const r1 = resAbove(E)[0] || null;
+    const tp1 = r1 && r1.price < tested - 0.1 * atr ? r1 : null;
+    const r2 = resAbove(Math.max(tested, tp1 ? tp1.price : 0))[0] || null;
+    const R = x => risk > 0 ? (x - E) / risk : null;
+    return { label: label, entry: E, stop: stop.price, stopWhy: stop.why, risk: risk,
+             tp1: tp1 ? tp1.price : null, tp1Touch: tp1 ? tp1.touches : 0, tested: tested,
+             tp2: r2 ? r2.price : null, rTp1: tp1 ? R(tp1.price) : null, rTested: R(tested), rTp2: r2 ? R(r2.price) : null };
+  };
+  const now = planFor(px, 'At next open (~last close)');
+  let pb = null;
+  if (ema9 < px - 0.3 * atr) {
+    let center = ema9;
+    const snap = supLv.find(s => Math.abs(s.price - ema9) <= 0.6 * atr && s.price < px - 0.3 * atr);
+    const shelf = demand[0] && demand[0].hi < px && Math.abs(demand[0].hi - ema9) <= 0.6 * atr ? demand[0].hi : null;
+    if (snap) center = (ema9 + snap.price) / 2; else if (shelf) center = (ema9 + shelf) / 2;
+    pb = planFor(center, 'Pullback to EMA9' + (snap ? ' + swing-low support' : shelf ? ' + volume shelf' : ''));
+    pb.zoneLo = center - 0.25 * atr; pb.zoneHi = center + 0.25 * atr;
+  }
+
+  // --- verdict ---
+  let verdict, vCol, chosen;
+  const extended = ext9 > EXT_EMA9_WARN;
+  const ceiling = resLv.find(r => r.price > px + 0.1 * atr && r.price - px < 1.0 * atr) || null;   // resistance within 1 ATR overhead
+  const reasons = [];
+  if (extended) reasons.push((ext9 > EXT_EMA9_HOT ? '⚠⚠ ' : '⚠ ') + ext9.toFixed(1) + '% over EMA9');
+  if (ceiling) reasons.push('resistance ' + tpFmt(ceiling.price) + ' only ' + ((ceiling.price - px) / atr).toFixed(1) + ' ATR overhead');
+  if (ex.reversal) reasons.push('reversal candle');
+  if (ma50 != null && px < ma50) reasons.push('below MA50');
+  if (brokeSupport) {
+    verdict = 'AVOID — trend/support broken'; vCol = '#e5484d'; chosen = pb || now;
+  } else if (!reasons.length) {
+    verdict = 'BUY ZONE — entry near next open'; vCol = '#0a9e5c'; chosen = now;
+  } else if (pb) {
+    verdict = 'WAIT — buy ' + tpFmt(pb.zoneLo) + '–' + tpFmt(pb.zoneHi) + ' (' + reasons.join('; ') + ')'; vCol = '#b45309'; chosen = pb;
+  } else {
+    verdict = 'HOLD OFF — ' + reasons.join('; ') + '; no pullback level yet'; vCol = '#e5484d'; chosen = now;
+  }
+  if (pullCol === '#e5484d' && vCol === '#0a9e5c') { verdict = 'CAUTION — distribution under way'; vCol = '#b45309'; }
+  if (pullCol === '#e5484d' && vCol === '#b45309' && verdict.indexOf('WAIT') === 0) verdict += ' — and distribution under way';
+
+  const f = fund[sym] || {};
+  let earnDays = null;
+  if (f.nextEarnings) { earnDays = Math.round((new Date(f.nextEarnings) - new Date()) / 86400000); }
+
+  return { sym: sym, px: px, asOf: t[n - 1], partial: partial, atr: atr, ema9: ema9, ema20: ema20, ma50: ma50, ma200: ma200,
+           ext9: ext9, xAtr20: xAtr20, volRatio: volRatio, vol5Ratio: vol5Ratio, lastVol: lastVol, avgVol20: avgVol20,
+           resLv: resLv.slice(0, 3), supLv: supLv.slice(0, 3), sellers: sellers, lone: lone, thinAbove: thinAbove, thinBelow: thinBelow,
+           demand: demand, overheadRatio: overheadRatio, trend: trend, trendCol: trendCol, pullback: pullback, pullCol: pullCol, pullWhy: pullWhy,
+           ex: ex, exCount: exCount, now: now, pb: pb, chosen: chosen, verdict: verdict, vCol: vCol, earnDays: earnDays, times: t };
+}
+
+function planChip(sym) {
+  const p = computeTradePlan(sym);
+  if (!p) return '<span style="color:#6b7280">—</span>';
+  const short = p.verdict.split(' — ')[0];
+  return '<a href="#plan-' + esc(sym) + '" style="text-decoration:none;white-space:nowrap;font-size:11px;font-weight:700;color:#fff;background:' + p.vCol +
+    ';border-radius:999px;padding:2px 8px" title="' + esc(p.verdict) + ' — click for the full plan">' + esc(short) + ' ›</a>';
+}
+
+function tpRow(label, value, note) {
+  return '<tr><td style="text-align:left;padding:3px 6px;color:#6b7280;white-space:nowrap;border:none">' + label + '</td>' +
+         '<td style="text-align:right;padding:3px 6px;font-weight:700;border:none">' + value + '</td>' +
+         '<td style="text-align:left;padding:3px 6px;color:#6b7280;font-size:11px;white-space:normal;border:none">' + (note || '') + '</td></tr>';
+}
+function tpR(r) {
+  if (r == null || !isFinite(r)) return '';
+  const col = r >= 2 ? '#0a9e5c' : r >= 1.2 ? '#374151' : '#e5484d';
+  return ' <span style="color:' + col + ';font-weight:700">' + r.toFixed(1) + 'R</span>';
+}
+
+function tradePlanCard(sym, sources) {
+  const p = computeTradePlan(sym);
+  if (!p) return '';
+  const k = p.chosen;
+  const sec = (title, body) => '<div style="margin-top:8px"><div style="font-size:11px;font-weight:700;color:#111827;text-transform:uppercase;letter-spacing:.03em">' + title + '</div>' +
+                              '<div style="font-size:12px;color:#374151;line-height:1.5">' + body + '</div></div>';
+  // sellers
+  let sellersHtml = '';
+  p.sellers.forEach(s => {
+    sellersHtml += '• <strong>' + tpFmt(s.lo) + '–' + tpFmt(s.hi) + '</strong>: heavy volume (' + s.rel.toFixed(1) + '× a typical price band)' +
+      (s.rejections ? ', ' + s.rejections + ' swing-high rejection' + (s.rejections > 1 ? 's' : '') + ' (' + s.rejDates.slice(-4).join(', ') + ')' : '') +
+      ' — buyers who bought here and are sitting at a loss sell into a rally back to their cost.<br>';
+  });
+  p.lone.forEach(r => {
+    sellersHtml += '• <strong>' + tpFmt(r.price) + '</strong>: swing-high rejection level' + (r.touches > 1 ? ' (' + r.touches + ' touches)' : '') + ', not a heavy-volume zone.<br>';
+  });
+  if (!sellersHtml) sellersHtml = 'No heavy-volume zone or swing-high rejection within ' + TP_REACH_ATR + ' ATR above — little recorded supply overhead.<br>';
+  if (p.thinAbove) {
+    const inside = p.lone.concat(p.resLv).filter(r => r.price >= p.thinAbove.lo && r.price <= p.thinAbove.hi).map(r => tpFmt(r.price));
+    sellersHtml += '• Thin volume ' + tpFmt(p.thinAbove.lo) + '–' + tpFmt(p.thinAbove.hi) + ': little traded there, so few trapped holders' +
+      (inside.length ? ' — but price has still been turned back inside it at ' + [...new Set(inside)].join(', ') + ', so clear those first' : ', and price can move through it quickly') + ' (untested).<br>';
+  }
+  if (p.overheadRatio != null) sellersHtml += '<span style="color:#6b7280">Volume traded within 2 ATR above vs below price: ' + p.overheadRatio.toFixed(2) + '× — ' +
+    (p.overheadRatio > 1.2 ? 'more supply overhead than support underneath.' : p.overheadRatio < 0.8 ? 'more support underneath than supply overhead.' : 'roughly balanced.') + '</span>';
+  // supports
+  const supHtml = (p.supLv.length ? p.supLv.map(s => '<strong>' + tpFmt(s.price) + '</strong>' + (s.touches > 1 ? ' (' + s.touches + '×)' : '')).join(' · ') : 'no swing low within reach') +
+    ' &nbsp;|&nbsp; EMA9 ' + tpFmt(p.ema9) + ' · EMA20 ' + tpFmt(p.ema20) + ' · MA50 ' + tpFmt(p.ma50) +
+    (p.demand[0] ? '<br>Volume shelf (buyers) ' + tpFmt(p.demand[0].lo) + '–' + tpFmt(p.demand[0].hi) : '') +
+    (p.thinBelow ? '<br><span style="color:#b45309">Thin volume below at ' + tpFmt(p.thinBelow.lo) + '–' + tpFmt(p.thinBelow.hi) + ' — little to slow a drop through it.</span>' : '');
+  // volume
+  const vr = p.volRatio;
+  const volHtml = 'Last session ' + fmtVol(p.lastVol) + ' = <strong style="color:' + (vr >= 1.2 ? '#0a9e5c' : vr <= 0.8 ? '#b45309' : '#374151') + '">' +
+    (vr != null ? vr.toFixed(2) + '× 20-day average (' + (vr >= 1.2 ? 'above' : vr <= 0.8 ? 'below' : 'about') + ' average)' : '—') + '</strong>' +
+    (p.vol5Ratio != null ? '; 5-day average ' + p.vol5Ratio.toFixed(2) + '×.' : '.');
+  // exhaustion
+  const exNames = { rsiDiv: 'RSI divergence', macdDiv: 'MACD divergence', volDiv: 'lower volume at the new high', reversal: 'reversal candle', stretched: '>2 ATR over EMA20' };
+  const fired = Object.keys(p.ex).filter(x => p.ex[x]).map(x => exNames[x]);
+  const exHtml = '<strong style="color:' + (p.exCount >= 3 ? '#e5484d' : p.exCount === 2 ? '#b45309' : '#374151') + '">' + p.exCount + ' of 5</strong>' +
+    (fired.length ? ': ' + fired.join(', ') : '') + '. <span style="color:#6b7280">3+ = exhausted by the checklist\'s own (untested) rule.</span>';
+  // plan table
+  const tbl = '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:2px">' +
+    tpRow('Entry', k.zoneLo != null ? tpFmt(k.zoneLo) + '–' + tpFmt(k.zoneHi) : tpFmt(k.entry), esc(k.label)) +
+    tpRow('Stop', tpFmt(k.stop), esc(k.stopWhy) + ' · risk ' + tpFmt(k.risk) + ' (' + (k.risk / k.entry * 100).toFixed(1) + '%)') +
+    (k.tp1 != null ? tpRow('TP1', tpFmt(k.tp1) + tpR(k.rTp1), 'first resistance' + (k.tp1Touch > 1 ? ' (' + k.tp1Touch + ' touches)' : '') + ' — take part here') : '') +
+    tpRow('Target', tpFmt(k.tested) + tpR(k.rTested), '<strong>entry + 1.5 ATR — the tested target</strong>') +
+    (k.tp2 != null ? tpRow('TP2 / runner', tpFmt(k.tp2) + tpR(k.rTp2), 'next resistance above') : '') +
+    '</table>' +
+    (p.pb && k !== p.now ? '<div style="font-size:11px;color:#6b7280;margin-top:3px">Buying now instead: entry ' + tpFmt(p.now.entry) + ', stop ' + tpFmt(p.now.stop) +
+      ', target ' + tpFmt(p.now.tested) + tpR(p.now.rTested) + (p.now.tp1 != null ? ', TP1 ' + tpFmt(p.now.tp1) + tpR(p.now.rTp1) : '') + '.</div>' : '');
+  const stopNote = sources.some(s => /RS Leader/.test(s)) ? '<br><span style="color:#b45309">RS Leaders: the stop version of this signal tested WORSE than random entry (+0.08R) — the panel rule is target-only.</span>' :
+                   sources.some(s => /Golden/.test(s)) ? '<br>Golden Cross is the only panel that survived a stop-loss test (+0.35R).' : '';
+  const earn = p.earnDays != null && p.earnDays >= 0 && p.earnDays <= TP_EARNINGS_DAYS
+    ? '<div style="margin-top:6px;font-size:12px;font-weight:700;color:#8b5cf6">Earnings in ' + p.earnDays + ' days — inside a 20-session hold.</div>' : '';
+  return '<div id="plan-' + esc(sym) + '" style="border:1px solid #e9eaee;border-radius:12px;padding:12px;background:#fff;width:380px;scroll-margin-top:12px">' +
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px">' +
+      '<span><strong style="font-size:15px"><a class="tklink" href="' + rallyLink(sym) + '" target="_blank" rel="noopener noreferrer">' + esc(sym) + '</a></strong> ' +
+      '<span style="font-weight:700">' + fmtPrice(p.px) + '</span> <span style="font-size:11px;color:#6b7280">close ' + tpDateShort(p.asOf) + (p.partial ? ' (today\'s bar in progress — ignored)' : '') + '</span></span>' +
+      '<span style="font-size:11px;color:#6b7280">ATR ' + tpFmt(p.atr) + ' (' + (p.atr / p.px * 100).toFixed(1) + '%)</span></div>' +
+    '<div style="font-size:11px;color:#6b7280;margin-top:2px">' + esc(sources.join(' + ')) + '</div>' +
+    '<div style="margin-top:8px;padding:6px 10px;border-radius:8px;background:' + p.vCol + ';color:#fff;font-weight:700;font-size:13px">' + esc(p.verdict) + '</div>' +
+    sec('Plan', tbl + '<span style="font-size:11px;color:#6b7280">Stretch now: ' + (p.ext9 >= 0 ? '+' : '') + p.ext9.toFixed(1) + '% vs EMA9' +
+        (p.ext9 > EXT_EMA9_HOT ? ' ⚠⚠' : p.ext9 > EXT_EMA9_WARN ? ' ⚠' : '') + ', ' + p.xAtr20.toFixed(1) + ' ATR over EMA20.' + stopNote + '</span>') +
+    sec('Trend', '<strong style="color:' + p.trendCol + '">' + esc(p.trend) + '</strong>') +
+    sec('Pullback', '<strong style="color:' + p.pullCol + '">' + esc(p.pullback) + '</strong><br><span style="font-size:11px;color:#6b7280">' + esc(p.pullWhy) + '</span>') +
+    sec('Volume', volHtml) +
+    sec('Where sellers are parked', sellersHtml) +
+    sec('Support', supHtml) +
+    sec('Exhaustion checklist', exHtml) +
+    earn +
+    '</div>';
+}
+
+function renderTradePlans() {
+  const el = document.getElementById('tradePlansBody');
+  if (!el) return;
+  const order = ['Weekly Pick', 'Golden Cross', 'RS Leader', 'Bull Flag', 'Intraday Breakout'];
+  const rank = srcs => Math.min(...srcs.map(s => { const i = order.findIndex(o => s.indexOf(o) === 0); return i < 0 ? 99 : i; }));
+  const rows = [...panelMembers.entries()].sort((a, b) => rank(a[1]) - rank(b[1]) || a[0].localeCompare(b[0]));
+  const cap = document.getElementById('tradePlansCaption');
+  if (cap) cap.textContent = rows.length + ' name' + (rows.length === 1 ? '' : 's') + ' across Weekly Picks and the four ranked panels. Built from completed daily bars only.';
+  el.innerHTML = rows.length ? rows.map(r => tradePlanCard(r[0], r[1])).join('')
+    : '<div class="empty" style="padding:10px">No names in Weekly Picks or the four ranked panels right now.</div>';
 }
 
 async function loadData() {
