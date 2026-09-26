@@ -267,6 +267,7 @@
   <strong>What is tested and what is not.</strong> Three things here carry backtest evidence: the sizing verdict, the <strong>Target</strong> row (entry + 1.5&times;ATR14, the target every panel's hit rate is measured against) and the <strong>EMA9 stretch</strong> figure (more than 5% above EMA9 roughly doubled drawdown without changing the hit rate). Everything else &mdash; entry zones, stops, TP1/TP2, "where sellers are parked", the pullback label, the trend label and the exhaustion checklist &mdash; is a rule of thumb that turns a chart reading into numbers. <strong>None of it has been backtested.</strong> Every panel except Golden Cross was tested with <em>no stop</em>; adding one makes it a different strategy.<br><br>
   <strong>How the pieces are built.</strong> <em>Support/resistance</em>: swing highs/lows (the extreme of the 3 bars either side) over ~1 year, merged when within 0.5 ATR. <em>Where sellers are parked</em>: price bands above today's price where unusually heavy volume traded (each day's volume spread across its high&ndash;low range), plus swing highs where price was turned back &mdash; buyers stuck there tend to sell as price returns to their cost. <em>Pullback</em>: <span style="color:#0a9e5c;font-weight:700">slight</span> = selling on below-average volume, at most 1 distribution day, depth &le; 2.2 ATR; <span style="color:#e5484d;font-weight:700">distribution</span> = 3+ distribution days (down close on above-average volume) in 10 sessions, or heavy down-day volume on a pullback deeper than 1 ATR. <em>Trend</em>: price vs EMA20 and MA50, and whether MA50 is rising; "broke support" = closed below the most recent swing low. <em>Size</em>: half when the close is more than 8% above EMA9, otherwise full. <em>Stop</em>: none, as tested; Golden Cross cards show the optional 1.5-move stop that panel survived.<br><br>
   <strong>Exit when the target is reached.</strong> How stretched a name is on arrival depends on how fast it got there. A fast run (more than ~6% over EMA9 on arrival) &mdash; take the full exit; a slow grind &mdash; take most, trail a small runner under EMA9. (Untested.)</div>
+  <div id="tradePlansSummary" style="margin-top:8px"></div>
   <div id="tradePlansBody" style="display:flex;flex-wrap:wrap;gap:14px;margin-top:12px"></div>
 </div>
 
@@ -2843,6 +2844,58 @@ function tradePlanCard(sym, sources, rk) {
     '</div>';
 }
 
+// ---- At-a-glance comparison across every card, so nothing has to be read card by card ----
+function renderTradePlanSummary(items) {
+  const el = document.getElementById('tradePlansSummary');
+  if (!el) return;
+  if (!items.length) { el.innerHTML = ''; return; }
+  const slot = TP_CAPITAL / TP_SLOTS;
+  const act = x => x.p.ignore ? 'IGNORE' : x.take ? 'TAKE #' + x.rank : x.backup ? 'BACKUP' : 'PASS';
+  const actCol = a => /^TAKE/.test(a) ? '#1d4ed8' : a === 'BACKUP' ? '#0a9e5c' : a === 'IGNORE' ? '#e5484d' : '#6b7280';
+  const earnIn = x => x.p.earnDays != null && x.p.earnDays >= 0 && x.p.earnDays <= TP_EARNINGS_DAYS;
+  const movePct = x => x.p.atr / x.p.px * 100;
+  const names = arr => arr.length ? arr.map(x => '<strong>' + esc(x.sym) + '</strong>').join(', ') : 'none';
+  const takes = items.filter(x => x.take), backups = items.filter(x => x.backup), ignores = items.filter(x => x.p.ignore);
+  const halfs = items.filter(x => !x.p.ignore && x.p.halfSize), earn = items.filter(earnIn);
+  const live = items.filter(x => !x.p.ignore);
+  const byMove = live.slice().sort((a, b) => movePct(a) - movePct(b));
+  const calm = byMove.slice(0, 2), wild = byMove.slice(-2).reverse();
+  const cleanCalm = byMove.filter(x => !earnIn(x) && !x.p.halfSize).slice(0, 2);
+  const lines = [];
+  lines.push(takes.length
+    ? '<span style="color:#1d4ed8;font-weight:800">TAKE today:</span> ' + names(takes) + ' (in 2+ panels).' + (backups.length ? ' Backups: ' + names(backups) + '.' : '')
+    : '<span style="color:#b45309;font-weight:800">No TAKE today</span> — no name is in 2+ panels. The tested choice is to leave the slots in cash.');
+  if (earn.length) lines.push('<span style="color:#8b5cf6;font-weight:800">Earnings inside a 20-session hold:</span> ' + earn.map(x => '<strong>' + esc(x.sym) + '</strong> (' + x.p.earnDays + ' days)').join(', ') + ' — the stock can gap past any plan overnight.');
+  if (halfs.length) lines.push('<span style="color:#b45309;font-weight:800">Half size (more than 8% stretched):</span> ' + names(halfs) + '.');
+  if (ignores.length) lines.push('<span style="color:#e5484d;font-weight:800">Ignore:</span> ' + names(ignores) + ' (clean-looking setup with distribution under way).');
+  if (live.length >= 3) lines.push('<span style="font-weight:800">Risk spread:</span> calmest ' + calm.map(x => '<strong>' + esc(x.sym) + '</strong> ' + movePct(x).toFixed(1) + '%').join(', ') +
+    '; most volatile ' + wild.map(x => '<strong>' + esc(x.sym) + '</strong> ' + movePct(x).toFixed(1) + '%').join(', ') + ' a day. On the same $' + Math.round(slot).toLocaleString() +
+    ', the most volatile moves about ' + (movePct(wild[0]) / movePct(calm[0])).toFixed(1) + '× as much as the calmest on a normal day.');
+  if (!takes.length && cleanCalm.length) lines.push('<span style="font-weight:800">If you take a single-panel name anyway:</span> the lowest-risk choice is ' + names(cleanCalm) +
+    ' (calmest, no earnings in the window, not stretched). That lowers the risk, not the odds.');
+  const rows = items.slice().sort((a, b) => {
+    const o = x => /^TAKE/.test(act(x)) ? 0 : act(x) === 'BACKUP' ? 1 : act(x) === 'PASS' ? 2 : 3;
+    return o(a) - o(b) || movePct(a) - movePct(b);
+  }).map(x => {
+    const a = act(x), w = [];
+    if (earnIn(x)) w.push('<span style="color:#8b5cf6;font-weight:700">earnings ' + x.p.earnDays + 'd</span>');
+    if (x.p.halfSize) w.push('<span style="color:#b45309;font-weight:700">stretched ' + x.p.ext9.toFixed(1) + '%</span>');
+    if (x.p.context && x.p.context.length) w.push('<span style="color:#6b7280">' + esc(x.p.context.join('; ')) + '</span>');
+    return '<tr><td style="text-align:left"><a href="#plan-' + esc(x.sym) + '" class="tklink"><strong>' + esc(x.sym) + '</strong></a></td>' +
+      '<td style="text-align:left"><span style="color:' + actCol(a) + ';font-weight:800">' + a + '</span></td>' +
+      '<td style="text-align:left;white-space:normal">' + esc(x.srcs.map(t => t.split(' #')[0]).join(' + ')) + '</td>' +
+      '<td>' + fmtPrice(x.p.px) + '</td><td>' + fmtPrice(x.p.chosen.tested) + '</td>' +
+      '<td>' + movePct(x).toFixed(1) + '%</td><td>$' + Math.round(slot * movePct(x) / 100).toLocaleString() + '</td>' +
+      '<td style="text-align:left;white-space:normal">' + (w.join(' · ') || '—') + '</td></tr>';
+  }).join('');
+  el.innerHTML = '<div style="border:1px solid #c7d2fe;background:#eef2ff;border-radius:12px;padding:12px 14px">' +
+    '<div style="font-weight:800;font-size:14px;color:#111827;margin-bottom:6px">At a glance — all ' + items.length + ' names</div>' +
+    '<ul style="margin:0 0 8px 18px;padding:0;font-size:13px;line-height:1.6">' + lines.map(l => '<li>' + l + '</li>').join('') + '</ul>' +
+    '<div style="overflow-x:auto"><table style="font-size:12px"><thead><tr><th style="text-align:left">Ticker</th><th style="text-align:left">Action</th><th style="text-align:left">Panel</th><th>Last close</th><th>Target</th>' +
+    '<th title="Average daily price swing over 14 sessions, as % of price">Normal daily move</th><th title="What one normal day\'s move is worth on one slot">$ per normal day (one slot)</th><th style="text-align:left">Flags</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<div style="font-size:11px;color:#6b7280;margin-top:6px">Sorted by action, then calmest first. Tested: TAKE (2+ panels), half size above 8% stretch, IGNORE. Earnings and volatility are risk facts, not tested signals. Chart warnings did not predict outcomes.</div></div>';
+}
+
 function renderTradePlans() {
   const el = document.getElementById('tradePlansBody');
   if (!el) return;
@@ -2871,6 +2924,7 @@ function renderTradePlans() {
     '<input id="tpSlots" type="number" min="1" max="10" value="' + TP_SLOTS + '" style="width:48px" onchange="setPlanCapital()"> slots. ' +
     (nTake ? '<span style="color:#1d4ed8">' + nTake + ' name' + (nTake === 1 ? '' : 's') + ' qualify as TAKE (in 2+ panels).</span>'
            : '<span style="color:#b45309">No name is in 2+ panels today — the tested choice is to leave free slots in cash rather than fill them.</span>');
+  renderTradePlanSummary(items);
   el.innerHTML = items.length ? items.map(x => tradePlanCard(x.sym, x.srcs, { rank: x.rank, take: x.take, backup: x.backup })).join('')
     : '<div class="empty" style="padding:10px">No names in Weekly Picks or the four ranked panels right now.</div>';
 }
