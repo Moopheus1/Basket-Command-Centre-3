@@ -247,8 +247,10 @@
   <strong>How to use these cards: every name is a buy at the next open (that is the panel rule that was tested). The card only tells you how BIG.</strong>
   <ul style="margin:6px 0 0 18px;padding:0">
   <li><span style="color:#0a9e5c;font-weight:700">FULL SIZE</span>: the normal case.</li>
-  <li><span style="color:#b45309;font-weight:700">HALF SIZE</span>: the close is more than 8% above the 9-day average (EMA9). In the backtest these names hit target just as often (77% vs 78%) with the same average gain (+3.0%), but the dip on the way was about double: median &minus;9.6% vs about &minus;4%, worst quarter &minus;20% vs &minus;11%. This held in both halves of the period. Half size keeps the profit in proportion and halves that dip. Across all signals, halving these improved profit per unit of drawdown by about 9%.</li>
+  <li><span style="color:#e5484d;font-weight:700">IGNORE</span>: a clean-looking setup (not stretched, no resistance just overhead, no reversal candle, trend intact) whose pullback reads as <em>distribution</em>. These hit target only 65% of the time with +1.4% average, close to buying on a random day, and they were weak in both halves (+1.3% / +1.5%). Only 40 signals, and the rule was picked after seeing the results, so confirm it on new data.</li>
+  <li><span style="color:#b45309;font-weight:700">HALF SIZE</span>: the close is more than 8% above the 9-day average (EMA9). In the backtest these names hit target just as often (77% vs 78%) with the same average gain (+3.0%), but the dip on the way was about double: median &minus;9.6% vs about &minus;4%, worst quarter &minus;20% vs &minus;11%. This held in both halves of the period. Half size keeps the profit in proportion and halves that dip. Across all signals, halving these improved profit per unit of drawdown by about 9%. The 8% line is the page's existing ⚠⚠ threshold, not one fitted to this test; trying 4&ndash;15% gave the best result at 8%, with 9&ndash;12% about the same and lower lines giving up profit.</li>
   </ul>
+  <strong>Which to take with limited capital: only names flagged by 2 or more panels.</strong> Names in 2+ panels hit target 86&ndash;92% (+7.1&ndash;7.4% average) in <em>both</em> halves of Jan&ndash;Aug 2026, against 73&ndash;80% (+1.8&ndash;3.9%) for names in one panel (72 multi-panel signals across 41 tickers). As a 2-slot book (buy next open, target, 20-session exit, no stop, IGNORE skipped), <strong>"multi-panel names only, otherwise stay in cash" returned &times;2.94 with a worst drawdown of &minus;19.1%</strong>, &times;1.59 in Jan&ndash;Apr and &times;1.85 in May&ndash;Aug. Filling spare slots with single-panel names did not help reliably: picking among them by lowest CMF, highest CMF, stretch or panel order behaved like chance (random picks after the multi-panel names: median &times;2.53, 10th&ndash;90th percentile &times;1.75&ndash;&times;3.41). At least one multi-panel name appeared on 109 of 162 trading days. When several qualify, the lowest CMF(20) goes first. About 16 rankings were tried in total, so the headline multiple flatters; the per-trade gap between multi- and single-panel names, which held in both halves, is the stronger evidence.<br><br>
   <strong>Why the earlier buy / wait / hold-off verdicts were removed.</strong> Replayed day by day over Jan&ndash;Aug 2026 (586 signals), they did not sort winners from losers: HOLD OFF names hit target 82%, WAIT 78%, BUY 77%. Waiting for a pullback filled only 63% of the time, and the trades that never filled were the best ones (96% hit, +7.0%). Tight "chart" stops cut the hit rate from about 78% to about 59%. Distribution, trend and resistance labels showed no edge either, so they are kept only as <em>context</em>. <strong>5&ndash;8% above EMA9 was NOT worse in this sample</strong>; only above 8% was. One sample in one bull market, so re-test after a few more months of data.</div>
   <div class="desc"><strong>"Normal daily move"</strong> (known on charts as ATR, Average True Range) is the average size of one day's price swing over the last 14 sessions. If a stock's normal daily move is $7, then "1.5 normal daily moves" is $10.50. Targets and stops are sized this way so a volatile stock gets wider levels than a quiet one.</div>
   <div class="desc">One card per name in Weekly Picks and the four ranked panels (click the <strong>Plan</strong> chip in any panel to jump here). Everything is computed from <strong>completed</strong> daily bars &mdash; while the US session is open, today's unfinished bar is ignored, because every backtest on this page used finished bars.<br><br>
@@ -2426,6 +2428,15 @@ const TP_HEAVY = 1.3, TP_THIN = 0.6;   // bin volume vs the median bin
 const TP_EARNINGS_DAYS = 28;    // ~20 sessions: an earnings date inside the hold window
 let panelMembers = new Map();
 let _planCache = {};
+// Capital / slots for the position-size line on each card. Per-viewer convenience only.
+let TP_CAPITAL = 100000, TP_SLOTS = 2;
+try { const c = JSON.parse(localStorage.getItem('bcc3_tp_capital') || 'null'); if (c && c.cap > 0 && c.slots > 0) { TP_CAPITAL = c.cap; TP_SLOTS = c.slots; } } catch (e) {}
+function setPlanCapital() {
+  const cap = parseFloat((document.getElementById('tpCap') || {}).value), sl = parseInt((document.getElementById('tpSlots') || {}).value, 10);
+  if (cap > 0) TP_CAPITAL = cap; if (sl > 0) TP_SLOTS = sl;
+  try { localStorage.setItem('bcc3_tp_capital', JSON.stringify({ cap: TP_CAPITAL, slots: TP_SLOTS })); } catch (e) {}
+  renderTradePlans();
+}
 function addMember(sym, tag) {
   if (!panelMembers.has(sym)) panelMembers.set(sym, []);
   const a = panelMembers.get(sym);
@@ -2604,6 +2615,7 @@ function _computeTradePlan(sym) {
   const upBefore = []; for (let i = Math.max(1, hiI - 9); i <= hiI; i++) if (c[i] > c[i - 1]) upBefore.push(v[i]);
   const downVolRatio = downIdx.length && avgVol20 ? tpMean(downIdx.map(i => v[i])) / avgVol20 : null;
   const upVolAdv = upBefore.length && avgVol20 ? tpMean(upBefore) / avgVol20 : null;
+  const cmf20 = (() => { let mf = 0, vv = 0; for (let i = Math.max(0, n - 20); i < n; i++) { const rg = h[i] - l[i]; if (rg > 0) { mf += ((c[i] - l[i]) - (h[i] - c[i])) / rg * v[i]; vv += v[i]; } } return vv ? mf / vv : null; })();
   const cmf10 = (() => { let mf = 0, vv = 0; for (let i = n - 10; i < n; i++) { const rg = h[i] - l[i]; if (rg > 0) { mf += ((c[i] - l[i]) - (h[i] - c[i])) / rg * v[i]; vv += v[i]; } } return vv ? mf / vv : null; })();
   let pullback, pullCol, pullWhy;
   if (pullAtr < 0.5) {
@@ -2687,7 +2699,13 @@ function _computeTradePlan(sym) {
   if (brokeSupport) context.push(trend.split(' — ')[0].toLowerCase());
   if (ex.reversal) context.push('reversal candle');
   const halfSize = ext9 > EXT_EMA9_HOT;
-  if (halfSize) { verdict = 'HALF SIZE — ' + ext9.toFixed(1) + '% above the 9-day average: same odds, about double the dip'; vCol = '#b45309'; }
+  // IGNORE: the old "CAUTION" case - a clean buy setup (<=5% over EMA9, no resistance within one normal day's
+  // move, no reversal candle, trend intact) while the pullback reads as DISTRIBUTION. Backtest: 65% hit,
+  // +1.4% avg, gain per unit of dip 0.22 (worst of any group), weak in both halves (+1.3% / +1.5%), n=40.
+  // Chosen AFTER seeing the results, so it needs confirming on new data.
+  const ignoreSetup = pullCol === '#e5484d' && !brokeSupport && ext9 <= EXT_EMA9_WARN && !ceiling && !ex.reversal && !(ma50 != null && px < ma50);
+  if (ignoreSetup) { verdict = 'IGNORE — clean setup but distribution under way (backtest: 65% hit, +1.4% avg)'; vCol = '#e5484d'; }
+  else if (halfSize) { verdict = 'HALF SIZE — ' + ext9.toFixed(1) + '% above the 9-day average: same odds, about double the dip'; vCol = '#b45309'; }
   else { verdict = 'FULL SIZE — buy at next open, per the panel rule'; vCol = '#0a9e5c'; }
   const f = fund[sym] || {};
   let earnDays = null;
@@ -2697,7 +2715,7 @@ function _computeTradePlan(sym) {
            ext9: ext9, xAtr20: xAtr20, volRatio: volRatio, vol5Ratio: vol5Ratio, lastVol: lastVol, avgVol20: avgVol20,
            resLv: resLv.slice(0, 3), supLv: supLv.slice(0, 3), sellers: sellers, lone: lone, thinAbove: thinAbove, thinBelow: thinBelow,
            demand: demand, overheadRatio: overheadRatio, trend: trend, trendCol: trendCol, pullback: pullback, pullCol: pullCol, pullWhy: pullWhy,
-           ex: ex, exCount: exCount, now: now, pb: pb, chosen: chosen, verdict: verdict, vCol: vCol, halfSize: halfSize, context: context, earnDays: earnDays, times: t };
+           ex: ex, exCount: exCount, now: now, pb: pb, chosen: chosen, verdict: verdict, vCol: vCol, halfSize: halfSize, ignore: ignoreSetup, cmf20: cmf20, context: context, earnDays: earnDays, times: t };
 }
 
 function planChip(sym) {
@@ -2719,9 +2737,10 @@ function tpR(r) {
   return ' <span style="color:' + col + ';font-weight:700">' + r.toFixed(1) + 'R</span>';
 }
 
-function tradePlanCard(sym, sources) {
+function tradePlanCard(sym, sources, rk) {
   const p = computeTradePlan(sym);
   if (!p) return '';
+  rk = rk || {};
   const k = p.chosen;
   const sec = (title, body) => '<div style="margin-top:8px"><div style="font-size:11px;font-weight:700;color:#111827;text-transform:uppercase;letter-spacing:.03em">' + title + '</div>' +
                               '<div style="font-size:12px;color:#374151;line-height:1.5">' + body + '</div></div>';
@@ -2779,11 +2798,20 @@ function tradePlanCard(sym, sources) {
       '<span><strong style="font-size:15px"><a class="tklink" href="' + rallyLink(sym) + '" target="_blank" rel="noopener noreferrer">' + esc(sym) + '</a></strong> ' +
       '<span style="font-weight:700">' + fmtPrice(p.px) + '</span> <span style="font-size:11px;color:#6b7280">close ' + tpDateShort(p.asOf) + (p.partial ? ' (today\'s bar in progress — ignored)' : '') + '</span></span>' +
       '<span style="font-size:11px;color:#6b7280" title="ATR(14): the average size of one day\'s price range over the last 14 sessions — how much this stock normally moves in a day.">Normal daily move $' + tpFmt(p.atr) + ' (' + (p.atr / p.px * 100).toFixed(1) + '%)</span></div>' +
-    '<div style="font-size:11px;color:#6b7280;margin-top:2px">' + esc(sources.join(' + ')) + '</div>' +
+    '<div style="font-size:11px;color:#6b7280;margin-top:2px">' + esc(sources.join(' + ')) + ' · CMF(20) ' + (p.cmf20 != null ? p.cmf20.toFixed(2) : '—') + '</div>' +
+    (rk.rank ? '<div style="margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">' +
+      '<span style="font-size:12px;font-weight:800;color:#111827">Rank #' + rk.rank + ' of ' + rk.total + '</span>' +
+      (rk.take ? '<span style="font-size:11px;font-weight:800;color:#fff;background:#1d4ed8;border-radius:999px;padding:2px 9px">TAKE — in ' + sources.length + ' panels</span>'
+             : (sources.length < 2 && !p.ignore ? '<span style="font-size:11px;font-weight:700;color:#6b7280;border:1px solid #d1d5db;border-radius:999px;padding:1px 8px">single panel — not a priority</span>' : '')) +
+      (sources.length >= 2 ? '<span style="font-size:11px;font-weight:700;color:#1d4ed8">in ' + sources.length + ' panels</span>' : '') + '</div>' : '') +
     '<div style="margin-top:8px;padding:6px 10px;border-radius:8px;background:' + p.vCol + ';color:#fff;font-weight:700;font-size:13px">' + esc(p.verdict) + '</div>' +
     '<div style="font-size:10px;color:#6b7280;margin-top:3px">Sizing rule backtested on 586 signals (Jan–Aug 2026) — see the panel note.</div>' +
     sec('Plan', tbl + (p.context.length ? '<div style="font-size:11px;color:#b45309;margin-top:3px"><strong>Context (did not predict outcomes):</strong> ' + esc(p.context.join('; ')) + '</div>' : '') + '<span style="font-size:11px;color:#6b7280">Stretch now: ' + (p.ext9 >= 0 ? '+' : '') + p.ext9.toFixed(1) + '% above the 9-day average (EMA9)' +
         (p.ext9 > EXT_EMA9_HOT ? ' ⚠⚠' : p.ext9 > EXT_EMA9_WARN ? ' ⚠' : '') + ', ' + p.xAtr20.toFixed(1) + ' normal daily moves above the 20-day average.' + stopNote + '</span>') +
+    (!p.ignore ? sec('Position size', (() => {
+        const slot = TP_CAPITAL / TP_SLOTS, amt = p.halfSize ? slot / 2 : slot;
+        return '$' + Math.round(amt).toLocaleString() + ' ≈ <strong>' + Math.floor(amt / p.px).toLocaleString() + ' shares</strong> at ' + fmtPrice(p.px) +
+          ' <span style="color:#6b7280">(' + (p.halfSize ? 'half of ' : '') + 'one of ' + TP_SLOTS + ' equal slots of $' + Math.round(TP_CAPITAL).toLocaleString() + ')</span>'; })()) : '') +
     sec('Trend', '<strong style="color:' + p.trendCol + '">' + esc(p.trend) + '</strong>') +
     sec('Pullback', '<strong style="color:' + p.pullCol + '">' + esc(p.pullback) + '</strong><br><span style="font-size:11px;color:#6b7280">' + esc(p.pullWhy) + '</span>') +
     sec('Volume', volHtml) +
@@ -2797,12 +2825,25 @@ function tradePlanCard(sym, sources) {
 function renderTradePlans() {
   const el = document.getElementById('tradePlansBody');
   if (!el) return;
-  const order = ['Weekly Pick', 'Golden Cross', 'RS Leader', 'Bull Flag', 'Intraday Breakout'];
-  const rank = srcs => Math.min(...srcs.map(s => { const i = order.findIndex(o => s.indexOf(o) === 0); return i < 0 ? 99 : i; }));
-  const rows = [...panelMembers.entries()].sort((a, b) => rank(a[1]) - rank(b[1]) || a[0].localeCompare(b[0]));
+  // RANKING for a small book. Backtest (Jan-Aug 2026, 2 equal slots, buy next open, 1.5x-move target, 20-session
+  // exit, no stop, IGNORE skipped): "in the most panels first, then lowest CMF" x2.70, max drawdown -18.6%,
+  // x1.65 Jan-Apr and x1.63 May-Aug; random picks among the same signals median x1.81 (10th-90th pct x1.23-x2.75).
+  // Names flagged by 2+ panels hit target 86-92% (+7.1-7.4% avg) in both halves vs 73-80% (+1.8-3.9%) for single-panel names.
+  const items = [...panelMembers.entries()].map(([sym, srcs]) => ({ sym: sym, srcs: srcs, p: computeTradePlan(sym) })).filter(x => x.p);
+  items.sort((a, b) => (a.p.ignore - b.p.ignore) || (b.srcs.length - a.srcs.length) ||
+                       ((a.p.cmf20 == null ? 9 : a.p.cmf20) - (b.p.cmf20 == null ? 9 : b.p.cmf20)) || a.sym.localeCompare(b.sym));
+  let taken = 0;
+  // TAKE only names in 2+ panels: 'multi-panel only, else stay in cash' x2.94 (-19.1% max DD; x1.59 / x1.85 by half).
+  // Filling the other slots with single-panel names added nothing reliable - the tie-break among them behaved like chance.
+  items.forEach((x, i) => { x.rank = i + 1; x.take = !x.p.ignore && x.srcs.length >= 2 && taken < TP_SLOTS; if (x.take) taken++; });
+  const nTake = taken;
   const cap = document.getElementById('tradePlansCaption');
-  if (cap) cap.textContent = rows.length + ' name' + (rows.length === 1 ? '' : 's') + ' across Weekly Picks and the four ranked panels. Built from completed daily bars only.';
-  el.innerHTML = rows.length ? rows.map(r => tradePlanCard(r[0], r[1])).join('')
+  if (cap) cap.innerHTML = items.length + ' name' + (items.length === 1 ? '' : 's') + ' across Weekly Picks and the four ranked panels, ranked for a ' + TP_SLOTS + '-position book. ' +
+    'Capital <input id="tpCap" type="number" value="' + TP_CAPITAL + '" style="width:110px" onchange="setPlanCapital()"> in ' +
+    '<input id="tpSlots" type="number" min="1" max="10" value="' + TP_SLOTS + '" style="width:48px" onchange="setPlanCapital()"> slots. ' +
+    (nTake ? '<span style="color:#1d4ed8">' + nTake + ' name' + (nTake === 1 ? '' : 's') + ' qualify as TAKE (in 2+ panels).</span>'
+           : '<span style="color:#b45309">No name is in 2+ panels today — the tested choice is to leave free slots in cash rather than fill them.</span>');
+  el.innerHTML = items.length ? items.map(x => tradePlanCard(x.sym, x.srcs, { rank: x.rank, total: items.length, take: x.take })).join('')
     : '<div class="empty" style="padding:10px">No names in Weekly Picks or the four ranked panels right now.</div>';
 }
 
