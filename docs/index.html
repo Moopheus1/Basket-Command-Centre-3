@@ -2799,16 +2799,21 @@ function tradePlanCard(sym, sources, rk) {
       '<span style="font-weight:700">' + fmtPrice(p.px) + '</span> <span style="font-size:11px;color:#6b7280">close ' + tpDateShort(p.asOf) + (p.partial ? ' (today\'s bar in progress — ignored)' : '') + '</span></span>' +
       '<span style="font-size:11px;color:#6b7280" title="ATR(14): the average size of one day\'s price range over the last 14 sessions — how much this stock normally moves in a day.">Normal daily move $' + tpFmt(p.atr) + ' (' + (p.atr / p.px * 100).toFixed(1) + '%)</span></div>' +
     '<div style="font-size:11px;color:#6b7280;margin-top:2px">' + esc(sources.join(' + ')) + ' · CMF(20) ' + (p.cmf20 != null ? p.cmf20.toFixed(2) : '—') + '</div>' +
-    (rk.rank ? '<div style="margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">' +
-      '<span style="font-size:12px;font-weight:800;color:#111827">Rank #' + rk.rank + ' of ' + rk.total + '</span>' +
-      (rk.take ? '<span style="font-size:11px;font-weight:800;color:#fff;background:#1d4ed8;border-radius:999px;padding:2px 9px">TAKE — in ' + sources.length + ' panels</span>'
-             : (sources.length < 2 && !p.ignore ? '<span style="font-size:11px;font-weight:700;color:#6b7280;border:1px solid #d1d5db;border-radius:999px;padding:1px 8px">single panel — not a priority</span>' : '')) +
-      (sources.length >= 2 ? '<span style="font-size:11px;font-weight:700;color:#1d4ed8">in ' + sources.length + ' panels</span>' : '') + '</div>' : '') +
-    '<div style="margin-top:8px;padding:6px 10px;border-radius:8px;background:' + p.vCol + ';color:#fff;font-weight:700;font-size:13px">' + esc(p.verdict) + '</div>' +
-    '<div style="font-size:10px;color:#6b7280;margin-top:3px">Sizing rule backtested on 586 signals (Jan–Aug 2026) — see the panel note.</div>' +
-    sec('Plan', tbl + (p.context.length ? '<div style="font-size:11px;color:#b45309;margin-top:3px"><strong>Context (did not predict outcomes):</strong> ' + esc(p.context.join('; ')) + '</div>' : '') + '<span style="font-size:11px;color:#6b7280">Stretch now: ' + (p.ext9 >= 0 ? '+' : '') + p.ext9.toFixed(1) + '% above the 9-day average (EMA9)' +
+
+    (() => {
+      const sizeTxt = p.halfSize ? 'HALF SIZE (' + p.ext9.toFixed(1) + '% above the 9-day average: same odds, about double the dip)' : 'FULL SIZE';
+      let txt, col, sub;
+      if (p.ignore) { txt = 'IGNORE'; col = '#e5484d'; sub = 'Clean-looking setup, but the pullback reads as distribution. Backtest: 65% hit, +1.4% average, close to buying on a random day.'; }
+      else if (rk.take) { txt = 'TAKE #' + rk.rank + ' — ' + sizeTxt; col = '#1d4ed8'; sub = 'In ' + sources.length + ' panels. Names in 2+ panels hit target 86–92% in both halves of the backtest.'; }
+      else if (rk.backup) { txt = 'BACKUP — in ' + sources.length + ' panels, but your ' + TP_SLOTS + ' slots are already filled'; col = '#0a9e5c'; sub = 'If you take it: ' + sizeTxt + '.'; }
+      else { txt = 'PASS — single panel'; col = '#6b7280'; sub = 'Still a positive-expectancy signal (73–80% hit, +1.8–3.9% average), but not a priority for a small book: no way of choosing among single-panel names beat chance. If you take it anyway: ' + sizeTxt + '.'; }
+      return '<div class="tpAction" style="margin-top:8px;padding:6px 10px;border-radius:8px;background:' + col + ';color:#fff;font-weight:800;font-size:13px">' + esc(txt) + '</div>' +
+             '<div style="font-size:11px;color:#374151;margin-top:3px">' + esc(sub) + '</div>';
+    })() +
+
+    sec('Plan', tbl + (p.context.length ? '<div style="font-size:11px;color:#b45309;margin-top:3px"><strong>Warning signs on the chart</strong> (tested: none of these predicted a worse result on its own): ' + esc(p.context.join('; ')) + '</div>' : '') + '<span style="font-size:11px;color:#6b7280">Stretch now: ' + (p.ext9 >= 0 ? '+' : '') + p.ext9.toFixed(1) + '% above the 9-day average (EMA9)' +
         (p.ext9 > EXT_EMA9_HOT ? ' ⚠⚠' : p.ext9 > EXT_EMA9_WARN ? ' ⚠' : '') + ', ' + p.xAtr20.toFixed(1) + ' normal daily moves above the 20-day average.' + stopNote + '</span>') +
-    (!p.ignore ? sec('Position size', (() => {
+    (rk.take || rk.backup ? sec('Position size', (() => {
         const slot = TP_CAPITAL / TP_SLOTS, amt = p.halfSize ? slot / 2 : slot;
         return '$' + Math.round(amt).toLocaleString() + ' ≈ <strong>' + Math.floor(amt / p.px).toLocaleString() + ' shares</strong> at ' + fmtPrice(p.px) +
           ' <span style="color:#6b7280">(' + (p.halfSize ? 'half of ' : '') + 'one of ' + TP_SLOTS + ' equal slots of $' + Math.round(TP_CAPITAL).toLocaleString() + ')</span>'; })()) : '') +
@@ -2830,12 +2835,19 @@ function renderTradePlans() {
   // x1.65 Jan-Apr and x1.63 May-Aug; random picks among the same signals median x1.81 (10th-90th pct x1.23-x2.75).
   // Names flagged by 2+ panels hit target 86-92% (+7.1-7.4% avg) in both halves vs 73-80% (+1.8-3.9%) for single-panel names.
   const items = [...panelMembers.entries()].map(([sym, srcs]) => ({ sym: sym, srcs: srcs, p: computeTradePlan(sym) })).filter(x => x.p);
-  items.sort((a, b) => (a.p.ignore - b.p.ignore) || (b.srcs.length - a.srcs.length) ||
-                       ((a.p.cmf20 == null ? 9 : a.p.cmf20) - (b.p.cmf20 == null ? 9 : b.p.cmf20)) || a.sym.localeCompare(b.sym));
+  // Order: multi-panel names (lowest CMF first - these all carry panel confirmation), then single-panel names grouped
+  // by panel in the page's hit-rate order WITHOUT a rank (no ranking among them beat chance), IGNORE last.
+  // Earlier version ranked single-panel names by lowest CMF, which put the heaviest SELLING first - wrong.
+  const PORD = ['Weekly Pick', 'Golden Cross', 'RS Leader', 'Bull Flag', 'Intraday Breakout'];
+  const pidx = x => Math.min(...x.srcs.map(t => { const i = PORD.findIndex(o => t.indexOf(o) === 0); return i < 0 ? 9 : i; }));
+  const grp = x => x.p.ignore ? 2 : x.srcs.length >= 2 ? 0 : 1;
+  items.sort((a, b) => (grp(a) - grp(b)) ||
+                       (grp(a) === 0 ? ((a.p.cmf20 == null ? 9 : a.p.cmf20) - (b.p.cmf20 == null ? 9 : b.p.cmf20)) : (pidx(a) - pidx(b))) ||
+                       a.sym.localeCompare(b.sym));
   let taken = 0;
   // TAKE only names in 2+ panels: 'multi-panel only, else stay in cash' x2.94 (-19.1% max DD; x1.59 / x1.85 by half).
   // Filling the other slots with single-panel names added nothing reliable - the tie-break among them behaved like chance.
-  items.forEach((x, i) => { x.rank = i + 1; x.take = !x.p.ignore && x.srcs.length >= 2 && taken < TP_SLOTS; if (x.take) taken++; });
+  items.forEach((x, i) => { x.take = !x.p.ignore && x.srcs.length >= 2 && taken < TP_SLOTS; x.backup = !x.p.ignore && x.srcs.length >= 2 && !x.take; if (x.take) { taken++; x.rank = taken; } });
   const nTake = taken;
   const cap = document.getElementById('tradePlansCaption');
   if (cap) cap.innerHTML = items.length + ' name' + (items.length === 1 ? '' : 's') + ' across Weekly Picks and the four ranked panels, ranked for a ' + TP_SLOTS + '-position book. ' +
@@ -2843,7 +2855,7 @@ function renderTradePlans() {
     '<input id="tpSlots" type="number" min="1" max="10" value="' + TP_SLOTS + '" style="width:48px" onchange="setPlanCapital()"> slots. ' +
     (nTake ? '<span style="color:#1d4ed8">' + nTake + ' name' + (nTake === 1 ? '' : 's') + ' qualify as TAKE (in 2+ panels).</span>'
            : '<span style="color:#b45309">No name is in 2+ panels today — the tested choice is to leave free slots in cash rather than fill them.</span>');
-  el.innerHTML = items.length ? items.map(x => tradePlanCard(x.sym, x.srcs, { rank: x.rank, total: items.length, take: x.take })).join('')
+  el.innerHTML = items.length ? items.map(x => tradePlanCard(x.sym, x.srcs, { rank: x.rank, take: x.take, backup: x.backup })).join('')
     : '<div class="empty" style="padding:10px">No names in Weekly Picks or the four ranked panels right now.</div>';
 }
 
