@@ -243,9 +243,17 @@
 <div class="panel" id="tradePlansPanel">
   <h2><span style="background:#111827;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">PLANS</span>Trade plans &mdash; entry, stop, targets, sellers, volume, trend</h2>
   <div class="desc" id="tradePlansCaption" style="font-weight:600;color:#374151"></div>
+  <div class="desc" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 12px;color:#14532d">
+  <strong>How to use these cards: every name is a buy at the next open (that is the panel rule that was tested). The card only tells you how BIG.</strong>
+  <ul style="margin:6px 0 0 18px;padding:0">
+  <li><span style="color:#0a9e5c;font-weight:700">FULL SIZE</span>: the normal case.</li>
+  <li><span style="color:#b45309;font-weight:700">HALF SIZE</span>: the close is more than 8% above the 9-day average (EMA9). In the backtest these names hit target just as often (77% vs 78%) with the same average gain (+3.0%), but the dip on the way was about double: median &minus;9.6% vs about &minus;4%, worst quarter &minus;20% vs &minus;11%. This held in both halves of the period. Half size keeps the profit in proportion and halves that dip. Across all signals, halving these improved profit per unit of drawdown by about 9%.</li>
+  </ul>
+  <strong>Why the earlier buy / wait / hold-off verdicts were removed.</strong> Replayed day by day over Jan&ndash;Aug 2026 (586 signals), they did not sort winners from losers: HOLD OFF names hit target 82%, WAIT 78%, BUY 77%. Waiting for a pullback filled only 63% of the time, and the trades that never filled were the best ones (96% hit, +7.0%). Tight "chart" stops cut the hit rate from about 78% to about 59%. Distribution, trend and resistance labels showed no edge either, so they are kept only as <em>context</em>. <strong>5&ndash;8% above EMA9 was NOT worse in this sample</strong>; only above 8% was. One sample in one bull market, so re-test after a few more months of data.</div>
+  <div class="desc"><strong>"Normal daily move"</strong> (known on charts as ATR, Average True Range) is the average size of one day's price swing over the last 14 sessions. If a stock's normal daily move is $7, then "1.5 normal daily moves" is $10.50. Targets and stops are sized this way so a volatile stock gets wider levels than a quiet one.</div>
   <div class="desc">One card per name in Weekly Picks and the four ranked panels (click the <strong>Plan</strong> chip in any panel to jump here). Everything is computed from <strong>completed</strong> daily bars &mdash; while the US session is open, today's unfinished bar is ignored, because every backtest on this page used finished bars.<br><br>
-  <strong>What is tested and what is not.</strong> Only two things here carry backtest evidence: the <strong>Target</strong> row (entry + 1.5&times;ATR14, the target every panel's hit rate is measured against) and the <strong>EMA9 stretch</strong> figure (more than 5% above EMA9 roughly doubled drawdown without changing the hit rate). Everything else &mdash; entry zones, stops, TP1/TP2, "where sellers are parked", the pullback label, the trend label and the exhaustion checklist &mdash; is a rule of thumb that turns a chart reading into numbers. <strong>None of it has been backtested.</strong> Every panel except Golden Cross was tested with <em>no stop</em>; adding one makes it a different strategy.<br><br>
-  <strong>How the pieces are built.</strong> <em>Support/resistance</em>: swing highs/lows (the extreme of the 3 bars either side) over ~1 year, merged when within 0.5 ATR. <em>Where sellers are parked</em>: price bands above today's price where unusually heavy volume traded (each day's volume spread across its high&ndash;low range), plus swing highs where price was turned back &mdash; buyers stuck there tend to sell as price returns to their cost. <em>Pullback</em>: <span style="color:#0a9e5c;font-weight:700">slight</span> = selling on below-average volume, at most 1 distribution day, depth &le; 2.2 ATR; <span style="color:#e5484d;font-weight:700">distribution</span> = 3+ distribution days (down close on above-average volume) in 10 sessions, or heavy down-day volume on a pullback deeper than 1 ATR. <em>Trend</em>: price vs EMA20 and MA50, and whether MA50 is rising; "broke support" = closed below the most recent swing low. <em>Stop</em>: just under the nearest swing low if it sits 0.5&ndash;1.5 ATR below entry (closer is inside one day's noise); otherwise entry &minus; 1.5 ATR, the distance used in the page's only stop tests. <em>Verdict</em>: BUY ZONE when the name is &le; 5% over EMA9, has no resistance within 1 ATR overhead and no reversal candle; otherwise WAIT for the EMA9 pullback zone; AVOID when the trend or support is broken.<br><br>
+  <strong>What is tested and what is not.</strong> Three things here carry backtest evidence: the sizing verdict, the <strong>Target</strong> row (entry + 1.5&times;ATR14, the target every panel's hit rate is measured against) and the <strong>EMA9 stretch</strong> figure (more than 5% above EMA9 roughly doubled drawdown without changing the hit rate). Everything else &mdash; entry zones, stops, TP1/TP2, "where sellers are parked", the pullback label, the trend label and the exhaustion checklist &mdash; is a rule of thumb that turns a chart reading into numbers. <strong>None of it has been backtested.</strong> Every panel except Golden Cross was tested with <em>no stop</em>; adding one makes it a different strategy.<br><br>
+  <strong>How the pieces are built.</strong> <em>Support/resistance</em>: swing highs/lows (the extreme of the 3 bars either side) over ~1 year, merged when within 0.5 ATR. <em>Where sellers are parked</em>: price bands above today's price where unusually heavy volume traded (each day's volume spread across its high&ndash;low range), plus swing highs where price was turned back &mdash; buyers stuck there tend to sell as price returns to their cost. <em>Pullback</em>: <span style="color:#0a9e5c;font-weight:700">slight</span> = selling on below-average volume, at most 1 distribution day, depth &le; 2.2 ATR; <span style="color:#e5484d;font-weight:700">distribution</span> = 3+ distribution days (down close on above-average volume) in 10 sessions, or heavy down-day volume on a pullback deeper than 1 ATR. <em>Trend</em>: price vs EMA20 and MA50, and whether MA50 is rising; "broke support" = closed below the most recent swing low. <em>Size</em>: half when the close is more than 8% above EMA9, otherwise full. <em>Stop</em>: none, as tested; Golden Cross cards show the optional 1.5-move stop that panel survived.<br><br>
   <strong>Exit when the target is reached.</strong> How stretched a name is on arrival depends on how fast it got there. A fast run (more than ~6% over EMA9 on arrival) &mdash; take the full exit; a slow grind &mdash; take most, trail a small runner under EMA9. (Untested.)</div>
   <div id="tradePlansBody" style="display:flex;flex-wrap:wrap;gap:14px;margin-top:12px"></div>
 </div>
@@ -2600,7 +2608,7 @@ function _computeTradePlan(sym) {
   let pullback, pullCol, pullWhy;
   if (pullAtr < 0.5) {
     pullback = 'NO PULLBACK — at or near the 10-session high'; pullCol = '#374151';
-    pullWhy = 'Within 0.5 ATR of the 10-session high (' + tpFmt(hi20) + '). ' + distDays + ' distribution day' + (distDays === 1 ? '' : 's') + ' in the last 10 sessions.';
+    pullWhy = 'Within half a normal day\'s move of the 10-session high (' + tpFmt(hi20) + '). ' + distDays + ' distribution day' + (distDays === 1 ? '' : 's') + ' in the last 10 sessions.';
   } else {
     const heavyDown = downVolRatio != null && downVolRatio > 1.25;
     const lightDown = downVolRatio != null && downVolRatio < 0.9;
@@ -2611,7 +2619,7 @@ function _computeTradePlan(sym) {
     } else {
       pullback = 'MIXED — not clean either way'; pullCol = '#b45309';
     }
-    pullWhy = 'Off the 10-session high (' + tpFmt(hi20) + ', ' + tpDateShort(t[hiI]) + ') by ' + pullPct.toFixed(1) + '% = ' + pullAtr.toFixed(1) + ' ATR. ' +
+    pullWhy = 'Off the 10-session high (' + tpFmt(hi20) + ', ' + tpDateShort(t[hiI]) + ') by ' + pullPct.toFixed(1) + '% (about ' + pullAtr.toFixed(1) + ' normal days\' moves). ' +
       (downVolRatio != null ? 'Down-day volume in the pullback ' + downVolRatio.toFixed(2) + '× the 20-day average' + (upVolAdv != null ? ' vs up-day volume ' + upVolAdv.toFixed(2) + '× on the way up' : '') + '. ' : 'No down days since the high. ') +
       distDays + ' distribution day' + (distDays === 1 ? '' : 's') + ' (down close on above-average volume) in the last 10 sessions. CMF(10) ' + (cmf10 != null ? cmf10.toFixed(2) : '—') + '.';
   }
@@ -2638,7 +2646,7 @@ function _computeTradePlan(sym) {
     const s = supLv.filter(x => x.price < E - 0.5 * atr)[0];
     if (s && E - (s.price - 0.15 * atr) <= 1.5 * atr)
       return { price: s.price - 0.15 * atr, why: 'just under swing-low level ' + tpFmt(s.price) + (s.touches > 1 ? ' (' + s.touches + ' touches)' : '') };
-    return { price: E - 1.5 * atr, why: '1.5 ATR (the tested stop distance)' + (s ? '; nearest swing low ' + tpFmt(s.price) + ' is further' : '; no swing low below') };
+    return { price: E - 1.5 * atr, why: '1.5 normal daily moves below entry ($' + tpFmt(1.5 * atr) + ', the tested stop distance)' + (s ? '; nearest swing low ' + tpFmt(s.price) + ' is further' : '; no swing low below') };
   };
   const resAbove = x => resLv.filter(r => r.price > x + 0.3 * atr);
   const planFor = (E, label) => {
@@ -2665,26 +2673,22 @@ function _computeTradePlan(sym) {
   }
 
   // --- verdict ---
-  let verdict, vCol, chosen;
-  const extended = ext9 > EXT_EMA9_WARN;
-  const ceiling = resLv.find(r => r.price > px + 0.1 * atr && r.price - px < 1.0 * atr) || null;   // resistance within 1 ATR overhead
-  const reasons = [];
-  if (extended) reasons.push((ext9 > EXT_EMA9_HOT ? '⚠⚠ ' : '⚠ ') + ext9.toFixed(1) + '% over EMA9');
-  if (ceiling) reasons.push('resistance ' + tpFmt(ceiling.price) + ' only ' + ((ceiling.price - px) / atr).toFixed(1) + ' ATR overhead');
-  if (ex.reversal) reasons.push('reversal candle');
-  if (ma50 != null && px < ma50) reasons.push('below MA50');
-  if (brokeSupport) {
-    verdict = 'AVOID — trend/support broken'; vCol = '#e5484d'; chosen = pb || now;
-  } else if (!reasons.length) {
-    verdict = 'BUY ZONE — entry near next open'; vCol = '#0a9e5c'; chosen = now;
-  } else if (pb) {
-    verdict = 'WAIT — buy ' + tpFmt(pb.zoneLo) + '–' + tpFmt(pb.zoneHi) + ' (' + reasons.join('; ') + ')'; vCol = '#b45309'; chosen = pb;
-  } else {
-    verdict = 'HOLD OFF — ' + reasons.join('; ') + '; no pullback level yet'; vCol = '#e5484d'; chosen = now;
-  }
-  if (pullCol === '#e5484d' && vCol === '#0a9e5c') { verdict = 'CAUTION — distribution under way'; vCol = '#b45309'; }
-  if (pullCol === '#e5484d' && vCol === '#b45309' && verdict.indexOf('WAIT') === 0) verdict += ' — and distribution under way';
-
+  // Verdict = POSITION SIZE, not buy/skip. Backtest of the earlier buy/wait/hold-off verdicts (586 signals,
+  // Jan-Aug 2026) showed they did not separate winners from losers, waiting missed the best trades and the
+  // structure stops cut the hit rate from ~78% to ~59%. The one thing that held up in both halves of the
+  // period: names MORE THAN 8% above EMA9 had the same odds and return but about double the dip on the way
+  // (median -9.6% vs about -4%, worst quarter -20% vs -11%). So those get half size; everything else full size.
+  let verdict, vCol;
+  const chosen = now;
+  const ceiling = resLv.find(r => r.price > px + 0.1 * atr && r.price - px < 1.0 * atr) || null;
+  const context = [];
+  if (ceiling) context.push('resistance ' + tpFmt(ceiling.price) + ' only $' + tpFmt(ceiling.price - px) + ' overhead');
+  if (pullCol === '#e5484d') context.push('distribution under way');
+  if (brokeSupport) context.push(trend.split(' — ')[0].toLowerCase());
+  if (ex.reversal) context.push('reversal candle');
+  const halfSize = ext9 > EXT_EMA9_HOT;
+  if (halfSize) { verdict = 'HALF SIZE — ' + ext9.toFixed(1) + '% above the 9-day average: same odds, about double the dip'; vCol = '#b45309'; }
+  else { verdict = 'FULL SIZE — buy at next open, per the panel rule'; vCol = '#0a9e5c'; }
   const f = fund[sym] || {};
   let earnDays = null;
   if (f.nextEarnings) { earnDays = Math.round((new Date(f.nextEarnings) - new Date()) / 86400000); }
@@ -2693,7 +2697,7 @@ function _computeTradePlan(sym) {
            ext9: ext9, xAtr20: xAtr20, volRatio: volRatio, vol5Ratio: vol5Ratio, lastVol: lastVol, avgVol20: avgVol20,
            resLv: resLv.slice(0, 3), supLv: supLv.slice(0, 3), sellers: sellers, lone: lone, thinAbove: thinAbove, thinBelow: thinBelow,
            demand: demand, overheadRatio: overheadRatio, trend: trend, trendCol: trendCol, pullback: pullback, pullCol: pullCol, pullWhy: pullWhy,
-           ex: ex, exCount: exCount, now: now, pb: pb, chosen: chosen, verdict: verdict, vCol: vCol, earnDays: earnDays, times: t };
+           ex: ex, exCount: exCount, now: now, pb: pb, chosen: chosen, verdict: verdict, vCol: vCol, halfSize: halfSize, context: context, earnDays: earnDays, times: t };
 }
 
 function planChip(sym) {
@@ -2731,13 +2735,13 @@ function tradePlanCard(sym, sources) {
   p.lone.forEach(r => {
     sellersHtml += '• <strong>' + tpFmt(r.price) + '</strong>: swing-high rejection level' + (r.touches > 1 ? ' (' + r.touches + ' touches)' : '') + ', not a heavy-volume zone.<br>';
   });
-  if (!sellersHtml) sellersHtml = 'No heavy-volume zone or swing-high rejection within ' + TP_REACH_ATR + ' ATR above — little recorded supply overhead.<br>';
+  if (!sellersHtml) sellersHtml = 'No heavy-volume zone or swing-high rejection within ' + TP_REACH_ATR + ' normal daily moves above — little recorded supply overhead.<br>';
   if (p.thinAbove) {
     const inside = p.lone.concat(p.resLv).filter(r => r.price >= p.thinAbove.lo && r.price <= p.thinAbove.hi).map(r => tpFmt(r.price));
     sellersHtml += '• Thin volume ' + tpFmt(p.thinAbove.lo) + '–' + tpFmt(p.thinAbove.hi) + ': little traded there, so few trapped holders' +
       (inside.length ? ' — but price has still been turned back inside it at ' + [...new Set(inside)].join(', ') + ', so clear those first' : ', and price can move through it quickly') + ' (untested).<br>';
   }
-  if (p.overheadRatio != null) sellersHtml += '<span style="color:#6b7280">Volume traded within 2 ATR above vs below price: ' + p.overheadRatio.toFixed(2) + '× — ' +
+  if (p.overheadRatio != null) sellersHtml += '<span style="color:#6b7280">Volume traded within 2 normal daily moves above vs below price: ' + p.overheadRatio.toFixed(2) + '× — ' +
     (p.overheadRatio > 1.2 ? 'more supply overhead than support underneath.' : p.overheadRatio < 0.8 ? 'more support underneath than supply overhead.' : 'roughly balanced.') + '</span>';
   // supports
   const supHtml = (p.supLv.length ? p.supLv.map(s => '<strong>' + tpFmt(s.price) + '</strong>' + (s.touches > 1 ? ' (' + s.touches + '×)' : '')).join(' · ') : 'no swing low within reach') +
@@ -2750,33 +2754,36 @@ function tradePlanCard(sym, sources) {
     (vr != null ? vr.toFixed(2) + '× 20-day average (' + (vr >= 1.2 ? 'above' : vr <= 0.8 ? 'below' : 'about') + ' average)' : '—') + '</strong>' +
     (p.vol5Ratio != null ? '; 5-day average ' + p.vol5Ratio.toFixed(2) + '×.' : '.');
   // exhaustion
-  const exNames = { rsiDiv: 'RSI divergence', macdDiv: 'MACD divergence', volDiv: 'lower volume at the new high', reversal: 'reversal candle', stretched: '>2 ATR over EMA20' };
+  const exNames = { rsiDiv: 'RSI divergence', macdDiv: 'MACD divergence', volDiv: 'lower volume at the new high', reversal: 'reversal candle', stretched: 'more than 2 normal daily moves above the 20-day average' };
   const fired = Object.keys(p.ex).filter(x => p.ex[x]).map(x => exNames[x]);
   const exHtml = '<strong style="color:' + (p.exCount >= 3 ? '#e5484d' : p.exCount === 2 ? '#b45309' : '#374151') + '">' + p.exCount + ' of 5</strong>' +
     (fired.length ? ': ' + fired.join(', ') : '') + '. <span style="color:#6b7280">3+ = exhausted by the checklist\'s own (untested) rule.</span>';
   // plan table
+  const isGolden = sources.some(x => /Golden/.test(x));
+  const dip = p.halfSize ? 'typical dip about &minus;9.6%, bad case (worst quarter) about &minus;20%' : 'typical dip about &minus;4%, bad case (worst quarter) about &minus;11%';
   const tbl = '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:2px">' +
-    tpRow('Entry', k.zoneLo != null ? tpFmt(k.zoneLo) + '–' + tpFmt(k.zoneHi) : tpFmt(k.entry), esc(k.label)) +
-    tpRow('Stop', tpFmt(k.stop), esc(k.stopWhy) + ' · risk ' + tpFmt(k.risk) + ' (' + (k.risk / k.entry * 100).toFixed(1) + '%)') +
-    (k.tp1 != null ? tpRow('TP1', tpFmt(k.tp1) + tpR(k.rTp1), 'first resistance' + (k.tp1Touch > 1 ? ' (' + k.tp1Touch + ' touches)' : '') + ' — take part here') : '') +
-    tpRow('Target', tpFmt(k.tested) + tpR(k.rTested), '<strong>entry + 1.5 ATR — the tested target</strong>') +
-    (k.tp2 != null ? tpRow('TP2 / runner', tpFmt(k.tp2) + tpR(k.rTp2), 'next resistance above') : '') +
+    tpRow('Entry', tpFmt(k.entry), 'next open (≈ last close)') +
+    tpRow('Target', tpFmt(k.tested), '<strong>entry + 1.5× the normal daily move ($' + tpFmt(1.5 * p.atr) + ') — the tested target, sell here</strong>') +
+    (k.tp1 != null ? tpRow('May stall at', tpFmt(k.tp1), 'resistance on the way' + (k.tp1Touch > 1 ? ' (' + k.tp1Touch + ' touches)' : '') + ' — context, not tested') : '') +
+    tpRow('Time exit', '20 sessions', 'sell at the close of session 20 if the target never hits') +
+    tpRow('Stop', isGolden ? tpFmt(k.entry - 1.5 * p.atr) : 'none', isGolden ? 'optional: 1.5 normal daily moves below entry — Golden Cross survived this stop test (+0.35R)'
+                                                                 : 'the panel was tested with no stop; expect a ' + dip) +
     '</table>' +
-    (p.pb && k !== p.now ? '<div style="font-size:11px;color:#6b7280;margin-top:3px">Buying now instead: entry ' + tpFmt(p.now.entry) + ', stop ' + tpFmt(p.now.stop) +
-      ', target ' + tpFmt(p.now.tested) + tpR(p.now.rTested) + (p.now.tp1 != null ? ', TP1 ' + tpFmt(p.now.tp1) + tpR(p.now.rTp1) : '') + '.</div>' : '');
+    (isGolden ? '<div style="font-size:11px;color:#6b7280;margin-top:3px">Without a stop, expect a ' + dip + '.</div>' : '');
   const stopNote = sources.some(s => /RS Leader/.test(s)) ? '<br><span style="color:#b45309">RS Leaders: the stop version of this signal tested WORSE than random entry (+0.08R) — the panel rule is target-only.</span>' :
-                   sources.some(s => /Golden/.test(s)) ? '<br>Golden Cross is the only panel that survived a stop-loss test (+0.35R).' : '';
+                   '';
   const earn = p.earnDays != null && p.earnDays >= 0 && p.earnDays <= TP_EARNINGS_DAYS
     ? '<div style="margin-top:6px;font-size:12px;font-weight:700;color:#8b5cf6">Earnings in ' + p.earnDays + ' days — inside a 20-session hold.</div>' : '';
   return '<div id="plan-' + esc(sym) + '" style="border:1px solid #e9eaee;border-radius:12px;padding:12px;background:#fff;width:380px;scroll-margin-top:12px">' +
     '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px">' +
       '<span><strong style="font-size:15px"><a class="tklink" href="' + rallyLink(sym) + '" target="_blank" rel="noopener noreferrer">' + esc(sym) + '</a></strong> ' +
       '<span style="font-weight:700">' + fmtPrice(p.px) + '</span> <span style="font-size:11px;color:#6b7280">close ' + tpDateShort(p.asOf) + (p.partial ? ' (today\'s bar in progress — ignored)' : '') + '</span></span>' +
-      '<span style="font-size:11px;color:#6b7280">ATR ' + tpFmt(p.atr) + ' (' + (p.atr / p.px * 100).toFixed(1) + '%)</span></div>' +
+      '<span style="font-size:11px;color:#6b7280" title="ATR(14): the average size of one day\'s price range over the last 14 sessions — how much this stock normally moves in a day.">Normal daily move $' + tpFmt(p.atr) + ' (' + (p.atr / p.px * 100).toFixed(1) + '%)</span></div>' +
     '<div style="font-size:11px;color:#6b7280;margin-top:2px">' + esc(sources.join(' + ')) + '</div>' +
     '<div style="margin-top:8px;padding:6px 10px;border-radius:8px;background:' + p.vCol + ';color:#fff;font-weight:700;font-size:13px">' + esc(p.verdict) + '</div>' +
-    sec('Plan', tbl + '<span style="font-size:11px;color:#6b7280">Stretch now: ' + (p.ext9 >= 0 ? '+' : '') + p.ext9.toFixed(1) + '% vs EMA9' +
-        (p.ext9 > EXT_EMA9_HOT ? ' ⚠⚠' : p.ext9 > EXT_EMA9_WARN ? ' ⚠' : '') + ', ' + p.xAtr20.toFixed(1) + ' ATR over EMA20.' + stopNote + '</span>') +
+    '<div style="font-size:10px;color:#6b7280;margin-top:3px">Sizing rule backtested on 586 signals (Jan–Aug 2026) — see the panel note.</div>' +
+    sec('Plan', tbl + (p.context.length ? '<div style="font-size:11px;color:#b45309;margin-top:3px"><strong>Context (did not predict outcomes):</strong> ' + esc(p.context.join('; ')) + '</div>' : '') + '<span style="font-size:11px;color:#6b7280">Stretch now: ' + (p.ext9 >= 0 ? '+' : '') + p.ext9.toFixed(1) + '% above the 9-day average (EMA9)' +
+        (p.ext9 > EXT_EMA9_HOT ? ' ⚠⚠' : p.ext9 > EXT_EMA9_WARN ? ' ⚠' : '') + ', ' + p.xAtr20.toFixed(1) + ' normal daily moves above the 20-day average.' + stopNote + '</span>') +
     sec('Trend', '<strong style="color:' + p.trendCol + '">' + esc(p.trend) + '</strong>') +
     sec('Pullback', '<strong style="color:' + p.pullCol + '">' + esc(p.pullback) + '</strong><br><span style="font-size:11px;color:#6b7280">' + esc(p.pullWhy) + '</span>') +
     sec('Volume', volHtml) +
