@@ -154,6 +154,7 @@
   <a href="#bullFlagPanel">↓ Bull Flag Watch &middot; #3</a>
   <a href="#intradayBreakoutPanel">↓ Intraday Breakout &middot; #4</a>
   <a href="#tradePlansPanel">↓ Trade plans</a>
+  <a href="#forwardPanel">↓ Forward test</a>
   <a href="#rotationPanel">↓ Rotation candidates</a>
   <a href="#deathPanel">↓ Death cross</a>
   <a href="#performancePanel">↓ Performance</a>
@@ -243,6 +244,15 @@
 <div class="panel" id="tradePlansPanel">
   <h2><span style="background:#111827;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">PLANS</span>Trade plans &mdash; entry, stop, targets, sellers, volume, trend</h2>
   <div class="desc" id="tradePlansCaption" style="font-weight:600;color:#374151"></div>
+  <div class="desc" style="background:#fef2f2;border:2px solid #e5484d;border-radius:10px;padding:10px 12px;color:#7f1d1d">
+  <strong>READ FIRST &mdash; the out-of-sample test failed.</strong> Every rule on this page (panels, TAKE, sizing, IGNORE) was built and tuned on Jan&ndash;Aug 2026, a strong tech bull market. Replayed on a period none of it was fitted to, <strong>20 Oct &ndash; 31 Dec 2025</strong> (flat market with a sharp November tech sell-off; SPY +2.3%):
+  <ul style="margin:6px 0 0 18px;padding:0">
+  <li>Panel signals hit target <strong>56&ndash;61%</strong> (Intraday Breakout 75%, n=28) against <strong>59% for random entries</strong>. There was no edge over chance.</li>
+  <li>Names in 2+ panels hit <strong>58%</strong> (n=19), not the 86&ndash;92% seen in 2026, though their average was still +4.2% vs 0.0% for single-panel names.</li>
+  <li>A 2-slot book (TAKE = multi-panel names only) <strong>lost 27%</strong> (&times;0.73, 5 trades). Weekly Picks only: &times;0.98. Random picks: median &times;0.67. SPY over the same window: &times;1.03.</li>
+  <li>The only rule that held: names more than 8% above EMA9 had about double the dip (median &minus;12.6% vs &minus;6.1%, worst quarter &minus;20% vs &minus;12%). That is a <em>risk</em> warning, not a source of profit. IGNORE did not hold (6 of 7 hit, small sample).</li>
+  </ul>
+  The ticker list is also today's basket, chosen with hindsight, which flatters every backtest here. <strong>Treat this page as a watchlist, not a proven system. Do not trade money you cannot afford to lose on it.</strong></div>
   <div class="desc" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 12px;color:#14532d">
   <strong>How to use these cards: every name is a buy at the next open (that is the panel rule that was tested). The card only tells you how BIG.</strong>
   <ul style="margin:6px 0 0 18px;padding:0">
@@ -258,6 +268,12 @@
   <strong>How the pieces are built.</strong> <em>Support/resistance</em>: swing highs/lows (the extreme of the 3 bars either side) over ~1 year, merged when within 0.5 ATR. <em>Where sellers are parked</em>: price bands above today's price where unusually heavy volume traded (each day's volume spread across its high&ndash;low range), plus swing highs where price was turned back &mdash; buyers stuck there tend to sell as price returns to their cost. <em>Pullback</em>: <span style="color:#0a9e5c;font-weight:700">slight</span> = selling on below-average volume, at most 1 distribution day, depth &le; 2.2 ATR; <span style="color:#e5484d;font-weight:700">distribution</span> = 3+ distribution days (down close on above-average volume) in 10 sessions, or heavy down-day volume on a pullback deeper than 1 ATR. <em>Trend</em>: price vs EMA20 and MA50, and whether MA50 is rising; "broke support" = closed below the most recent swing low. <em>Size</em>: half when the close is more than 8% above EMA9, otherwise full. <em>Stop</em>: none, as tested; Golden Cross cards show the optional 1.5-move stop that panel survived.<br><br>
   <strong>Exit when the target is reached.</strong> How stretched a name is on arrival depends on how fast it got there. A fast run (more than ~6% over EMA9 on arrival) &mdash; take the full exit; a slow grind &mdash; take most, trail a small runner under EMA9. (Untested.)</div>
   <div id="tradePlansBody" style="display:flex;flex-wrap:wrap;gap:14px;margin-top:12px"></div>
+</div>
+
+<div class="panel" id="forwardPanel">
+  <h2><span style="background:#7c3aed;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">FORWARD TEST</span>Live record &mdash; signals logged after each close, scored after 20 sessions</h2>
+  <div class="desc">This is the only honest test left: every name in Weekly Picks and the four ranked panels is written to <code>forward_log.csv</code> after each close, with its size label, whether it was a TAKE, and the market conditions that day. After 20 sessions it is scored with the tested rule (buy next open, sell at entry + 1.5&times; the normal daily move or at session 20, no stop) and compared with <strong>random entries</strong> on the same dates. A name that stays in a panel for several days counts once per 5 sessions. <strong>The pass/fail test is fixed in advance:</strong> TAKE signals must hit target at least 10 points more often than random entries, with a higher average return, on at least 20 scored TAKEs. Don't change the rules while the log runs; if you do, start a new log.</div>
+  <div id="forwardBody" style="font-size:13px"></div>
 </div>
 
 <div class="panel" id="rotationPanel">
@@ -2899,7 +2915,27 @@ async function loadData() {
 // file every 10 minutes.
 const DATA_REFRESH_MS = 10 * 60 * 1000;
 
+async function loadForwardSummary() {
+  const el = document.getElementById('forwardBody');
+  if (!el) return;
+  let j;
+  try { const r = await fetch('forward_summary.json?t=' + Date.now(), { cache: 'no-store' }); if (!r.ok) throw new Error(r.status); j = await r.json(); }
+  catch (e) { el.innerHTML = '<div class="empty" style="padding:8px">No forward log yet. It starts after the first completed session once the Forward log workflow is installed.</div>'; return; }
+  const pc = v => v == null ? '—' : (v * 100).toFixed(1) + '%';
+  const sg = v => v == null ? '—' : (v >= 0 ? '+' : '') + (v * 100).toFixed(2) + '%';
+  const row = (name, st, bold) => '<tr' + (bold ? ' style="font-weight:700"' : '') + '><td style="text-align:left">' + esc(name) + '</td><td>' + (st.n || 0) + '</td><td>' + pc(st.hit_rate) + '</td><td>' + sg(st.avg_return) + '</td><td>' + sg(st.median_dip) + '</td><td>' + sg(st.bad_case_dip) + '</td></tr>';
+  let rows = row('Random entries (baseline)', j.random_baseline || {}, true) + row('All logged signals', j.all_signals || {}) + row('TAKE (2+ panels)', j.take || {}, true);
+  const grp = (title, o) => { if (!o) return ''; return '<tr><td colspan="6" style="text-align:left;color:#6b7280;padding-top:10px">' + title + '</td></tr>' + Object.entries(o).map(([k, v]) => row('  ' + k, v)).join(''); };
+  rows += grp('By number of panels', j.by_n_panels) + grp('By size label', j.by_size) + grp('By panel', j.by_panel) + grp('By QQQ vs its 50-day', j.by_qqq_above_50d) + grp('By basket breadth', j.by_breadth);
+  const vcol = /^PASS/.test(j.verdict) ? '#0a9e5c' : /^FAIL/.test(j.verdict) ? '#e5484d' : '#6b7280';
+  el.innerHTML = '<div style="padding:8px 12px;border-radius:8px;background:' + vcol + ';color:#fff;font-weight:800;margin-bottom:8px">' + esc(j.verdict) + '</div>' +
+    '<div style="color:#6b7280;margin-bottom:6px">' + j.logged_days + ' session(s) logged, ' + j.logged_rows + ' rows, ' + j.scored_signals + ' scored so far. Rules ' + esc(j.rules_version) + '. Updated ' + new Date(j.updated).toLocaleString() + '.</div>' +
+    '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Group</th><th>Scored</th><th>Hit target</th><th>Avg return</th><th>Typical dip</th><th>Bad-case dip</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<div style="color:#6b7280;margin-top:6px">Raw files: <a href="forward_log.csv">forward_log.csv</a> · <a href="forward_results.csv">forward_results.csv</a></div>';
+}
+
 (async function init() {
+  loadForwardSummary();
   const ok = await loadData();
   if (!ok) return;
   setInterval(loadData, DATA_REFRESH_MS);
