@@ -1,0 +1,65 @@
+name: Forward log
+
+# Runs after every "Update market data" run. The script itself only logs once the US
+# session has closed (4:20pm ET or later), and never logs the same day twice, so the
+# ~45 intraday triggers a day simply exit without committing anything.
+on:
+  workflow_run:
+    workflows: ["Update market data"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write   # to dispatch pages.yml after a commit
+
+concurrency:
+  group: forward-log
+  cancel-in-progress: false
+
+jobs:
+  log:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Log and score signals
+        run: node scripts/forward_log.js
+      - name: Commit log
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Same pattern as update-data.yml: keep our freshly written files, reset to the
+          # latest remote, re-apply them, retry if the data workflow pushed in between.
+          mkdir -p /tmp/fl
+          for f in forward_log.csv forward_results.csv forward_summary.json; do
+            [ -f docs/$f ] && cp docs/$f /tmp/fl/$f || true
+          done
+          pushed=false
+          for i in 1 2 3 4 5; do
+            git fetch origin main -q
+            git reset --hard origin/main -q
+            for f in forward_log.csv forward_results.csv forward_summary.json; do
+              [ -f /tmp/fl/$f ] && cp /tmp/fl/$f docs/$f || true
+            done
+            git add docs/forward_log.csv docs/forward_results.csv docs/forward_summary.json 2>/dev/null || true
+            if git diff --staged --quiet; then
+              echo "No changes to commit"; echo "changed=false" >> "$GITHUB_OUTPUT"; pushed=true; break
+            fi
+            git commit -q -m "Forward log update [skip ci]"
+            if git push -q; then pushed=true; echo "changed=true" >> "$GITHUB_OUTPUT"; break; fi
+            echo "Push attempt $i failed, retrying..."; sleep 3
+          done
+          [ "$pushed" = true ] || { echo "::error::Failed to push forward log"; exit 1; }
+      - name: Trigger Pages deploy
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run pages.yml
