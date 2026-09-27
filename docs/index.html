@@ -147,6 +147,7 @@
 </div>
 
 <div class="jumpbar">
+  <a href="#takePanel">↓ TAKE (2+ panels)</a>
   <a href="#weeklyPicksPanel">↓ Weekly Picks (top 2)</a>
   <a href="#chartsPanel">↓ Charts</a>
   <a href="#goldenPanel">↓ Golden cross &middot; #1</a>
@@ -165,6 +166,14 @@
 <div class="statgrid" id="stats"></div>
 
 <div class="desc" style="margin:0 0 6px;font-weight:600">Panels are ordered by BACKTESTED hit rate (entry next open, target = entry + 1.5&times;ATR14, no stop, 20-session max hold, Jan&ndash;Aug 2026). Buying on a RANDOM day hits that same target <strong>62.3%</strong> of the time (n=799) &mdash; that is the number every panel below must be read against. A 78% hit rate is roughly +16 points of edge, not 78 points of skill. One regime only: an 8-month tech bull market. In a flat or falling market these converge toward each other and the order may not hold. Bull Flag and Intraday Breakout now use CMF(20) &gt; 0.20 in place of their original raw-volume rules; their numbers above are post-swap. The top three (79.2 / 78.3 / 77.9) are within noise of each other on samples of 53&ndash;95 &mdash; read the panels as two tiers, not four ranks, and note that these figures come from a single 8-month sample that has now been searched many times over.</div>
+
+<div class="panel" id="takePanel">
+  <h2><span style="background:#1d4ed8;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">TAKE &middot; 2+ PANELS</span>Today's trades &mdash; names flagged by two or more panels</h2>
+  <div class="desc"><strong>The one rule that held for four years.</strong> Replayed day by day over Sep 2022 &ndash; Aug 2026 (4,075 signals), names in 2+ panels beat random entries in the same stocks <em>every year</em>: hit rate 71% / 74% / 78% / 82% vs random 66% / 67% / 72% / 65%. As a 2-slot book (buy next open, sell at the target or after 20 sessions, no stop, half size above 8% stretch) it returned &times;1.21 / &times;1.24 / &times;1.71 / &times;2.39 by year, against random picks &times;0.93 / &times;1.05 / &times;1.31 / &times;1.74 and SPY &times;1.11 / &times;1.25 / &times;1.16 / &times;1.20.<br><br>
+  <strong style="color:#b91c1c">Expected drawdown: the 2-slot book's worst fall in each year was &minus;24%, &minus;25%, &minus;34% and &minus;15%</strong> (SPY: &minus;13%, &minus;9%, &minus;19%, &minus;9%). Size the book so a 35% fall is survivable. <strong>Target</strong> for TAKE names is entry + 2&times; the normal daily move (better than 1.5&times; per trade in all four years). <strong>No stop</strong>: stops lost money in every year tested.<br><br>
+  Caveats: the ticker list was chosen in 2026, so every backtest here is flattered by hindsight (the comparison with random entries is fair; the absolute returns are not). Single-panel names were no better than random in 2022&ndash;24. The forward test below is the real check.</div>
+  <div id="tradePlansSummary" style="margin-top:8px"></div>
+</div>
 
 <div class="panel" id="weeklyPicksPanel">
   <h2><span style="background:#1d4ed8;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">WEEKLY &middot; TOP 2</span>Weekly Picks &mdash; ranked selection</h2>
@@ -260,20 +269,19 @@
   <li><span style="color:#e5484d;font-weight:700">IGNORE</span>: a clean-looking setup (not stretched, no resistance just overhead, no reversal candle, trend intact) whose pullback reads as <em>distribution</em>. These hit target only 65% of the time with +1.4% average, close to buying on a random day, and they were weak in both halves (+1.3% / +1.5%). Only 40 signals, and the rule was picked after seeing the results, so confirm it on new data.</li>
   <li><span style="color:#b45309;font-weight:700">HALF SIZE</span>: the close is more than 8% above the 9-day average (EMA9). In the backtest these names hit target just as often (77% vs 78%) with the same average gain (+3.0%), but the dip on the way was about double: median &minus;9.6% vs about &minus;4%, worst quarter &minus;20% vs &minus;11%. This held in both halves of the period. Half size keeps the profit in proportion and halves that dip. Across all signals, halving these improved profit per unit of drawdown by about 9%. The 8% line is the page's existing ⚠⚠ threshold, not one fitted to this test; trying 4&ndash;15% gave the best result at 8%, with 9&ndash;12% about the same and lower lines giving up profit.</li>
   </ul>
-  <strong>Which to take with limited capital: only names flagged by 2 or more panels.</strong> Names in 2+ panels hit target 86&ndash;92% (+7.1&ndash;7.4% average) in <em>both</em> halves of Jan&ndash;Aug 2026, against 73&ndash;80% (+1.8&ndash;3.9%) for names in one panel (72 multi-panel signals across 41 tickers). As a 2-slot book (buy next open, target, 20-session exit, no stop, IGNORE skipped), <strong>"multi-panel names only, otherwise stay in cash" returned &times;2.94 with a worst drawdown of &minus;19.1%</strong>, &times;1.59 in Jan&ndash;Apr and &times;1.85 in May&ndash;Aug. Filling spare slots with single-panel names did not help reliably: picking among them by lowest CMF, highest CMF, stretch or panel order behaved like chance (random picks after the multi-panel names: median &times;2.53, 10th&ndash;90th percentile &times;1.75&ndash;&times;3.41). At least one multi-panel name appeared on 109 of 162 trading days. When several qualify, the lowest CMF(20) goes first. About 16 rankings were tried in total, so the headline multiple flatters; the per-trade gap between multi- and single-panel names, which held in both halves, is the stronger evidence.<br><br>
+  <strong>Which to take:</strong> only names in 2+ panels &mdash; see the TAKE panel at the top of the page for the four-year test and expected drawdown.<br><br>
   <strong>Why the earlier buy / wait / hold-off verdicts were removed.</strong> Replayed day by day over Jan&ndash;Aug 2026 (586 signals), they did not sort winners from losers: HOLD OFF names hit target 82%, WAIT 78%, BUY 77%. Waiting for a pullback filled only 63% of the time, and the trades that never filled were the best ones (96% hit, +7.0%). Tight "chart" stops cut the hit rate from about 78% to about 59%. Distribution, trend and resistance labels showed no edge either, so they are kept only as <em>context</em>. <strong>5&ndash;8% above EMA9 was NOT worse in this sample</strong>; only above 8% was. One sample in one bull market, so re-test after a few more months of data.</div>
   <div class="desc"><strong>"Normal daily move"</strong> (known on charts as ATR, Average True Range) is the average size of one day's price swing over the last 14 sessions. If a stock's normal daily move is $7, then "1.5 normal daily moves" is $10.50. Targets and stops are sized this way so a volatile stock gets wider levels than a quiet one.</div>
   <div class="desc">One card per name in Weekly Picks and the four ranked panels (click the <strong>Plan</strong> chip in any panel to jump here). Everything is computed from <strong>completed</strong> daily bars &mdash; while the US session is open, today's unfinished bar is ignored, because every backtest on this page used finished bars.<br><br>
   <strong>What is tested and what is not.</strong> Three things here carry backtest evidence: the sizing verdict, the <strong>Target</strong> row (entry + 1.5&times;ATR14, the target every panel's hit rate is measured against) and the <strong>EMA9 stretch</strong> figure (more than 5% above EMA9 roughly doubled drawdown without changing the hit rate). Everything else &mdash; entry zones, stops, TP1/TP2, "where sellers are parked", the pullback label, the trend label and the exhaustion checklist &mdash; is a rule of thumb that turns a chart reading into numbers. <strong>None of it has been backtested.</strong> Every panel except Golden Cross was tested with <em>no stop</em>; adding one makes it a different strategy.<br><br>
   <strong>How the pieces are built.</strong> <em>Support/resistance</em>: swing highs/lows (the extreme of the 3 bars either side) over ~1 year, merged when within 0.5 ATR. <em>Where sellers are parked</em>: price bands above today's price where unusually heavy volume traded (each day's volume spread across its high&ndash;low range), plus swing highs where price was turned back &mdash; buyers stuck there tend to sell as price returns to their cost. <em>Pullback</em>: <span style="color:#0a9e5c;font-weight:700">slight</span> = selling on below-average volume, at most 1 distribution day, depth &le; 2.2 ATR; <span style="color:#e5484d;font-weight:700">distribution</span> = 3+ distribution days (down close on above-average volume) in 10 sessions, or heavy down-day volume on a pullback deeper than 1 ATR. <em>Trend</em>: price vs EMA20 and MA50, and whether MA50 is rising; "broke support" = closed below the most recent swing low. <em>Size</em>: half when the close is more than 8% above EMA9, otherwise full. <em>Stop</em>: none, as tested; Golden Cross cards show the optional 1.5-move stop that panel survived.<br><br>
   <strong>Exit when the target is reached.</strong> How stretched a name is on arrival depends on how fast it got there. A fast run (more than ~6% over EMA9 on arrival) &mdash; take the full exit; a slow grind &mdash; take most, trail a small runner under EMA9. (Untested.)</div>
-  <div id="tradePlansSummary" style="margin-top:8px"></div>
   <div id="tradePlansBody" style="display:flex;flex-wrap:wrap;gap:14px;margin-top:12px"></div>
 </div>
 
 <div class="panel" id="forwardPanel">
   <h2><span style="background:#7c3aed;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">FORWARD TEST</span>Live record &mdash; signals logged after each close, scored after 20 sessions</h2>
-  <div class="desc">This is the only honest test left: every name in Weekly Picks and the four ranked panels is written to <code>forward_log.csv</code> after each close, with its size label, whether it was a TAKE, and the market conditions that day. After 20 sessions it is scored with the tested rule (buy next open, sell at entry + 1.5&times; the normal daily move or at session 20, no stop) and compared with <strong>random entries</strong> on the same dates. A name that stays in a panel for several days counts once per 5 sessions. <strong>The pass/fail test is fixed in advance:</strong> TAKE signals must hit target at least 10 points more often than random entries, with a higher average return, on at least 20 scored TAKEs. Don't change the rules while the log runs; if you do, start a new log.</div>
+  <div class="desc">This is the only honest test left: every name in Weekly Picks and the four ranked panels is written to <code>forward_log.csv</code> after each close, with its size label, whether it was a TAKE, and the market conditions that day. After 20 sessions it is scored with the tested rule (buy next open, sell at entry + 1.5&times; the normal daily move or at session 20, no stop) and compared with <strong>random entries</strong> on the same dates. A name that stays in a panel for several days counts once per 5 sessions. <strong>The pass/fail test is fixed in advance:</strong> TAKE signals (2× target) must hit target at least 10 points more often than random entries scored with the same 2× target, with a higher average return, on at least 20 scored TAKEs. Rules version v2 (27 Sep 2026); the earlier v1 rows are archived. Don't change the rules while the log runs; if you do, start a new log.</div>
   <div id="forwardBody" style="font-size:13px"></div>
 </div>
 
@@ -2445,6 +2453,11 @@ const TP_HEAVY = 1.3, TP_THIN = 0.6;   // bin volume vs the median bin
 const TP_EARNINGS_DAYS = 28;    // ~20 sessions: an earnings date inside the hold window
 let panelMembers = new Map();
 let _planCache = {};
+// Target multiple. Names in 2+ panels (TAKE / BACKUP) use 2.0x the normal daily move: over Sep 2022 - Aug 2026 it
+// earned more per trade than 1.5x in all four years (+0.6 to +1.2 points) and more per day held. Single-panel names
+// keep the 1.5x each panel was originally tested with. Approved 27 Sep 2026.
+const TAKE_TARGET_MULT = 2.0, PANEL_TARGET_MULT = 1.5;
+function tpTargetMult(srcs, p) { return (srcs && srcs.length >= 2 && !(p && p.ignore)) ? TAKE_TARGET_MULT : PANEL_TARGET_MULT; }
 // Capital / slots for the position-size line on each card. Per-viewer convenience only.
 let TP_CAPITAL = 100000, TP_SLOTS = 2;
 try { const c = JSON.parse(localStorage.getItem('bcc3_tp_capital') || 'null'); if (c && c.cap > 0 && c.slots > 0) { TP_CAPITAL = c.cap; TP_SLOTS = c.slots; } } catch (e) {}
@@ -2795,17 +2808,15 @@ function tradePlanCard(sym, sources, rk) {
   const exHtml = '<strong style="color:' + (p.exCount >= 3 ? '#e5484d' : p.exCount === 2 ? '#b45309' : '#374151') + '">' + p.exCount + ' of 5</strong>' +
     (fired.length ? ': ' + fired.join(', ') : '') + '. <span style="color:#6b7280">3+ = exhausted by the checklist\'s own (untested) rule.</span>';
   // plan table
-  const isGolden = sources.some(x => /Golden/.test(x));
+  const tMult = tpTargetMult(sources, p), tgt = k.entry + tMult * p.atr;
   const dip = p.halfSize ? 'typical dip about &minus;9.6%, bad case (worst quarter) about &minus;20%' : 'typical dip about &minus;4%, bad case (worst quarter) about &minus;11%';
   const tbl = '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:2px">' +
     tpRow('Entry', tpFmt(k.entry), 'next open (≈ last close)') +
-    tpRow('Target', tpFmt(k.tested), '<strong>entry + 1.5× the normal daily move ($' + tpFmt(1.5 * p.atr) + ') — the tested target, sell here</strong>') +
+    tpRow('Target', tpFmt(tgt), '<strong>entry + ' + tMult.toFixed(1) + '× the normal daily move ($' + tpFmt(tMult * p.atr) + ') — ' + (tMult === TAKE_TARGET_MULT ? 'the 2+ panel target (tested 2022–26)' : 'the panel\'s tested target') + ', sell here</strong>') +
     (k.tp1 != null ? tpRow('May stall at', tpFmt(k.tp1), 'resistance on the way' + (k.tp1Touch > 1 ? ' (' + k.tp1Touch + ' touches)' : '') + ' — context, not tested') : '') +
     tpRow('Time exit', '20 sessions', 'sell at the close of session 20 if the target never hits') +
-    tpRow('Stop', isGolden ? tpFmt(k.entry - 1.5 * p.atr) : 'none', isGolden ? 'optional: 1.5 normal daily moves below entry — Golden Cross survived this stop test (+0.35R)'
-                                                                 : 'the panel was tested with no stop; expect a ' + dip) +
-    '</table>' +
-    (isGolden ? '<div style="font-size:11px;color:#6b7280;margin-top:3px">Without a stop, expect a ' + dip + '.</div>' : '');
+    tpRow('Stop', 'none', 'stops (1.5× and 2.5× the normal daily move) lost money in all four years tested, 2022–26; expect a ' + dip) +
+    '</table>';
   const stopNote = sources.some(s => /RS Leader/.test(s)) ? '<br><span style="color:#b45309">RS Leaders: the stop version of this signal tested WORSE than random entry (+0.08R) — the panel rule is target-only.</span>' :
                    '';
   const earn = p.earnDays != null && p.earnDays >= 0 && p.earnDays <= TP_EARNINGS_DAYS
@@ -2821,9 +2832,9 @@ function tradePlanCard(sym, sources, rk) {
       const sizeTxt = p.halfSize ? 'HALF SIZE (' + p.ext9.toFixed(1) + '% above the 9-day average: same odds, about double the dip)' : 'FULL SIZE';
       let txt, col, sub;
       if (p.ignore) { txt = 'IGNORE'; col = '#e5484d'; sub = 'Clean-looking setup, but the pullback reads as distribution. Backtest: 65% hit, +1.4% average, close to buying on a random day.'; }
-      else if (rk.take) { txt = 'TAKE #' + rk.rank + ' — ' + sizeTxt; col = '#1d4ed8'; sub = 'In ' + sources.length + ' panels. Names in 2+ panels hit target 86–92% in both halves of the backtest.'; }
+      else if (rk.take) { txt = 'TAKE #' + rk.rank + ' — ' + sizeTxt; col = '#1d4ed8'; sub = 'In ' + sources.length + ' panels. Names in 2+ panels beat random entries in every year 2022–26 (71–82% hit vs 65–72%).'; }
       else if (rk.backup) { txt = 'BACKUP — in ' + sources.length + ' panels, but your ' + TP_SLOTS + ' slots are already filled'; col = '#0a9e5c'; sub = 'If you take it: ' + sizeTxt + '.'; }
-      else { txt = 'PASS — single panel'; col = '#6b7280'; sub = 'Still a positive-expectancy signal (73–80% hit, +1.8–3.9% average), but not a priority for a small book: no way of choosing among single-panel names beat chance. If you take it anyway: ' + sizeTxt + '.'; }
+      else { txt = 'PASS — single panel'; col = '#6b7280'; sub = 'Single-panel names were no better than random entries in 2022–24, and no way of choosing among them beat chance. Not a priority for a small book. If you take it anyway: ' + sizeTxt + '.'; }
       return '<div class="tpAction" style="margin-top:8px;padding:6px 10px;border-radius:8px;background:' + col + ';color:#fff;font-weight:800;font-size:13px">' + esc(txt) + '</div>' +
              '<div style="font-size:11px;color:#374151;margin-top:3px">' + esc(sub) + '</div>';
     })() +
@@ -2865,6 +2876,7 @@ function renderTradePlanSummary(items) {
   lines.push(takes.length
     ? '<span style="color:#1d4ed8;font-weight:800">TAKE today:</span> ' + names(takes) + ' (in 2+ panels).' + (backups.length ? ' Backups: ' + names(backups) + '.' : '')
     : '<span style="color:#b45309;font-weight:800">No TAKE today</span> — no name is in 2+ panels. The tested choice is to leave the slots in cash.');
+  lines.push('<span style="color:#b91c1c;font-weight:800">Expected drawdown:</span> a 2-slot book of TAKE names fell 15–34% at its worst in each year 2022–26 (SPY 9–19%). No stop — stops lost money in every year tested.');
   if (earn.length) lines.push('<span style="color:#8b5cf6;font-weight:800">Earnings inside a 20-session hold:</span> ' + earn.map(x => '<strong>' + esc(x.sym) + '</strong> (' + x.p.earnDays + ' days)').join(', ') + ' — the stock can gap past any plan overnight.');
   if (halfs.length) lines.push('<span style="color:#b45309;font-weight:800">Half size (more than 8% stretched):</span> ' + names(halfs) + '.');
   if (ignores.length) lines.push('<span style="color:#e5484d;font-weight:800">Ignore:</span> ' + names(ignores) + ' (clean-looking setup with distribution under way).');
@@ -2884,7 +2896,7 @@ function renderTradePlanSummary(items) {
     return '<tr><td style="text-align:left"><a href="#plan-' + esc(x.sym) + '" class="tklink"><strong>' + esc(x.sym) + '</strong></a></td>' +
       '<td style="text-align:left"><span style="color:' + actCol(a) + ';font-weight:800">' + a + '</span></td>' +
       '<td style="text-align:left;white-space:normal">' + esc(x.srcs.map(t => t.split(' #')[0]).join(' + ')) + '</td>' +
-      '<td>' + fmtPrice(x.p.px) + '</td><td>' + fmtPrice(x.p.chosen.tested) + '</td>' +
+      '<td>' + fmtPrice(x.p.px) + '</td><td>' + fmtPrice(x.p.px + tpTargetMult(x.srcs, x.p) * x.p.atr) + (tpTargetMult(x.srcs, x.p) === TAKE_TARGET_MULT ? ' <span style="color:#6b7280;font-size:10px">(2×)</span>' : '') + '</td>' +
       '<td>' + movePct(x).toFixed(1) + '%</td><td>$' + Math.round(slot * movePct(x) / 100).toLocaleString() + '</td>' +
       '<td style="text-align:left;white-space:normal">' + (w.join(' · ') || '—') + '</td></tr>';
   }).join('');
@@ -2893,7 +2905,7 @@ function renderTradePlanSummary(items) {
     '<ul style="margin:0 0 8px 18px;padding:0;font-size:13px;line-height:1.6">' + lines.map(l => '<li>' + l + '</li>').join('') + '</ul>' +
     '<div style="overflow-x:auto"><table style="font-size:12px"><thead><tr><th style="text-align:left">Ticker</th><th style="text-align:left">Action</th><th style="text-align:left">Panel</th><th>Last close</th><th>Target</th>' +
     '<th title="Average daily price swing over 14 sessions, as % of price">Normal daily move</th><th title="What one normal day\'s move is worth on one slot">$ per normal day (one slot)</th><th style="text-align:left">Flags</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
-    '<div style="font-size:11px;color:#6b7280;margin-top:6px">Sorted by action, then calmest first. Tested: TAKE (2+ panels), half size above 8% stretch, IGNORE. Earnings and volatility are risk facts, not tested signals. Chart warnings did not predict outcomes.</div></div>';
+    '<div style="font-size:11px;color:#6b7280;margin-top:6px">Sorted by action, then calmest first. Tested over 2022–26: TAKE (2+ panels) and half size above 8% stretch held up; IGNORE did not (worked in 2 of 4 years). Earnings and volatility are risk facts, not tested signals. Chart warnings did not predict outcomes.</div></div>';
 }
 
 function renderTradePlans() {
@@ -2978,7 +2990,7 @@ async function loadForwardSummary() {
   const pc = v => v == null ? '—' : (v * 100).toFixed(1) + '%';
   const sg = v => v == null ? '—' : (v >= 0 ? '+' : '') + (v * 100).toFixed(2) + '%';
   const row = (name, st, bold) => '<tr' + (bold ? ' style="font-weight:700"' : '') + '><td style="text-align:left">' + esc(name) + '</td><td>' + (st.n || 0) + '</td><td>' + pc(st.hit_rate) + '</td><td>' + sg(st.avg_return) + '</td><td>' + sg(st.median_dip) + '</td><td>' + sg(st.bad_case_dip) + '</td></tr>';
-  let rows = row('Random entries (baseline)', j.random_baseline || {}, true) + row('All logged signals', j.all_signals || {}) + row('TAKE (2+ panels)', j.take || {}, true);
+  let rows = row('Random entries, 1.5× target (compare with single-panel names)', j.random_baseline || {}, true) + (j.random_baseline_2x ? row('Random entries, 2× target (compare with TAKE)', j.random_baseline_2x, true) : '') + row('All logged signals', j.all_signals || {}) + row('TAKE (2+ panels, 2× target)', j.take || {}, true);
   const grp = (title, o) => { if (!o) return ''; return '<tr><td colspan="6" style="text-align:left;color:#6b7280;padding-top:10px">' + title + '</td></tr>' + Object.entries(o).map(([k, v]) => row('  ' + k, v)).join(''); };
   rows += grp('By number of panels', j.by_n_panels) + grp('By size label', j.by_size) + grp('By panel', j.by_panel) + grp('By QQQ vs its 50-day', j.by_qqq_above_50d) + grp('By basket breadth', j.by_breadth);
   const vcol = /^PASS/.test(j.verdict) ? '#0a9e5c' : /^FAIL/.test(j.verdict) ? '#e5484d' : '#6b7280';
