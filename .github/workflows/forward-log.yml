@@ -39,17 +39,13 @@ jobs:
           # Same pattern as update-data.yml: keep our freshly written files, reset to the
           # latest remote, re-apply them, retry if the data workflow pushed in between.
           mkdir -p /tmp/fl
-          for f in forward_log.csv forward_results.csv forward_summary.json; do
-            [ -f docs/$f ] && cp docs/$f /tmp/fl/$f || true
-          done
+          cp docs/forward_*.csv docs/forward_summary.json /tmp/fl/ 2>/dev/null || true
           pushed=false
           for i in 1 2 3 4 5; do
             git fetch origin main -q
             git reset --hard origin/main -q
-            for f in forward_log.csv forward_results.csv forward_summary.json; do
-              [ -f /tmp/fl/$f ] && cp /tmp/fl/$f docs/$f || true
-            done
-            git add docs/forward_log.csv docs/forward_results.csv docs/forward_summary.json 2>/dev/null || true
+            cp /tmp/fl/* docs/ 2>/dev/null || true
+            git add docs/forward_*.csv docs/forward_summary.json 2>/dev/null || true
             if git diff --staged --quiet; then
               echo "No changes to commit"; echo "changed=false" >> "$GITHUB_OUTPUT"; pushed=true; break
             fi
