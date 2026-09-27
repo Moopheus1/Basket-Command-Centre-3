@@ -31,9 +31,10 @@ const DATA = path.join(ROOT, 'docs', 'data.json');
 const LOG = path.join(ROOT, 'docs', 'forward_log.csv');
 const RES = path.join(ROOT, 'docs', 'forward_results.csv');
 const SUM = path.join(ROOT, 'docs', 'forward_summary.json');
-const RULES_VERSION = 'v1-2026-09-26';     // bump + start a new log file if any rule changes
+const RULES_VERSION = 'v2-2026-09-27';   // v2: TAKE (2+ panel) names target 2.0x the normal daily move; no stops anywhere     // bump + start a new log file if any rule changes
 const SLOTS = 2;                            // TAKE = up to 2 names in 2+ panels, lowest CMF first
-const HOLD = 20, TARGET_MULT = 1.5;
+const HOLD = 20, TAKE_MULT = 2.0, PANEL_MULT = 1.5;
+const multFor = r => (+r.n_panels >= 2 && r.size !== 'IGNORE') ? TAKE_MULT : PANEL_MULT;
 const MIN_ET_MINUTES_AFTER_CLOSE = 16 * 60 + 20;   // only log once the close has settled
 
 // ---------- 1. load the page's script into a sandbox with a stub DOM ----------
@@ -89,7 +90,7 @@ const out = vm.runInContext(`(() => {
     rows: items.map(x => ({ sym: x.sym, panels: x.srcs.map(t => t.split(' #')[0]).join('+'), n_panels: x.srcs.length,
       take: take.has(x.sym) ? 1 : 0,
       size: x.p.ignore ? 'IGNORE' : x.p.halfSize ? 'HALF' : 'FULL',
-      close: x.p.px, move: x.p.atr, target_ref: x.p.px + ${TARGET_MULT} * x.p.atr, ext9: x.p.ext9, cmf20: x.p.cmf20,
+      close: x.p.px, move: x.p.atr, target_ref: x.p.px + ((x.srcs.length >= 2 && !x.p.ignore) ? ${TAKE_MULT} : ${PANEL_MULT}) * x.p.atr, ext9: x.p.ext9, cmf20: x.p.cmf20,
       trend: x.p.trend.split(' — ')[0], pullback: x.p.pullback.split(' — ')[0], bar_date: tpBarDate(x.p.asOf) }))
   };
 })()`, sandbox);
@@ -110,7 +111,7 @@ function regime(date) {
 }
 
 // ---------- CSV helpers ----------
-const LOG_COLS = ['signal_date', 'rules_version', 'sym', 'panels', 'n_panels', 'take', 'size', 'close', 'move', 'target_ref', 'ext9', 'cmf20', 'trend', 'pullback', 'qqq_above_50d', 'breadth_above_50d', 'spy_close', 'logged_at'];
+const LOG_COLS = ['signal_date', 'rules_version', 'sym', 'panels', 'n_panels', 'take', 'size', 'close', 'move', 'target_mult', 'target_ref', 'ext9', 'cmf20', 'trend', 'pullback', 'qqq_above_50d', 'breadth_above_50d', 'spy_close', 'logged_at'];
 function readCsv(file) {
   if (!fs.existsSync(file)) return [];
   const [head, ...lines] = fs.readFileSync(file, 'utf8').trim().split('\n');
@@ -125,7 +126,19 @@ function writeCsv(file, cols, rows) {
 const r4 = v => v == null || !isFinite(v) ? '' : (+v).toFixed(4);
 
 // ---------- 3. append today's signals (only once the session is complete) ----------
-const log = readCsv(LOG);
+let log = readCsv(LOG);
+// A rule change starts a fresh log: rows from any other rules version are moved to their own archive file.
+const old = log.filter(r => r.rules_version && r.rules_version !== RULES_VERSION);
+if (old.length) {
+  const byVer = {}; for (const r of old) (byVer[r.rules_version] = byVer[r.rules_version] || []).push(r);
+  for (const [ver, rows] of Object.entries(byVer)) {
+    const f = path.join(ROOT, 'docs', 'forward_log_' + ver + '.csv');
+    writeCsv(f, Object.keys(rows[0]), rows.concat(readCsv(f).filter(x => !rows.some(y => y.signal_date === x.signal_date && y.sym === x.sym))));
+    console.log('Archived ' + rows.length + ' row(s) from rules ' + ver + ' to ' + path.basename(f));
+  }
+  log = log.filter(r => r.rules_version === RULES_VERSION);
+  writeCsv(LOG, LOG_COLS, log);
+}
 const seen = new Set(log.map(r => r.signal_date + '|' + r.sym));
 const complete = out.lastBarDate < out.todayET || out.etDow === 0 || out.etDow === 6 || out.etMinutes >= MIN_ET_MINUTES_AFTER_CLOSE;
 let added = 0;
@@ -138,7 +151,7 @@ if (!complete) {
     const key = out.lastBarDate + '|' + r.sym;
     if (seen.has(key)) continue;
     log.push({ signal_date: out.lastBarDate, rules_version: RULES_VERSION, sym: r.sym, panels: r.panels, n_panels: r.n_panels, take: r.take, size: r.size,
-               close: r4(r.close), move: r4(r.move), target_ref: r4(r.target_ref), ext9: r4(r.ext9), cmf20: r4(r.cmf20), trend: r.trend, pullback: r.pullback,
+               close: r4(r.close), move: r4(r.move), target_mult: multFor(r), target_ref: r4(r.target_ref), ext9: r4(r.ext9), cmf20: r4(r.cmf20), trend: r.trend, pullback: r.pullback,
                qqq_above_50d: rg.qqq_above_50d, breadth_above_50d: rg.breadth_above_50d, spy_close: rg.spy_close, logged_at: new Date().toISOString() });
     seen.add(key); added++;
   }
@@ -154,13 +167,13 @@ if (!complete) {
 }
 
 // ---------- 4. score everything whose 20 sessions are complete ----------
-function outcome(sym, date, move) {
+function outcome(sym, date, move, mult) {
   const bars = (J.tickers[sym] || {}).bars; if (!bars) return null;
   const i = bars.findIndex(b => new Date(b[0] * 1000).toISOString().slice(0, 10) === date);
   if (i < 0 || i + HOLD >= bars.length) return null;          // not enough sessions yet
   const lastIsLive = new Date(bars[bars.length - 1][0] * 1000).toISOString().slice(0, 10) === out.todayET && !complete;
   if (lastIsLive && i + HOLD >= bars.length - 1) return null;
-  const e = bars[i + 1][1], tg = e + TARGET_MULT * move;
+  const e = bars[i + 1][1], tg = e + mult * move;
   let low = Infinity;
   for (let m = i + 1; m <= i + HOLD; m++) {
     low = Math.min(low, bars[m][3]);
@@ -184,7 +197,7 @@ for (const r of log) {
   if (r.sym === '(none)') continue;
   const bi = barIndex(r.sym, r.signal_date);
   if (bi >= 0 && lastScored[r.sym] != null && bi - lastScored[r.sym] < 5) continue;
-  const o = outcome(r.sym, r.signal_date, +r.move);
+  const o = outcome(r.sym, r.signal_date, +r.move, multFor(r));
   if (!o) continue;
   lastScored[r.sym] = bi;
   results.push({ ...r, entry: r4(o.entry), hit: o.hit, days: o.days, ret: r4(o.ret), dip: r4(o.dip) });
@@ -193,9 +206,9 @@ writeCsv(RES, LOG_COLS.concat(['entry', 'hit', 'days', 'ret', 'dip']), results);
 
 // Random baseline: every basket stock on each date that produced a scored signal.
 const dates = [...new Set(results.map(r => r.signal_date))];
-const base = [];
+const base = [], base2 = [];
 for (const d of dates) for (const s of Object.keys(J.tickers)) {
-  if (BENCH.has(s)) continue; const a = atrAt(s, d); if (!a) continue; const o = outcome(s, d, a); if (o) base.push(o);
+  if (BENCH.has(s)) continue; const a = atrAt(s, d); if (!a) continue; const o = outcome(s, d, a, PANEL_MULT); if (o) base.push(o); const o2 = outcome(s, d, a, TAKE_MULT); if (o2) base2.push(o2);
 }
 function stats(rows) {
   if (!rows.length) return { n: 0 };
@@ -205,19 +218,19 @@ function stats(rows) {
 }
 const by = (f) => { const g = {}; for (const r of results) { const k = f(r); (g[k] = g[k] || []).push(r); } return Object.fromEntries(Object.entries(g).map(([k, v]) => [k, stats(v)])); };
 const panelRows = {}; for (const r of results) for (const p of String(r.panels).split('+')) (panelRows[p] = panelRows[p] || []).push(r);
-const B = stats(base), T = stats(results.filter(r => +r.take === 1)), A = stats(results);
+const B = stats(base), B2 = stats(base2), T = stats(results.filter(r => +r.take === 1)), A = stats(results);
 // Pre-registered success test (fixed now, before any forward data): TAKE signals must beat the random
 // baseline by at least 10 points of hit rate AND have a higher average return, on at least 20 scored TAKEs.
 let verdict = 'NOT ENOUGH DATA YET — need 20+ scored TAKE signals';
-if (T.n >= 20) verdict = (T.hit_rate - B.hit_rate >= 0.10 && T.avg_return > B.avg_return)
+if (T.n >= 20) verdict = (T.hit_rate - B2.hit_rate >= 0.10 && T.avg_return > B2.avg_return)
   ? 'PASS — TAKE signals beat random entries by 10+ points of hit rate with a higher average return'
   : 'FAIL — TAKE signals did not clearly beat random entries';
 const summary = {
   rules_version: RULES_VERSION, updated: new Date().toISOString(), logged_rows: log.length,
   logged_days: new Set(log.map(r => r.signal_date)).size, scored_signals: results.length,
-  success_test: 'TAKE hit rate >= random + 10 points AND TAKE average return > random, on >= 20 scored TAKEs',
+  success_test: 'TAKE hit rate >= random + 10 points AND TAKE average return > random (random scored with the same 2.0x target), on >= 20 scored TAKEs',
   verdict,
-  random_baseline: B, all_signals: A, take: T,
+  random_baseline: B, random_baseline_2x: B2, all_signals: A, take: T,
   by_n_panels: by(r => +r.n_panels >= 2 ? '2+ panels' : '1 panel'),
   by_size: by(r => r.size), by_panel: Object.fromEntries(Object.entries(panelRows).map(([k, v]) => [k, stats(v)])),
   by_qqq_above_50d: by(r => r.qqq_above_50d === '1' ? 'QQQ above 50d' : 'QQQ below 50d'),
