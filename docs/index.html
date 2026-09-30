@@ -1389,7 +1389,7 @@ const COLS = [
   ['sym', 'Ticker'], ['price', 'Price'], ['daily', 'Daily'], ['wtd', 'WTD'], ['mtd', 'MTD'],
   ['ytd', 'YTD'], ['y1', '1Y'], ['vsSpy', 'vs SPY'], ['mapos', 'vs EMA9/SMA20'], ['mom', 'Momentum'], ['per', 'Persist'], ['sig', 'Signal'],
   ['target', 'Analyst Target'], ['earnings', 'Next Earnings'], ['mcap', 'Market cap'], ['vol', 'Volume'],
-  ['health', 'Health Score'], ['rsi', 'RSI (14D)']
+  ['health', 'Health Score'], ['rsi', 'RSI (14D)'], ['wrsi', 'Weekly RSI']
 ];
 
 // Mirror the Performance table's horizontal scrollbar above the table. The proxy is an empty
@@ -1436,7 +1436,7 @@ function renderTable(spy, tickers) {
              vsSpy: spy ? d.daily - spy.daily : null, mapos: (maPosition(t) ? maPosition(t).vsEma9 : null),
              mom: d.momScore, per: d.perScore, sig: d.signal,
              target: targetUpside, earnings: f.nextEarnings, f: f,
-             mcap: f.mcap != null ? f.mcap : null, vol: d.vol, health: f.healthScore, rsi: d.rsi };
+             mcap: f.mcap != null ? f.mcap : null, vol: d.vol, health: f.healthScore, rsi: d.rsi, wrsi: d.weeklyRsi };
   });
   rows.sort((a, b) => {
     const x = a[sortCol], y = b[sortCol];
@@ -1449,7 +1449,7 @@ function renderTable(spy, tickers) {
   });
 
   const extraRows = tickers.filter(t => data[t] && data[t].error).map(t =>
-    '<tr><td>' + t + '</td><td colspan="17" style="text-align:left"><span class="down">no data: ' +
+    '<tr><td>' + t + '</td><td colspan="18" style="text-align:left"><span class="down">no data: ' +
     esc(data[t].error).slice(0, 40) + '</span></td></tr>'
   ).join('');
 
@@ -1471,7 +1471,8 @@ function renderTable(spy, tickers) {
     '<td>' + fmtMcap(r.mcap) + '</td>' +
     '<td>' + fmtVol(r.vol) + '</td>' +
     '<td>' + scoreBadge(r.health) + (r.f.healthGrade ? ' <span style="color:#9ca3af;font-size:11px">' + r.f.healthGrade + '</span>' : '') + '</td>' +
-    '<td>' + rsiBadge(r.rsi) + '</td></tr>'
+    '<td>' + rsiBadge(r.rsi) + '</td>' +
+    '<td>' + rsiBadge(r.wrsi) + '</td></tr>'
   ).join('') + extraRows;
   syncPerfScrollbars();
   if (typeof requestAnimationFrame === 'function') requestAnimationFrame(syncPerfScrollbars);  // re-measure once layout settles
