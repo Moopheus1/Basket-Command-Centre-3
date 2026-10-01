@@ -67,7 +67,8 @@ jobs:
             git fetch origin main -q
             git reset --hard origin/main -q
             cp /tmp/flow/* docs/ 2>/dev/null || true
-            git add docs/flow.json docs/flow_history.json docs/flow_log.csv docs/flow_summary.json 2>/dev/null || true
+            # stage only files that exist: one missing path makes git add refuse ALL of them
+            for f in docs/flow.json docs/flow_history.json docs/flow_log.csv docs/flow_summary.json; do [ -f "$f" ] && git add "$f"; done || true
             if git diff --staged --quiet; then echo "changed=false" >> "$GITHUB_OUTPUT"; pushed=true; break; fi
             git commit -q -m "Options flow update [skip ci]"
             if git push -q; then pushed=true; echo "changed=true" >> "$GITHUB_OUTPUT"; break; fi

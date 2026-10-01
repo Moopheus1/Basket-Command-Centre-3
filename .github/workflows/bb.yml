@@ -45,7 +45,8 @@ jobs:
             git fetch origin main -q
             git reset --hard origin/main -q
             cp /tmp/bb/* docs/ 2>/dev/null || true
-            git add docs/bb.json docs/bb_log.csv docs/bb_summary.json 2>/dev/null || true
+            # stage only files that exist: one missing path makes git add refuse ALL of them
+            for f in docs/bb.json docs/bb_log.csv docs/bb_summary.json; do [ -f "$f" ] && git add "$f"; done || true
             if git diff --staged --quiet; then echo "changed=false" >> "$GITHUB_OUTPUT"; pushed=true; break; fi
             git commit -q -m "Base and breakout update [skip ci]"
             if git push -q; then pushed=true; echo "changed=true" >> "$GITHUB_OUTPUT"; break; fi
