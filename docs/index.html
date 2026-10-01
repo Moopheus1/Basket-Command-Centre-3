@@ -153,7 +153,7 @@
   <div class="bench-chips" id="benchChips"></div>
 </div>
 
-<div class="jumpbar">
+<div class="jumpbar" id="jumpbarTop">
   <button class="pnl-all" onclick="setAllPanels(true)">Collapse all</button>
   <button class="pnl-all" onclick="setAllPanels(false)" style="background:#4b5563">Expand all</button>
   <a href="#takePanel">↓ TAKE (2+ panels)</a>
@@ -364,7 +364,7 @@
   <div class="cards" id="cards"></div>
 </div>
 
-<div class="jumpbar" style="margin:14px 0 20px">
+<div class="jumpbar" id="jumpbarBottom" style="margin:14px 0 20px">
   <a href="#top">↑ Top</a>
   <a href="#goldenPanel">Golden cross</a>
   <a href="#deathPanel">Death cross</a>
@@ -3175,6 +3175,19 @@ function renderFlowPanel() {
   el.innerHTML = html;
 }
 
+// ===== Bottom quick-access bar mirrors the top menu, so any change to the top menu carries over automatically =====
+// (the static links in #jumpbarBottom only show if scripts fail to run)
+function syncBottomJumpbar() {
+  const top = document.getElementById('jumpbarTop'), bot = document.getElementById('jumpbarBottom');
+  if (!top || !bot) return;
+  bot.innerHTML = '<a href="#top">↑ Top</a>';
+  [...top.children].forEach(el => {
+    const c = el.cloneNode(true);
+    if (c.tagName === 'A') c.textContent = c.textContent.replace(/^\s*↓\s*/, '↑ ');   // from the bottom, links point back up
+    bot.appendChild(c);
+  });
+}
+
 // ===== Collapsible panels: a Hide/Show button on every panel; remembered per browser (falls back silently if storage is blocked) =====
 const PNL_KEY = 'bcc3_collapsed_panels';
 function pnlLoad() { try { return new Set(JSON.parse(localStorage.getItem(PNL_KEY) || '[]')); } catch (e) { return new Set(); } }
@@ -3207,6 +3220,7 @@ function initCollapsiblePanels() {
 }
 
 (async function init() {
+  try { syncBottomJumpbar(); } catch (e) {}      // before initCollapsiblePanels, so bottom links also open hidden panels
   try { initCollapsiblePanels(); } catch (e) {}
   loadForwardSummary();
   const ok = await loadData();
