@@ -45,6 +45,13 @@
   .panel { background: #fff; border: 1px solid #e9eaee; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
   .panel h2 { font-size: 17px; margin-bottom: 2px; }
   .panel .desc { font-size: 12px; color: #6b7280; margin-bottom: 12px; }
+  .panel { position: relative; }
+  .pnl-toggle { float: right; margin: 0 0 6px 10px; border: 1px solid #e5e7eb; background: #fff; border-radius: 999px; padding: 3px 11px; font-size: 12px; font-weight: 700; color: #374151; cursor: pointer; }
+  .pnl-toggle:hover { background: #f3f4f6; }
+  .panel.collapsed { padding-bottom: 10px; }
+  .panel.collapsed > *:not(.pnl-toggle):not(h2):not(:has(> h2)) { display: none !important; }
+  .panel.collapsed > h2 { margin-bottom: 0; }
+  .jumpbar button.pnl-all { background: #16181d; color: #fff; border: 0; border-radius: 999px; padding: 5px 12px; font-size: 12px; font-weight: 700; cursor: pointer; }
   .addbar { display: flex; gap: 8px; margin: 10px 0 14px; flex-wrap: wrap; }
   .addbar input { flex: 1; min-width: 160px; max-width: 260px; padding: 8px 12px; border: 1px solid #d6d9de; border-radius: 10px; font-size: 13px; text-transform: uppercase; }
   .addbar input:focus { outline: 2px solid #4c7dfc33; border-color: #4c7dfc; }
@@ -147,6 +154,8 @@
 </div>
 
 <div class="jumpbar">
+  <button class="pnl-all" onclick="setAllPanels(true)">Collapse all</button>
+  <button class="pnl-all" onclick="setAllPanels(false)" style="background:#4b5563">Expand all</button>
   <a href="#takePanel">↓ TAKE (2+ panels)</a>
   <a href="#weeklyPicksPanel">↓ Weekly Picks (top 2)</a>
   <a href="#chartsPanel">↓ Charts</a>
@@ -615,6 +624,7 @@ function esc(s) { return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&l
 function rallyLink(t) {
   return 'https://rallies.ai/research/' + encodeURIComponent(t);
 }
+function tkA(t) { return '<a class="tklink" href="' + rallyLink(t) + '" target="_blank" rel="noopener noreferrer">' + esc(t) + '</a>'; }
 function pctHtml(v, opts) {
   opts = opts || {};
   if (v == null || isNaN(v)) return '<span class="flat">—</span>';
@@ -3052,27 +3062,27 @@ function renderBBPanel() {
     const lv = bbData.live || [];
     html += '<h3 style="font-size:14px;margin:10px 0 4px">Breaking out now &mdash; provisional until the close</h3>' + (lv.length
       ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Price</th><th>Pivot</th><th>Above pivot</th><th>Volume pace</th><th>Close in range</th><th>Candle</th><th>Looks valid?</th><th>Size at today\'s low</th></tr></thead><tbody>' +
-        lv.map(r => '<tr><td style="text-align:left;font-weight:700">' + esc(r.sym) + '</td><td>' + fmtNum2(r.price) + '</td><td>' + fmtNum2(r.pivot) + '</td><td>+' + r.above_pivot_pct.toFixed(1) + '%' + (r.above_pivot_pct > 3 ? ' <span style="color:#b45309">⚠ chasing</span>' : '') + '</td><td>' + (r.vol_pace_x == null ? '—' : r.vol_pace_x.toFixed(1) + '× avg') + '</td><td>' + (r.close_in_range == null ? '—' : Math.round(r.close_in_range * 100) + '%') + '</td><td>' + (r.green ? 'green' : '<span style="color:#e5484d">red 🚩</span>') + '</td><td>' + (r.looks_valid ? '<strong style="color:#0a9e5c">yes</strong>' : '<span style="color:#b45309">not yet</span>') + '</td><td>' + bbRiskSize(r.price, r.day_low) + '</td></tr>').join('') + '</tbody></table></div>'
+        lv.map(r => '<tr><td style="text-align:left;font-weight:700">' + tkA(r.sym) + '</td><td>' + fmtNum2(r.price) + '</td><td>' + fmtNum2(r.pivot) + '</td><td>+' + r.above_pivot_pct.toFixed(1) + '%' + (r.above_pivot_pct > 3 ? ' <span style="color:#b45309">⚠ chasing</span>' : '') + '</td><td>' + (r.vol_pace_x == null ? '—' : r.vol_pace_x.toFixed(1) + '× avg') + '</td><td>' + (r.close_in_range == null ? '—' : Math.round(r.close_in_range * 100) + '%') + '</td><td>' + (r.green ? 'green' : '<span style="color:#e5484d">red 🚩</span>') + '</td><td>' + (r.looks_valid ? '<strong style="color:#0a9e5c">yes</strong>' : '<span style="color:#b45309">not yet</span>') + '</td><td>' + bbRiskSize(r.price, r.day_low) + '</td></tr>').join('') + '</tbody></table></div>'
       : '<div class="empty" style="padding:8px">No setup is trading above its pivot right now.</div>');
   }
   // confirmed triggers
   const tg = bbData.triggers || [];
   html += '<h3 style="font-size:14px;margin:12px 0 4px">Confirmed breakouts at the last close &mdash; the tested entry is the next open</h3>' + (tg.length
     ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Close</th><th>Pivot</th><th>Stop (day low)</th><th>1% risk size</th><th>Base</th><th>ADR</th><th>Earnings</th><th>Flow</th><th style="text-align:left">Other panels</th></tr></thead><tbody>' +
-      tg.map(r => '<tr><td style="text-align:left;font-weight:700">' + esc(r.sym) + '</td><td>' + fmtNum2(r.close) + '</td><td>' + fmtNum2(r.base.pivot) + '</td><td>' + fmtNum2(r.stop) + '</td><td>' + bbRiskSize(r.close, r.stop) + '</td><td>' + r.base.days + 'd · ' + r.base.range_pct.toFixed(1) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
+      tg.map(r => '<tr><td style="text-align:left;font-weight:700">' + tkA(r.sym) + '</td><td>' + fmtNum2(r.close) + '</td><td>' + fmtNum2(r.base.pivot) + '</td><td>' + fmtNum2(r.stop) + '</td><td>' + bbRiskSize(r.close, r.stop) + '</td><td>' + r.base.days + 'd · ' + r.base.range_pct.toFixed(1) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
     : '<div class="empty" style="padding:8px">No confirmed breakout at the last close. In the backtest a trigger came about twice a month across the whole basket &mdash; an empty table is the normal state.</div>');
   // setups
   const su = bbData.setups || [];
   html += '<h3 style="font-size:14px;margin:12px 0 4px">In a base now &mdash; checklist passes, waiting for the pivot (' + su.length + ')</h3>' + (su.length
     ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Close</th><th>Pivot</th><th>To pivot</th><th>Base</th><th>Prior run</th><th>ADR</th><th>8 / 21 / 50 EMA</th><th>Earnings</th><th>Flow</th><th style="text-align:left">Other panels</th></tr></thead><tbody>' +
-      su.map(r => '<tr><td style="text-align:left;font-weight:700">' + esc(r.sym) + '</td><td>' + fmtNum2(r.close) + '</td><td>' + fmtNum2(r.base.pivot) + '</td><td>+' + r.to_pivot_pct.toFixed(1) + '%</td><td>' + r.base.days + 'd · ' + r.base.range_pct.toFixed(1) + '%' + (r.base.range_pct > 15 ? ' <span style="color:#b45309">wide</span>' : '') + '</td><td>+' + r.base.prior_move_pct.toFixed(0) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td style="white-space:nowrap">' + fmtNum2(r.ema8) + ' / ' + fmtNum2(r.ema21) + ' / ' + fmtNum2(r.ema50) + '</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
+      su.map(r => '<tr><td style="text-align:left;font-weight:700">' + tkA(r.sym) + '</td><td>' + fmtNum2(r.close) + '</td><td>' + fmtNum2(r.base.pivot) + '</td><td>+' + r.to_pivot_pct.toFixed(1) + '%</td><td>' + r.base.days + 'd · ' + r.base.range_pct.toFixed(1) + '%' + (r.base.range_pct > 15 ? ' <span style="color:#b45309">wide</span>' : '') + '</td><td>+' + r.base.prior_move_pct.toFixed(0) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td style="white-space:nowrap">' + fmtNum2(r.ema8) + ' / ' + fmtNum2(r.ema21) + ' / ' + fmtNum2(r.ema50) + '</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
     : '<div class="empty" style="padding:8px">No name passes the full checklist with a tight base today.</div>');
   // reverse-engineered list: volatile washouts (R4)
   const wo = bbData.washouts || [];
   html += '<h3 style="font-size:14px;margin:14px 0 4px">Volatile washouts &mdash; the rule the data found (' + wo.length + ')</h3>' +
     '<div style="color:#6b7280;margin-bottom:6px">ADR 5%+, close 20%+ below the 200 EMA, 50 EMA falling. Tested entry: next open; tested exit: +20% target or &minus;8% stop within 20 sessions. Sorted deepest first.</div>' + (wo.length
     ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Close</th><th>vs 200 EMA</th><th>50 EMA, 10-day change</th><th>From 52-week high</th><th>ADR</th><th>Days in list</th><th>Earnings</th><th>Flow</th><th style="text-align:left">Other panels</th></tr></thead><tbody>' +
-      wo.map(r => '<tr><td style="text-align:left;font-weight:700">' + esc(r.sym) + (r.split_flag ? ' <span title="A one-day move matched a stock-split ratio; prices here are not split-adjusted, so verify on a chart" style="color:#b45309">⚠ split?</span>' : '') + '</td><td>' + fmtNum2(r.close) + '</td><td>' + r.vs_e200_pct.toFixed(1) + '%</td><td>' + (r.e50_slope_pct >= 0 ? '+' : '') + r.e50_slope_pct.toFixed(1) + '%</td><td>' + r.from_52w_high_pct.toFixed(1) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td>' + (r.days_in_list > 40 ? '<span style="color:#b45309;font-weight:700">' + r.days_in_list + '</span>' : r.days_in_list) + '</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
+      wo.map(r => '<tr><td style="text-align:left;font-weight:700">' + tkA(r.sym) + (r.split_flag ? ' <span title="A one-day move matched a stock-split ratio; prices here are not split-adjusted, so verify on a chart" style="color:#b45309">⚠ split?</span>' : '') + '</td><td>' + fmtNum2(r.close) + '</td><td>' + r.vs_e200_pct.toFixed(1) + '%</td><td>' + (r.e50_slope_pct >= 0 ? '+' : '') + r.e50_slope_pct.toFixed(1) + '%</td><td>' + r.from_52w_high_pct.toFixed(1) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td>' + (r.days_in_list > 40 ? '<span style="color:#b45309;font-weight:700">' + r.days_in_list + '</span>' : r.days_in_list) + '</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
     : '<div class="empty" style="padding:8px">No volatile name is 20%+ below its 200 EMA with a falling 50 EMA today.</div>');
   // forward test
   const fs = bbSummary;
@@ -3114,11 +3124,11 @@ function flowBadge(lab) {
   return '<span style="background:' + c + ';color:#fff;border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700">' + esc(lab || 'NO DATA') + '</span>';
 }
 function flowRow(sym, r, extra) {
-  if (!r || r.error) return '<tr><td style="text-align:left;font-weight:700">' + esc(sym) + '</td><td>' + flowBadge(null) + '</td>' + (extra != null ? '<td style="text-align:left;white-space:normal">' + extra + '</td>' : '') + '<td colspan="6" style="color:#9ca3af;text-align:left">' + esc(r && r.error || 'not in flow.json') + '</td></tr>';
+  if (!r || r.error) return '<tr><td style="text-align:left;font-weight:700">' + tkA(sym) + '</td><td>' + flowBadge(null) + '</td>' + (extra != null ? '<td style="text-align:left;white-space:normal">' + extra + '</td>' : '') + '<td colspan="6" style="color:#9ca3af;text-align:left">' + esc(r && r.error || 'not in flow.json') + '</td></tr>';
   const sg = v => v == null ? '—' : (v >= 0 ? '+' : '') + v.toFixed(2);
   const t = (r.top || [])[0];
   const topTxt = t ? (t.type === 'C' ? 'Call ' : 'Put ') + t.strike + ' ' + t.exp.slice(5) + ' · ' + t.vol.toLocaleString() + ' vs OI ' + t.oi.toLocaleString() + ' · ' + flowMoney(t.prem) + (t.side === 'S' ? ' (likely sold)' : t.side === 'B' ? ' (likely bought)' : '') : '—';
-  return '<tr><td style="text-align:left;font-weight:700">' + esc(sym) + '</td><td>' + flowBadge(r.label) + '</td>' + (extra != null ? '<td style="text-align:left;white-space:normal;min-width:140px">' + extra + '</td>' : '') +
+  return '<tr><td style="text-align:left;font-weight:700">' + tkA(sym) + '</td><td>' + flowBadge(r.label) + '</td>' + (extra != null ? '<td style="text-align:left;white-space:normal;min-width:140px">' + extra + '</td>' : '') +
     '<td>' + sg(r.bias) + '</td><td>' + sg(r.rel) + '</td>' +
     '<td>' + flowMoney(r.unusual_call_prem) + '</td><td>' + flowMoney(r.unusual_put_prem) + '</td>' +
     '<td>' + (r.act_x == null ? '<span style="color:#9ca3af">building</span>' : r.act_x.toFixed(1) + '×') + '</td>' +
@@ -3165,7 +3175,39 @@ function renderFlowPanel() {
   el.innerHTML = html;
 }
 
+// ===== Collapsible panels: a Hide/Show button on every panel; remembered per browser (falls back silently if storage is blocked) =====
+const PNL_KEY = 'bcc3_collapsed_panels';
+function pnlLoad() { try { return new Set(JSON.parse(localStorage.getItem(PNL_KEY) || '[]')); } catch (e) { return new Set(); } }
+function pnlSave(set) { try { localStorage.setItem(PNL_KEY, JSON.stringify([...set])); } catch (e) {} }
+function setPanelCollapsed(panel, collapsed, save) {
+  panel.classList.toggle('collapsed', collapsed);
+  const b = panel.querySelector(':scope > .pnl-toggle');
+  if (b) { b.textContent = collapsed ? '▸ Show' : '▾ Hide'; b.setAttribute('aria-expanded', String(!collapsed)); }
+  if (save !== false) { const s = pnlLoad(); collapsed ? s.add(panel.id) : s.delete(panel.id); pnlSave(s); }
+}
+function setAllPanels(collapsed) {
+  document.querySelectorAll('div.panel[id]').forEach(p => setPanelCollapsed(p, collapsed, false));
+  pnlSave(collapsed ? new Set([...document.querySelectorAll('div.panel[id]')].map(p => p.id)) : new Set());
+}
+function initCollapsiblePanels() {
+  const saved = pnlLoad();
+  document.querySelectorAll('div.panel[id]').forEach(p => {
+    if (p.querySelector(':scope > .pnl-toggle')) return;
+    const b = document.createElement('button');
+    b.className = 'pnl-toggle'; b.type = 'button';
+    b.addEventListener('click', () => setPanelCollapsed(p, !p.classList.contains('collapsed')));
+    p.insertBefore(b, p.firstChild);
+    setPanelCollapsed(p, saved.has(p.id), false);
+  });
+  // a menu link to a hidden panel opens it
+  document.querySelectorAll('.jumpbar a[href^="#"]').forEach(a => a.addEventListener('click', () => {
+    const p = document.getElementById(a.getAttribute('href').slice(1));
+    if (p && p.classList && p.classList.contains('collapsed')) setPanelCollapsed(p, false);
+  }));
+}
+
 (async function init() {
+  try { initCollapsiblePanels(); } catch (e) {}
   loadForwardSummary();
   const ok = await loadData();
   if (!ok) return;
