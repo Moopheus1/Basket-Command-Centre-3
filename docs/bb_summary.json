@@ -1,0 +1,24 @@
+{
+ "rules_version": "bb-v1-2026-10-01",
+ "logged_triggers": 0,
+ "scored": 0,
+ "triggers": {
+  "n": 0
+ },
+ "random_same_dates": {
+  "n": 0
+ },
+ "success_test": "Scored triggers must beat random entries on the same dates by >= 0.30R average AND >= 10 points of 1.5xATR hit rate, on >= 20 scored triggers. Fixed 1 Oct 2026.",
+ "backtest": "Dec 2025 - Sep 2026: 19 triggers, hit 83.3% vs 64.1% random; +1.46R vs +0.20R; +0.41R without the best two trades.",
+ "washout": {
+  "logged": 6,
+  "scored": 0,
+  "hit_pct": null,
+  "volatile_baseline_pct": null,
+  "baseline_n": 0,
+  "success_test": "Washout entries (one per stock per 10 sessions) must reach +20% before -8% at least 5 points more often than any ADR>=5% name on the same dates, on >= 60 scored entries. Fixed 1 Oct 2026.",
+  "verdict": "NOT ENOUGH DATA YET - 0/60 scored washout entries (each needs 20 sessions)"
+ },
+ "updated": "2026-10-01T20:23:11+00:00",
+ "verdict": "NOT ENOUGH DATA YET - 0/20 scored triggers (each needs 40 sessions after the breakout)"
+}
