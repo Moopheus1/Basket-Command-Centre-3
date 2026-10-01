@@ -155,6 +155,7 @@
   <a href="#bullFlagPanel">↓ Bull Flag Watch &middot; #3</a>
   <a href="#intradayBreakoutPanel">↓ Intraday Breakout &middot; #4</a>
   <a href="#tradePlansPanel">↓ Trade plans</a>
+  <a href="#bbPanel">↓ Base &amp; Breakout (test)</a>
   <a href="#flowPanel">↓ Options flow (test)</a>
   <a href="#forwardPanel">↓ Forward test</a>
   <a href="#rotationPanel">↓ Rotation candidates</a>
@@ -278,6 +279,14 @@
   <strong>How the pieces are built.</strong> <em>Support/resistance</em>: swing highs/lows (the extreme of the 3 bars either side) over ~1 year, merged when within 0.5 ATR. <em>Where sellers are parked</em>: price bands above today's price where unusually heavy volume traded (each day's volume spread across its high&ndash;low range), plus swing highs where price was turned back &mdash; buyers stuck there tend to sell as price returns to their cost. <em>Pullback</em>: <span style="color:#0a9e5c;font-weight:700">slight</span> = selling on below-average volume, at most 1 distribution day, depth &le; 2.2 ATR; <span style="color:#e5484d;font-weight:700">distribution</span> = 3+ distribution days (down close on above-average volume) in 10 sessions, or heavy down-day volume on a pullback deeper than 1 ATR. <em>Trend</em>: price vs EMA20 and MA50, and whether MA50 is rising; "broke support" = closed below the most recent swing low. <em>Size</em>: half when the close is more than 8% above EMA9, otherwise full. <em>Stop</em>: none, as tested; Golden Cross cards show the optional 1.5-move stop that panel survived.<br><br>
   <strong>Exit when the target is reached.</strong> How stretched a name is on arrival depends on how fast it got there. A fast run (more than ~6% over EMA9 on arrival) &mdash; take the full exit; a slow grind &mdash; take most, trail a small runner under EMA9. (Untested.)</div>
   <div id="tradePlansBody" style="display:flex;flex-wrap:wrap;gap:14px;margin-top:12px"></div>
+</div>
+
+<div class="panel" id="bbPanel">
+  <h2><span style="background:#b45309;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">BASE &amp; BREAKOUT &middot; TEST</span>Strong stocks resting, then launching again &mdash; display only, not part of TAKE</h2>
+  <div class="desc"><strong>The checklist</strong> (daily bars): SPY above its 50 EMA &middot; the stock is a <em>leader</em> (63-session return vs SPY in the basket's top 30%) &middot; ADR (average daily range) 5%+ &middot; close above a rising 8 &gt; 21 &gt; 50 EMA stack &middot; above both the 200 EMA and 200 SMA &middot; weekly uptrend (above a rising 30-week average). <strong>The base:</strong> after a 25%+ run, 5&ndash;20 sessions of sideways action that is tight (range at most 2.5&times; ADR and 20%), holds the 21 EMA and is on below-average volume. <strong>Pivot</strong> = the top of the base. <strong>Trigger:</strong> a close above the pivot on 1.5&times; average volume, with a green candle closing in the top quarter of its range. <strong>Stop</strong> = the breakout day's low.<br><br>
+  <strong>Backtest on this basket</strong> (Dec 2025 &ndash; Sep 2026, 19 triggers, buying the <em>next open</em>): hit the page's standard 1.5&times;ATR target within 20 sessions 83% of the time vs 64% for random entries in the same stocks; with the thesis's own exit (stop at the breakout low, sell on a close below the 21 EMA or after 40 sessions) it averaged <strong>+1.46R</strong> vs +0.20R random, winning only 47% of the time. <strong>Read the tail:</strong> without the two best trades (HYMC +11.6R, ARM +7.1R) the other 15 averaged +0.41R. That is how this style is supposed to work &mdash; many small losses, a few big wins &mdash; but 19 trades in one bull run is also exactly what luck looks like (a 7% chance of a hit rate this high by chance). Median stop distance was 9.6%, so size every position to the stop, never by habit.<br><br>
+  <strong>Limits.</strong> The dashboard only sees completed daily bars, so a trigger is confirmed after the close and bought the next morning &mdash; often above the pivot (median gap +1.8%), not &ldquo;as close to the pivot as you can.&rdquo; During the session, setups trading above their pivot are shown as <em>provisional</em>, with volume extrapolated for the time of day; they are not confirmed until the close. Earnings within 5 days is a red flag, not a filter. The <em>Other panels</em> column shows whether a name is also in a ranked panel; on 30 Sep none of the six setups were. Nothing here counts toward TAKE.</div>
+  <div id="bbBody" style="font-size:13px"></div>
 </div>
 
 <div class="panel" id="flowPanel">
@@ -3011,6 +3020,68 @@ async function loadForwardSummary() {
 }
 
 
+// ===== BASE & BREAKOUT (display-only test panel; reads bb.json written by scripts/base_breakout.py; never calls addMember) =====
+let bbData = null, bbSummary = null;
+async function loadBB() {
+  try { const r = await fetch('bb.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) bbData = await r.json(); } catch (e) {}
+  try { const r = await fetch('bb_summary.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) bbSummary = await r.json(); } catch (e) {}
+  renderBBPanel();
+}
+function bbRiskSize(entry, stop) {
+  const risk = entry - stop;
+  if (!(risk > 0)) return '—';
+  const sh = Math.floor(TP_CAPITAL * 0.01 / risk);
+  return sh.toLocaleString() + ' sh (' + (risk / entry * 100).toFixed(1) + '% stop)';
+}
+function renderBBPanel() {
+  const el = document.getElementById('bbBody');
+  if (!el) return;
+  if (!bbData) { el.innerHTML = '<div class="empty" style="padding:10px">No bb.json yet. It is written after the next market-data update once the Base &amp; Breakout workflow is installed.</div>'; return; }
+  const m = bbData.market || {};
+  const mk = m.above_ema50
+    ? '<span style="color:#0a9e5c;font-weight:700">SPY above its 50 EMA</span>'
+    : '<span style="color:#e5484d;font-weight:700">🚩 SPY below its 50 EMA &mdash; the thesis says stand aside</span>';
+  const choppy = m.above_ema50 && m.spy < m.ema21 ? ' <span style="color:#b45309;font-weight:700">· but below its 21 EMA (choppy)</span>' : '';
+  const pnl = sym => { const t = panelMembers.get(sym); return t && t.length ? esc(t.join(', ')) : '<span style="color:#9ca3af">—</span>'; };
+  const flow = sym => { const r = flowData && flowData.tickers && flowData.tickers[sym]; return r && !r.error ? flowBadge(r.label) : '<span style="color:#9ca3af">—</span>'; };
+  const earn = d => d == null ? '—' : d <= 5 ? '<span style="color:#e5484d;font-weight:700">🚩 ' + d + 'd</span>' : d + 'd';
+  let html = '<div style="margin-bottom:8px">Last completed session ' + esc(bbData.session) + ' · ' + mk + choppy +
+    ' (SPY ' + fmtNum2(m.spy) + ', 50 EMA ' + fmtNum2(m.ema50) + ', 21 EMA ' + fmtNum2(m.ema21) + ') · position size uses the Trade plans capital (' + TP_CAPITAL.toLocaleString() + ') at 1% risk</div>';
+  // live (provisional) breakouts
+  if (bbData.partial_session) {
+    const lv = bbData.live || [];
+    html += '<h3 style="font-size:14px;margin:10px 0 4px">Breaking out now &mdash; provisional until the close</h3>' + (lv.length
+      ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Price</th><th>Pivot</th><th>Above pivot</th><th>Volume pace</th><th>Close in range</th><th>Candle</th><th>Looks valid?</th><th>Size at today\'s low</th></tr></thead><tbody>' +
+        lv.map(r => '<tr><td style="text-align:left;font-weight:700">' + esc(r.sym) + '</td><td>' + fmtNum2(r.price) + '</td><td>' + fmtNum2(r.pivot) + '</td><td>+' + r.above_pivot_pct.toFixed(1) + '%' + (r.above_pivot_pct > 3 ? ' <span style="color:#b45309">⚠ chasing</span>' : '') + '</td><td>' + (r.vol_pace_x == null ? '—' : r.vol_pace_x.toFixed(1) + '× avg') + '</td><td>' + (r.close_in_range == null ? '—' : Math.round(r.close_in_range * 100) + '%') + '</td><td>' + (r.green ? 'green' : '<span style="color:#e5484d">red 🚩</span>') + '</td><td>' + (r.looks_valid ? '<strong style="color:#0a9e5c">yes</strong>' : '<span style="color:#b45309">not yet</span>') + '</td><td>' + bbRiskSize(r.price, r.day_low) + '</td></tr>').join('') + '</tbody></table></div>'
+      : '<div class="empty" style="padding:8px">No setup is trading above its pivot right now.</div>');
+  }
+  // confirmed triggers
+  const tg = bbData.triggers || [];
+  html += '<h3 style="font-size:14px;margin:12px 0 4px">Confirmed breakouts at the last close &mdash; the tested entry is the next open</h3>' + (tg.length
+    ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Close</th><th>Pivot</th><th>Stop (day low)</th><th>1% risk size</th><th>Base</th><th>ADR</th><th>Earnings</th><th>Flow</th><th style="text-align:left">Other panels</th></tr></thead><tbody>' +
+      tg.map(r => '<tr><td style="text-align:left;font-weight:700">' + esc(r.sym) + '</td><td>' + fmtNum2(r.close) + '</td><td>' + fmtNum2(r.base.pivot) + '</td><td>' + fmtNum2(r.stop) + '</td><td>' + bbRiskSize(r.close, r.stop) + '</td><td>' + r.base.days + 'd · ' + r.base.range_pct.toFixed(1) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
+    : '<div class="empty" style="padding:8px">No confirmed breakout at the last close. In the backtest a trigger came about twice a month across the whole basket &mdash; an empty table is the normal state.</div>');
+  // setups
+  const su = bbData.setups || [];
+  html += '<h3 style="font-size:14px;margin:12px 0 4px">In a base now &mdash; checklist passes, waiting for the pivot (' + su.length + ')</h3>' + (su.length
+    ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Close</th><th>Pivot</th><th>To pivot</th><th>Base</th><th>Prior run</th><th>ADR</th><th>8 / 21 / 50 EMA</th><th>Earnings</th><th>Flow</th><th style="text-align:left">Other panels</th></tr></thead><tbody>' +
+      su.map(r => '<tr><td style="text-align:left;font-weight:700">' + esc(r.sym) + '</td><td>' + fmtNum2(r.close) + '</td><td>' + fmtNum2(r.base.pivot) + '</td><td>+' + r.to_pivot_pct.toFixed(1) + '%</td><td>' + r.base.days + 'd · ' + r.base.range_pct.toFixed(1) + '%' + (r.base.range_pct > 15 ? ' <span style="color:#b45309">wide</span>' : '') + '</td><td>+' + r.base.prior_move_pct.toFixed(0) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td style="white-space:nowrap">' + fmtNum2(r.ema8) + ' / ' + fmtNum2(r.ema21) + ' / ' + fmtNum2(r.ema50) + '</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
+    : '<div class="empty" style="padding:8px">No name passes the full checklist with a tight base today.</div>');
+  // forward test
+  const fs = bbSummary;
+  if (fs) {
+    const vcol = /^PASS/.test(fs.verdict) ? '#0a9e5c' : /^FAIL/.test(fs.verdict) ? '#e5484d' : '#6b7280';
+    const row = (n, st) => st && st.n ? '<tr><td style="text-align:left">' + n + '</td><td>' + st.n + '</td><td>' + st.hit_pct.toFixed(1) + '%</td><td>' + (st.avg_R >= 0 ? '+' : '') + st.avg_R.toFixed(2) + 'R</td><td>' + st.win_pct.toFixed(0) + '%</td><td>' + (st.avg_ret_pct >= 0 ? '+' : '') + st.avg_ret_pct.toFixed(2) + '%</td></tr>' : '';
+    const rows = row('Logged triggers', fs.triggers) + row('Random entries, same dates', fs.random_same_dates);
+    html += '<h3 style="font-size:14px;margin:14px 0 4px">Base &amp; Breakout forward test</h3>' +
+      '<div style="padding:8px 12px;border-radius:8px;background:' + vcol + ';color:#fff;font-weight:800;margin-bottom:6px">' + esc(fs.verdict) + '</div>' +
+      '<div style="color:#6b7280;margin-bottom:6px">' + fs.logged_triggers + ' trigger(s) logged, ' + fs.scored + ' scored. ' + esc(fs.success_test) + '</div>' +
+      (rows ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Group</th><th>Scored</th><th>Hit 1.5× target</th><th>Avg R</th><th>Win rate</th><th>Avg return</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '') +
+      '<div style="color:#6b7280;margin-top:6px">Raw file: <a href="bb_log.csv">bb_log.csv</a></div>';
+  }
+  el.innerHTML = html;
+}
+
 // ===== OPTIONS FLOW (display-only test panel; never calls addMember, so TAKE is untouched) =====
 let flowData = null, flowSummary = null;
 async function loadFlow() {
@@ -3083,8 +3154,9 @@ function renderFlowPanel() {
   loadForwardSummary();
   const ok = await loadData();
   if (!ok) return;
-  loadFlow();
-  setInterval(async () => { await loadData(); renderFlowPanel(); }, DATA_REFRESH_MS);
+  await loadFlow();
+  loadBB();
+  setInterval(async () => { await loadData(); renderFlowPanel(); loadBB(); }, DATA_REFRESH_MS);
 })();
 </script>
 </body>

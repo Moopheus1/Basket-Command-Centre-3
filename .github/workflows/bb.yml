@@ -1,0 +1,59 @@
+name: Base and breakout
+
+# Runs after every "Update market data" run (every 10 min in session + EOD), so intraday
+# breakouts above a pivot show up as provisional within ~10 minutes. Pure Python, no installs,
+# a few seconds per run. Only commits when bb.json / the log actually change (bb.json carries
+# the market-data timestamp, not the clock). Display-only: never touches panel/TAKE files or
+# the v2 forward log.
+on:
+  workflow_run:
+    workflows: ["Update market data"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write   # to dispatch pages.yml after a commit
+
+concurrency:
+  group: base-breakout
+  cancel-in-progress: false
+
+jobs:
+  bb:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Find setups and breakouts
+        run: python scripts/base_breakout.py
+      - name: Commit
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          mkdir -p /tmp/bb
+          cp docs/bb.json docs/bb_log.csv docs/bb_summary.json /tmp/bb/ 2>/dev/null || true
+          pushed=false
+          for i in 1 2 3 4 5; do
+            git fetch origin main -q
+            git reset --hard origin/main -q
+            cp /tmp/bb/* docs/ 2>/dev/null || true
+            git add docs/bb.json docs/bb_log.csv docs/bb_summary.json 2>/dev/null || true
+            if git diff --staged --quiet; then echo "changed=false" >> "$GITHUB_OUTPUT"; pushed=true; break; fi
+            git commit -q -m "Base and breakout update [skip ci]"
+            if git push -q; then pushed=true; echo "changed=true" >> "$GITHUB_OUTPUT"; break; fi
+            echo "Push attempt $i failed, retrying..."; sleep 3
+          done
+          [ "$pushed" = true ] || { echo "::error::Failed to push base-breakout files"; exit 1; }
+      - name: Trigger Pages deploy
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run pages.yml
