@@ -27,6 +27,10 @@ Backtest on this basket's own data (Dec 2025 - Sep 2026, 19 triggers, entry next
   vs +0.20R random, win rate 47%. Without the two best trades (HYMC +11.6R, ARM +7.1R) the other 15
   averaged +0.41R - the edge is a few big winners, which is how this style is meant to work, and also
   exactly what a short sample can fake.
+1000-session check (Oct 2022 - Sep 2026, 54 triggers, split-adjusted Yahoo bars): vs random ADR>=5% names on the
+  same days, a 5%+ run within 20 sessions 85% vs 83% (no edge); with identical stops WORSE (+5% before -5%:
+  37% vs 49%; 1.5xATR race 46% vs 52%). Median 20-session return +6.6% vs +3.7% for checklist-only; the mean
+  (+17%) is carried by five trades. 2023 and 2024 averaged negative.
 
 Outputs
   docs/bb.json         today's state: setups (checklist + base), confirmed triggers, live provisional triggers
