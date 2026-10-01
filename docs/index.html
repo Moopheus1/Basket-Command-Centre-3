@@ -155,6 +155,7 @@
   <a href="#bullFlagPanel">↓ Bull Flag Watch &middot; #3</a>
   <a href="#intradayBreakoutPanel">↓ Intraday Breakout &middot; #4</a>
   <a href="#tradePlansPanel">↓ Trade plans</a>
+  <a href="#flowPanel">↓ Options flow (test)</a>
   <a href="#forwardPanel">↓ Forward test</a>
   <a href="#rotationPanel">↓ Rotation candidates</a>
   <a href="#deathPanel">↓ Death cross</a>
@@ -277,6 +278,14 @@
   <strong>How the pieces are built.</strong> <em>Support/resistance</em>: swing highs/lows (the extreme of the 3 bars either side) over ~1 year, merged when within 0.5 ATR. <em>Where sellers are parked</em>: price bands above today's price where unusually heavy volume traded (each day's volume spread across its high&ndash;low range), plus swing highs where price was turned back &mdash; buyers stuck there tend to sell as price returns to their cost. <em>Pullback</em>: <span style="color:#0a9e5c;font-weight:700">slight</span> = selling on below-average volume, at most 1 distribution day, depth &le; 2.2 ATR; <span style="color:#e5484d;font-weight:700">distribution</span> = 3+ distribution days (down close on above-average volume) in 10 sessions, or heavy down-day volume on a pullback deeper than 1 ATR. <em>Trend</em>: price vs EMA20 and MA50, and whether MA50 is rising; "broke support" = closed below the most recent swing low. <em>Size</em>: half when the close is more than 8% above EMA9, otherwise full. <em>Stop</em>: none, as tested; Golden Cross cards show the optional 1.5-move stop that panel survived.<br><br>
   <strong>Exit when the target is reached.</strong> How stretched a name is on arrival depends on how fast it got there. A fast run (more than ~6% over EMA9 on arrival) &mdash; take the full exit; a slow grind &mdash; take most, trail a small runner under EMA9. (Untested.)</div>
   <div id="tradePlansBody" style="display:flex;flex-wrap:wrap;gap:14px;margin-top:12px"></div>
+</div>
+
+<div class="panel" id="flowPanel">
+  <h2><span style="background:#0f766e;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">OPTIONS FLOW &middot; TEST</span>Where options money leaned yesterday &mdash; display only, not part of TAKE</h2>
+  <div class="desc"><strong>What this is.</strong> After each close, Yahoo option chains for every basket name (expiries within 45 days) are scanned for <strong>unusual out-of-the-money</strong> trades: contracts that traded more than their open interest (and 100+ contracts), which suggests new positions rather than closing ones. <em>Bias</em> = bullish minus bearish unusual premium, from &minus;1 to +1. Calls dominate in a rising market (the median name read +0.61 on 30 Sep), so the labels are <strong>relative to the basket that day</strong>: BULLISH = 0.30+ above the basket median, BEARISH = 0.30+ below. Names with under $250k of unusual premium are THIN and not labelled.<br><br>
+  <strong>What it cannot see.</strong> Yahoo's end-of-day data does not say whether a trade was <em>bought or sold</em>; a big call print can be someone selling calls. Where a closing bid/ask exists the last trade's place in the spread is used as a rough side estimate (&ldquo;side known&rdquo;); otherwise the raw direction is used. Checked against a paid feed that infers side (Rallies, 30 Sep): it agreed on SMH, MRNA and roughly STX, and disagreed on NBIS (heavy call <em>selling</em> read as bullish) and AMAT (the paid feed's bullish money was in 2027&ndash;28 expiries this scan ignores). <strong>Treat it as unproven.</strong><br><br>
+  <strong>How to use it with the panels above.</strong> The first table lists today's panel names with their flow reading, as a second opinion only. Nothing here changes TAKE, Weekly Picks or the v2 forward log. The flow readings run their own forward test (bottom): BULLISH names must beat the basket by 1+ point over 10 sessions, in 55%+ of cases, on 40+ readings. Until that passes, a BEARISH flag on a TAKE name is a reason to look closer, not a reason to skip it.</div>
+  <div id="flowBody" style="font-size:13px"></div>
 </div>
 
 <div class="panel" id="forwardPanel">
@@ -3001,11 +3010,81 @@ async function loadForwardSummary() {
     '<div style="color:#6b7280;margin-top:6px">Raw files: <a href="forward_log.csv">forward_log.csv</a> · <a href="forward_results.csv">forward_results.csv</a></div>';
 }
 
+
+// ===== OPTIONS FLOW (display-only test panel; never calls addMember, so TAKE is untouched) =====
+let flowData = null, flowSummary = null;
+async function loadFlow() {
+  try { const r = await fetch('flow.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) flowData = await r.json(); } catch (e) {}
+  try { const r = await fetch('flow_summary.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) flowSummary = await r.json(); } catch (e) {}
+  renderFlowPanel();
+}
+function flowMoney(v) {
+  if (v == null || !isFinite(v)) return '—';
+  const a = Math.abs(v);
+  return a >= 1e9 ? '$' + (v / 1e9).toFixed(1) + 'B' : a >= 1e6 ? '$' + (v / 1e6).toFixed(1) + 'M' : a >= 1e3 ? '$' + Math.round(v / 1e3) + 'k' : '$' + Math.round(v);
+}
+function flowBadge(lab) {
+  const c = { BULLISH: '#0a9e5c', BEARISH: '#e5484d', NEUTRAL: '#6b7280', THIN: '#9ca3af' }[lab] || '#9ca3af';
+  return '<span style="background:' + c + ';color:#fff;border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700">' + esc(lab || 'NO DATA') + '</span>';
+}
+function flowRow(sym, r, extra) {
+  if (!r || r.error) return '<tr><td style="text-align:left;font-weight:700">' + esc(sym) + '</td><td>' + flowBadge(null) + '</td>' + (extra != null ? '<td style="text-align:left;white-space:normal">' + extra + '</td>' : '') + '<td colspan="6" style="color:#9ca3af;text-align:left">' + esc(r && r.error || 'not in flow.json') + '</td></tr>';
+  const sg = v => v == null ? '—' : (v >= 0 ? '+' : '') + v.toFixed(2);
+  const t = (r.top || [])[0];
+  const topTxt = t ? (t.type === 'C' ? 'Call ' : 'Put ') + t.strike + ' ' + t.exp.slice(5) + ' · ' + t.vol.toLocaleString() + ' vs OI ' + t.oi.toLocaleString() + ' · ' + flowMoney(t.prem) + (t.side === 'S' ? ' (likely sold)' : t.side === 'B' ? ' (likely bought)' : '') : '—';
+  return '<tr><td style="text-align:left;font-weight:700">' + esc(sym) + '</td><td>' + flowBadge(r.label) + '</td>' + (extra != null ? '<td style="text-align:left;white-space:normal;min-width:140px">' + extra + '</td>' : '') +
+    '<td>' + sg(r.bias) + '</td><td>' + sg(r.rel) + '</td>' +
+    '<td>' + flowMoney(r.unusual_call_prem) + '</td><td>' + flowMoney(r.unusual_put_prem) + '</td>' +
+    '<td>' + (r.act_x == null ? '<span style="color:#9ca3af">building</span>' : r.act_x.toFixed(1) + '×') + '</td>' +
+    '<td style="text-align:left;white-space:normal;font-size:12px">' + esc(topTxt) + '</td></tr>';
+}
+function renderFlowPanel() {
+  const el = document.getElementById('flowBody');
+  if (!el) return;
+  if (!flowData || !flowData.tickers) { el.innerHTML = '<div class="empty" style="padding:10px">No flow.json yet. The first reading is written after the next completed US session.</div>'; return; }
+  const T = flowData.tickers;
+  const head = extraCol => '<thead><tr><th style="text-align:left">Ticker</th><th>Flow</th>' + (extraCol ? '<th style="text-align:left">' + extraCol + '</th>' : '') + '<th>Bias</th><th>vs basket</th><th>Unusual calls</th><th>Unusual puts</th><th>Activity vs normal</th><th style="text-align:left">Biggest unusual contract</th></tr></thead>';
+  // 1. names the existing panels flagged today
+  const members = [...panelMembers.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
+  let html = '<div style="color:#6b7280;margin-bottom:6px">Session ' + esc(flowData.session) + ' · basket median bias ' + (flowData.median_bias >= 0 ? '+' : '') + (+flowData.median_bias).toFixed(2) + ' · rules ' + esc(flowData.rules_version) + '</div>';
+  html += '<h3 style="font-size:14px;margin:10px 0 4px">Today\'s panel names &mdash; flow as a second opinion</h3>';
+  html += members.length
+    ? '<div style="overflow-x:auto"><table>' + head('Panels') + '<tbody>' + members.map(([sym, tags]) => flowRow(sym, T[sym], esc(tags.join(', ')) + (tags.length >= 2 ? ' <strong style="color:#1d4ed8">2+ panels</strong>' : ''))).join('') + '</tbody></table></div>'
+    : '<div class="empty" style="padding:8px">No names in the panels today.</div>';
+  // 2. strongest readings across the whole basket
+  const live = Object.entries(T).filter(([, r]) => r && !r.error && (r.label === 'BULLISH' || r.label === 'BEARISH'));
+  const bull = live.filter(([, r]) => r.label === 'BULLISH').sort((a, b) => b[1].rel - a[1].rel || (b[1].unusual_call_prem - a[1].unusual_call_prem));
+  const bear = live.filter(([, r]) => r.label === 'BEARISH').sort((a, b) => a[1].rel - b[1].rel || (b[1].unusual_put_prem - a[1].unusual_put_prem));
+  const counts = {}; Object.values(T).forEach(r => { const k = r && !r.error ? r.label : 'ERROR'; counts[k] = (counts[k] || 0) + 1; });
+  html += '<h3 style="font-size:14px;margin:14px 0 4px">Whole basket &mdash; BULLISH (' + bull.length + ') and BEARISH (' + bear.length + ')</h3>' +
+    '<div style="color:#6b7280;margin-bottom:6px">' + Object.entries(counts).map(([k, v]) => k + ' ' + v).join(' · ') + '</div>' +
+    '<div style="overflow-x:auto"><table>' + head(null) + '<tbody>' + bull.map(([s, r]) => flowRow(s, r)).join('') +
+    (bear.length ? '<tr><td colspan="8" style="border-top:2px solid #e5e7eb"></td></tr>' : '') + bear.map(([s, r]) => flowRow(s, r)).join('') + '</tbody></table></div>';
+  // 3. its own forward test
+  const fs = flowSummary;
+  if (fs) {
+    const vcol = /^PASS/.test(fs.verdict) ? '#0a9e5c' : /^FAIL/.test(fs.verdict) ? '#e5484d' : '#6b7280';
+    const pct = v => v == null ? '—' : (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
+    let rows = '';
+    ['BULLISH', 'BEARISH', 'NEUTRAL'].forEach(l => ['5d', '10d'].forEach(h => {
+      const st = ((fs.by_label || {})[l] || {})[h]; if (!st) return;
+      rows += '<tr><td style="text-align:left">' + l + ' · ' + h + '</td><td>' + st.n + '</td><td>' + pct(st.avg_return_pct) + '</td><td>' + pct(st.avg_vs_basket_pct) + '</td><td>' + (l === 'NEUTRAL' ? '—' : st.right_direction_vs_basket_pct.toFixed(1) + '%') + '</td></tr>';
+    }));
+    html += '<h3 style="font-size:14px;margin:14px 0 4px">Flow forward test</h3>' +
+      '<div style="padding:8px 12px;border-radius:8px;background:' + vcol + ';color:#fff;font-weight:800;margin-bottom:6px">' + esc(fs.verdict) + '</div>' +
+      '<div style="color:#6b7280;margin-bottom:6px">' + fs.logged_sessions + ' session(s), ' + fs.logged_rows + ' readings logged. ' + esc(fs.success_test) + '</div>' +
+      (rows ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Label · window</th><th>Scored</th><th>Avg return</th><th>Avg vs basket</th><th>Right direction vs basket</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '') +
+      '<div style="color:#6b7280;margin-top:6px">Raw file: <a href="flow_log.csv">flow_log.csv</a></div>';
+  }
+  el.innerHTML = html;
+}
+
 (async function init() {
   loadForwardSummary();
   const ok = await loadData();
   if (!ok) return;
-  setInterval(loadData, DATA_REFRESH_MS);
+  loadFlow();
+  setInterval(async () => { await loadData(); renderFlowPanel(); }, DATA_REFRESH_MS);
 })();
 </script>
 </body>

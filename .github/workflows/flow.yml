@@ -1,0 +1,81 @@
+name: Options flow
+
+# Runs after every "Update market data" run (so it rides the same cron-job.org / Cloudflare
+# dispatcher). The gate step exits in seconds unless the US session has closed (4:20pm ET+)
+# and today's reading has not been taken yet, so only one run a day does the ~4-minute scan.
+# Display-only: writes docs/flow*.json and docs/flow_log.csv, never touches the panel or TAKE
+# files or the v2 forward log.
+on:
+  workflow_run:
+    workflows: ["Update market data"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Run the scan now even before the close (testing only - pre-market chains carry yesterday's volume against today's open interest, so 'unusual' is undercounted)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write   # to dispatch pages.yml after a commit
+
+concurrency:
+  group: options-flow
+  cancel-in-progress: false
+
+jobs:
+  flow:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Gate - after the close and not yet done today?
+        id: gate
+        run: |
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then echo "run=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          dow=$(TZ=America/New_York date +%u); mins=$((10#$(TZ=America/New_York date +%H) * 60 + 10#$(TZ=America/New_York date +%M)))
+          today=$(TZ=America/New_York date +%F)
+          done=$(python3 -c "import json;print(json.load(open('docs/flow.json')).get('session',''))" 2>/dev/null || echo "")
+          if [ "$dow" -le 5 ] && [ "$mins" -ge 980 ] && [ "$done" != "$today" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Skip: dow=$dow minutes=$mins lastFlowSession=$done"; echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-python@v5
+        if: steps.gate.outputs.run == 'true'
+        with:
+          python-version: "3.12"
+      - name: Scan option chains
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          pip install -q yfinance pandas
+          python scripts/fetch_flow.py ${{ github.event.inputs.force == 'true' && '--force' || '' }}
+      - name: Commit flow files
+        id: commit
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          mkdir -p /tmp/flow
+          cp docs/flow.json docs/flow_history.json docs/flow_log.csv docs/flow_summary.json /tmp/flow/ 2>/dev/null || true
+          pushed=false
+          for i in 1 2 3 4 5; do
+            git fetch origin main -q
+            git reset --hard origin/main -q
+            cp /tmp/flow/* docs/ 2>/dev/null || true
+            git add docs/flow.json docs/flow_history.json docs/flow_log.csv docs/flow_summary.json 2>/dev/null || true
+            if git diff --staged --quiet; then echo "changed=false" >> "$GITHUB_OUTPUT"; pushed=true; break; fi
+            git commit -q -m "Options flow update [skip ci]"
+            if git push -q; then pushed=true; echo "changed=true" >> "$GITHUB_OUTPUT"; break; fi
+            echo "Push attempt $i failed, retrying..."; sleep 3
+          done
+          [ "$pushed" = true ] || { echo "::error::Failed to push flow files"; exit 1; }
+      - name: Trigger Pages deploy
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run pages.yml
