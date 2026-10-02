@@ -137,6 +137,8 @@ def fetch_full(symbol):
         "targetHigh": info.get("targetHighPrice"),
         "targetLow": info.get("targetLowPrice"),
         "numAnalysts": info.get("numberOfAnalystOpinions"),
+        "recKey": info.get("recommendationKey"),      # e.g. strong_buy / buy / hold / sell
+        "recMean": info.get("recommendationMean"),    # 1.0 = strong buy .. 5.0 = strong sell
         "nextEarnings": next_earnings,
         # healthScore/healthGrade are filled in afterward by
         # health_score_monitor.run(), once per EOD run, as a separate pass
@@ -230,6 +232,8 @@ def run_intraday(tickers, existing):
                 "targetHigh": prior.get("targetHigh"),
                 "targetLow": prior.get("targetLow"),
                 "numAnalysts": prior.get("numAnalysts"),
+                "recKey": prior.get("recKey"),
+                "recMean": prior.get("recMean"),
                 "nextEarnings": prior.get("nextEarnings"),
                 # healthScore/healthGrade intentionally omitted here -
                 # apply_prior_health_scores() in main() sets them

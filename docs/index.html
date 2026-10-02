@@ -251,9 +251,9 @@
 
 <div class="panel" id="bbPanel">
   <h2><span style="background:#b45309;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">#4 &middot; BASE &amp; BREAKOUT &middot; TEST</span>Strong stocks resting, then launching again &mdash; display only, not part of TAKE</h2>
-  <div class="desc"><strong>The checklist</strong> (daily bars): SPY above its 50 EMA &middot; the stock is a <em>leader</em> (63-session return vs SPY in the basket's top 30%) &middot; ADR (average daily range) 5%+ &middot; close above a rising 8 &gt; 21 &gt; 50 EMA stack &middot; above both the 200 EMA and 200 SMA &middot; weekly uptrend (above a rising 30-week average). <strong>The base:</strong> after a 25%+ run, 5&ndash;20 sessions of sideways action that is tight (range at most 2.5&times; ADR and 20%), holds the 21 EMA and is on below-average volume. <strong>Pivot</strong> = the top of the base. <strong>Trigger:</strong> a close above the pivot on 1.5&times; average volume, with a green candle closing in the top quarter of its range. <strong>Stop</strong> = the breakout day's low.<br><br>
+  <div class="desc"><strong>The checklist</strong> (daily bars): SPY above its 50 EMA &middot; the stock is a <em>leader</em> (63-session return vs SPY in the basket's top 30%) &middot; ADR (average daily range) 5%+ &middot; close above a rising 8 &gt; 21 &gt; 50 EMA stack &middot; above both the 200 EMA and 200 SMA &middot; weekly uptrend (above a rising 30-week average). <strong>The base:</strong> after a 25%+ run, 5&ndash;20 sessions of sideways action that is tight (range at most 2.5&times; ADR and 20%), holds the 21 EMA and is on below-average volume. <strong>Trigger price</strong> (often called the &ldquo;pivot&rdquo; or buy point) = the top of the base. <strong>Breakout confirmed:</strong> a close above the trigger price on 1.5&times; average volume, with a green candle closing in the top quarter of its range. <strong>Stop</strong> = the breakout day's low.<br><br>
   <strong>Backtest on this basket</strong> (Dec 2025 &ndash; Sep 2026, 19 triggers, buying the <em>next open</em>): hit the page's standard 1.5&times;ATR target within 20 sessions 83% of the time vs 64% for random entries in the same stocks; with the thesis's own exit (stop at the breakout low, sell on a close below the 21 EMA or after 40 sessions) it averaged <strong>+1.46R</strong> vs +0.20R random, winning only 47% of the time. <strong>Read the tail:</strong> without the two best trades (HYMC +11.6R, ARM +7.1R) the other 15 averaged +0.41R. That is how this style is supposed to work &mdash; many small losses, a few big wins &mdash; but 19 trades in one bull run is also exactly what luck looks like (a 7% chance of a hit rate this high by chance). Median stop distance was 9.6%, so size every position to the stop, never by habit.<br><br><strong style="color:#e5484d">Longer test (1,000 sessions, Oct 2022 &ndash; Sep 2026, 54 triggers, split-adjusted prices) &mdash; read this before using the panel.</strong> Against random high-volatility (ADR 5%+) names on the same days, the base-and-breakout added <em>nothing</em> to the odds of a 5%+ run: 85% vs 83%. With the same stop for every group it did <strong>worse</strong>: +5% before &minus;5% in 37% of trades vs 49% for random, and 46% vs 52% for a 1.5&times;ATR up-or-down race. The better-looking numbers above come from the breakout-day-low stop sitting a median 10.7% away, which makes the stop hard to hit. What remains is a fat right tail: median 20-session return +6.6% vs +3.7% for checklist-only names, mean +17% driven by HYMC, OUST, OKLO, ARM and SNDK, and 30% of trades negative after 20 sessions. 2023 and 2024 were losing years (&minus;1.8% and &minus;1.6% average). Treat this as a hunt for occasional big runners, not a reliable 5% setup.<br><br><strong>Reverse-engineered list: volatile washouts.</strong> To find what the stocks that actually ran had in common, every stock-day of the last 1,000 sessions was labelled by whether it went on to gain <strong>20% before falling 8%</strong> (from the next open, within 20 sessions), and about 25 features measured the day before were compared for runners vs non-runners. Four candidate rules were written from Oct 2022 &ndash; Nov 2024 only, then all four were run once on Jan 2025 &ndash; Sep 2026. The rule shown here was <em>not</em> the best of the four in 2022&ndash;24; it was chosen because it did best in 2025&ndash;26, which spends that test period, so the forward test below is the real out-of-sample check. Volatility explained most of it; once volatility was held fixed, the checklist above (EMA stack, tight base, relative-strength rank) carried <em>no</em> information. What did: volatile names far below their long-term averages. The surviving rule &mdash; <strong>ADR 5%+, close 20%+ below the 200 EMA, 50 EMA falling</strong> &mdash; reached +20% before &minus;8% <strong>40.8%</strong> of the time in the untouched test vs 31.0% for any volatile name (299 entries across 64 stocks, one per stock per 10 sessions; no single stock moves it more than a point), with a median 20-session return of +9.4%. <strong>But:</strong> it still hit &minus;8% first 53% of the time; in 2022&ndash;24 its edge was only +2.3 points, so most of it came from 2025&ndash;26's sharp rebounds; and hindsight bias is worst here, because the ticker list was chosen in 2026 and its beaten-down names are, by construction, ones that recovered. This is the opposite of the breakout thesis &mdash; it buys falling stocks, not leaders &mdash; and a name can sit in the list for months while it keeps falling (see <em>Days in list</em>).<br><br>
-  <strong>Limits.</strong> The dashboard only sees completed daily bars, so a trigger is confirmed after the close and bought the next morning &mdash; often above the pivot (median gap +1.8%), not &ldquo;as close to the pivot as you can.&rdquo; During the session, setups trading above their pivot are shown as <em>provisional</em>, with volume extrapolated for the time of day; they are not confirmed until the close. Earnings within 5 days is a red flag, not a filter. The <em>Other panels</em> column shows whether a name is also in a ranked panel; on 30 Sep none of the six setups were. Nothing here counts toward TAKE.</div>
+  <strong>Limits.</strong> The dashboard only sees completed daily bars, so a trigger is confirmed after the close and bought the next morning &mdash; often above the trigger price (median gap +1.8%), not &ldquo;as close to the trigger price as you can.&rdquo; During the session, setups trading above their trigger price are shown as <em>provisional</em>, with volume extrapolated for the time of day; they are not confirmed until the close. Earnings within 5 days is a red flag, not a filter. The <em>Other panels</em> column shows whether a name is also in a ranked panel; on 30 Sep none of the six setups were. Nothing here counts toward TAKE.</div>
   <div id="bbBody" style="font-size:13px"></div>
 </div>
 
@@ -2925,14 +2925,16 @@ function renderTradePlanSummary(items) {
     return '<tr><td style="text-align:left"><a href="#plan-' + esc(x.sym) + '" class="tklink"><strong>' + esc(x.sym) + '</strong></a></td>' +
       '<td style="text-align:left"><span style="color:' + actCol(a) + ';font-weight:800">' + a + '</span></td>' +
       '<td style="text-align:left;white-space:normal">' + esc(x.srcs.map(t => t.split(' #')[0]).join(' + ')) + '</td>' +
-      '<td>' + fmtPrice(x.p.px) + '</td><td>' + fmtPrice(x.p.px + tpTargetMult(x.srcs, x.p) * x.p.atr) + (tpTargetMult(x.srcs, x.p) === TAKE_TARGET_MULT ? ' <span style="color:#6b7280;font-size:10px">(2×)</span>' : '') + '</td>' +
+      '<td>' + fmtPrice(x.p.px) + '</td><td>' + priceNowHtml(x.sym) + '</td><td>' + fmtPrice(x.p.px + tpTargetMult(x.srcs, x.p) * x.p.atr) + (tpTargetMult(x.srcs, x.p) === TAKE_TARGET_MULT ? ' <span style="color:#6b7280;font-size:10px">(2×)</span>' : '') + '</td>' +
+      '<td style="white-space:nowrap">' + (x.p.ignore ? '<span style="color:#9ca3af">—</span>' : (() => { const amt = x.p.halfSize ? slot / 2 : slot; return '$' + Math.round(amt).toLocaleString() + ' · <strong>' + Math.floor(amt / x.p.px).toLocaleString() + ' sh</strong>' + (x.p.halfSize ? ' <span style="color:#b45309;font-size:10px">half</span>' : '') + (x.take || x.backup ? '' : ' <span style="color:#9ca3af;font-size:10px">if taken</span>'); })()) + '</td>' +
+      '<td>' + flowFor(x.sym) + '</td>' +
       '<td>' + movePct(x).toFixed(1) + '%</td><td>$' + Math.round(slot * movePct(x) / 100).toLocaleString() + '</td>' +
       '<td style="text-align:left;white-space:normal">' + (w.join(' · ') || '—') + '</td></tr>';
   }).join('');
   el.innerHTML = '<div style="border:1px solid #c7d2fe;background:#eef2ff;border-radius:12px;padding:12px 14px">' +
     '<div style="font-weight:800;font-size:14px;color:#111827;margin-bottom:6px">At a glance — all ' + items.length + ' names</div>' +
     '<ul style="margin:0 0 8px 18px;padding:0;font-size:13px;line-height:1.6">' + lines.map(l => '<li>' + l + '</li>').join('') + '</ul>' +
-    '<div style="overflow-x:auto"><table style="font-size:12px"><thead><tr><th style="text-align:left">Ticker</th><th style="text-align:left">Action</th><th style="text-align:left">Panel</th><th>Last close</th><th>Target</th>' +
+    '<div style="overflow-x:auto"><table style="font-size:12px"><thead><tr><th style="text-align:left">Ticker</th><th style="text-align:left">Action</th><th style="text-align:left">Panel</th><th title="Last COMPLETED session\'s close. While the US market is open the unfinished bar is ignored, so this is yesterday\'s close, not the live price.">Last close' + (items[0] && items[0].p.asOf ? ' <span style="font-weight:400;color:#6b7280">(' + tpDateShort(items[0].p.asOf) + ')</span>' : '') + '</th><th title="Latest price in the data, refreshed about every 10 minutes while the market is open">Price now</th><th>Target</th><th title="Dollar amount and shares for one slot of your capital. Half size when more than 8% above the 9-day average. IGNORE names get none.">Size (one slot)</th><th title="Options-flow reading from the Options Flow test panel. Second opinion only; not part of TAKE.">Flow</th>' +
     '<th title="Average daily price swing over 14 sessions, as % of price">Normal daily move</th><th title="What one normal day\'s move is worth on one slot">$ per normal day (one slot)</th><th style="text-align:left">Flags</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
     '<div style="font-size:11px;color:#6b7280;margin-top:6px">Sorted by action, then calmest first. Tested over 2022–26: TAKE (2+ panels) and half size above 8% stretch held up; IGNORE did not (worked in 2 of 4 years). Earnings and volatility are risk facts, not tested signals. Chart warnings did not predict outcomes.</div></div>';
 }
@@ -2986,7 +2988,7 @@ async function loadData() {
         data[sym].cross = computeCrossStatus(entry.bars);
       }
       fund[sym] = { name: entry.name, sector: entry.sector, industry: entry.industry, mcap: entry.mcap, beta: entry.beta,
-                    targetMean: entry.targetMean, targetHigh: entry.targetHigh, targetLow: entry.targetLow, numAnalysts: entry.numAnalysts,
+                    targetMean: entry.targetMean, targetHigh: entry.targetHigh, targetLow: entry.targetLow, numAnalysts: entry.numAnalysts, recKey: entry.recKey || null, recMean: entry.recMean != null ? entry.recMean : null,
                     nextEarnings: entry.nextEarnings || null,
                     healthScore: entry.healthScore != null ? entry.healthScore : null,
                     healthGrade: entry.healthGrade || null,
@@ -3043,6 +3045,17 @@ function bbRiskSize(entry, stop) {
   const sh = Math.floor(TP_CAPITAL * 0.01 / risk);
   return sh.toLocaleString() + ' sh (' + (risk / entry * 100).toFixed(1) + '% stop)';
 }
+function bbTP(sym, entry) {
+  const t = profitTarget(sym, entry); if (!t) return '—';
+  return '<strong>' + fmtNum2(t.tgt) + '</strong> <span style="color:#6b7280;font-size:11px">(+' + (t.tgt / entry * 100 - 100).toFixed(1) + '%)</span>';
+}
+// Proposed size for a name still in its base: buy on a break above the trigger price, stop at the base low, risk 1% of capital.
+function bbSetupSize(r) {
+  const entry = r.base.pivot, stop = r.base.base_low, risk = entry - stop;
+  if (!(risk > 0)) return '—';
+  const sh = Math.floor(TP_CAPITAL * 0.01 / risk), usd = sh * entry;
+  return '<strong>' + sh.toLocaleString() + ' sh</strong> ($' + Math.round(usd).toLocaleString() + ')<br><span style="color:#6b7280;font-size:11px">stop ' + fmtNum2(stop) + ' (&minus;' + (risk / entry * 100).toFixed(1) + '%)' + (usd > TP_CAPITAL ? ' · <span style="color:#b45309">more than your capital — cap it</span>' : '') + '</span>';
+}
 function renderBBPanel() {
   const el = document.getElementById('bbBody');
   if (!el) return;
@@ -3061,28 +3074,28 @@ function renderBBPanel() {
   if (bbData.partial_session) {
     const lv = bbData.live || [];
     html += '<h3 style="font-size:14px;margin:10px 0 4px">Breaking out now &mdash; provisional until the close</h3>' + (lv.length
-      ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Price</th><th>Pivot</th><th>Above pivot</th><th>Volume pace</th><th>Close in range</th><th>Candle</th><th>Looks valid?</th><th>Size at today\'s low</th></tr></thead><tbody>' +
-        lv.map(r => '<tr><td style="text-align:left;font-weight:700">' + tkA(r.sym) + '</td><td>' + fmtNum2(r.price) + '</td><td>' + fmtNum2(r.pivot) + '</td><td>+' + r.above_pivot_pct.toFixed(1) + '%' + (r.above_pivot_pct > 3 ? ' <span style="color:#b45309">⚠ chasing</span>' : '') + '</td><td>' + (r.vol_pace_x == null ? '—' : r.vol_pace_x.toFixed(1) + '× avg') + '</td><td>' + (r.close_in_range == null ? '—' : Math.round(r.close_in_range * 100) + '%') + '</td><td>' + (r.green ? 'green' : '<span style="color:#e5484d">red 🚩</span>') + '</td><td>' + (r.looks_valid ? '<strong style="color:#0a9e5c">yes</strong>' : '<span style="color:#b45309">not yet</span>') + '</td><td>' + bbRiskSize(r.price, r.day_low) + '</td></tr>').join('') + '</tbody></table></div>'
-      : '<div class="empty" style="padding:8px">No setup is trading above its pivot right now.</div>');
+      ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Price</th><th>Trigger price</th><th>Above trigger</th><th>Volume pace</th><th>Close in range</th><th>Candle</th><th>Looks valid?</th><th>Size at today\'s low</th><th title="Entry + 1.5x the normal daily move">Take profit</th><th>Analyst view</th></tr></thead><tbody>' +
+        lv.map(r => '<tr><td style="text-align:left;font-weight:700">' + tkA(r.sym) + '</td><td>' + fmtNum2(r.price) + '</td><td>' + fmtNum2(r.pivot) + '</td><td>+' + r.above_pivot_pct.toFixed(1) + '%' + (r.above_pivot_pct > 3 ? ' <span style="color:#b45309">⚠ chasing</span>' : '') + '</td><td>' + (r.vol_pace_x == null ? '—' : r.vol_pace_x.toFixed(1) + '× avg') + '</td><td>' + (r.close_in_range == null ? '—' : Math.round(r.close_in_range * 100) + '%') + '</td><td>' + (r.green ? 'green' : '<span style="color:#e5484d">red 🚩</span>') + '</td><td>' + (r.looks_valid ? '<strong style="color:#0a9e5c">yes</strong>' : '<span style="color:#b45309">not yet</span>') + '</td><td>' + bbRiskSize(r.price, r.day_low) + '</td><td>' + bbTP(r.sym, r.price) + '</td><td>' + analystView(r.sym, r.price) + '</td></tr>').join('') + '</tbody></table></div>'
+      : '<div class="empty" style="padding:8px">No setup is trading above its trigger price right now.</div>');
   }
   // confirmed triggers
   const tg = bbData.triggers || [];
   html += '<h3 style="font-size:14px;margin:12px 0 4px">Confirmed breakouts at the last close &mdash; the tested entry is the next open</h3>' + (tg.length
-    ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Close</th><th>Pivot</th><th>Stop (day low)</th><th>1% risk size</th><th>Base</th><th>ADR</th><th>Earnings</th><th>Flow</th><th style="text-align:left">Other panels</th></tr></thead><tbody>' +
-      tg.map(r => '<tr><td style="text-align:left;font-weight:700">' + tkA(r.sym) + '</td><td>' + fmtNum2(r.close) + '</td><td>' + fmtNum2(r.base.pivot) + '</td><td>' + fmtNum2(r.stop) + '</td><td>' + bbRiskSize(r.close, r.stop) + '</td><td>' + r.base.days + 'd · ' + r.base.range_pct.toFixed(1) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
+    ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Close</th><th>Price now</th><th>Trigger price</th><th>Stop (day low)</th><th>1% risk size</th><th title="Entry + 1.5x the normal daily move: the page-standard target this panel was tested against">Take profit</th><th title="The thesis exit: sell on a close below the 21 EMA">Or exit below 21 EMA</th><th>Analyst view</th><th>Base</th><th>ADR</th><th>Earnings</th><th>Flow</th><th style="text-align:left">Other panels</th></tr></thead><tbody>' +
+      tg.map(r => '<tr><td style="text-align:left;font-weight:700">' + tkA(r.sym) + '</td><td>' + fmtNum2(r.close) + '</td><td>' + priceNowHtml(r.sym) + '</td><td>' + fmtNum2(r.base.pivot) + '</td><td>' + fmtNum2(r.stop) + '</td><td>' + bbRiskSize(r.close, r.stop) + '</td><td>' + bbTP(r.sym, r.close) + '</td><td>' + (r.ema21 != null ? fmtNum2(r.ema21) : '—') + '</td><td>' + analystView(r.sym, r.close) + '</td><td>' + r.base.days + 'd · ' + r.base.range_pct.toFixed(1) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
     : '<div class="empty" style="padding:8px">No confirmed breakout at the last close. In the backtest a trigger came about twice a month across the whole basket &mdash; an empty table is the normal state.</div>');
   // setups
   const su = bbData.setups || [];
-  html += '<h3 style="font-size:14px;margin:12px 0 4px">In a base now &mdash; checklist passes, waiting for the pivot (' + su.length + ')</h3>' + (su.length
-    ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Close</th><th>Pivot</th><th>To pivot</th><th>Base</th><th>Prior run</th><th>ADR</th><th>8 / 21 / 50 EMA</th><th>Earnings</th><th>Flow</th><th style="text-align:left">Other panels</th></tr></thead><tbody>' +
-      su.map(r => '<tr><td style="text-align:left;font-weight:700">' + tkA(r.sym) + '</td><td>' + fmtNum2(r.close) + '</td><td>' + fmtNum2(r.base.pivot) + '</td><td>+' + r.to_pivot_pct.toFixed(1) + '%</td><td>' + r.base.days + 'd · ' + r.base.range_pct.toFixed(1) + '%' + (r.base.range_pct > 15 ? ' <span style="color:#b45309">wide</span>' : '') + '</td><td>+' + r.base.prior_move_pct.toFixed(0) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td style="white-space:nowrap">' + fmtNum2(r.ema8) + ' / ' + fmtNum2(r.ema21) + ' / ' + fmtNum2(r.ema50) + '</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
+  html += '<h3 style="font-size:14px;margin:12px 0 4px">In a base now &mdash; checklist passes, waiting for the trigger price (' + su.length + ')</h3>' + (su.length
+    ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Close</th><th>Price now</th><th>Trigger price</th><th>To trigger</th><th title="Buy on a break above the trigger price, stop at the base low, risk 1% of capital">Proposed size</th><th>Base</th><th>Prior run</th><th>ADR</th><th>8 / 21 / 50 EMA</th><th>Earnings</th><th>Flow</th><th style="text-align:left">Other panels</th></tr></thead><tbody>' +
+      su.map(r => '<tr><td style="text-align:left;font-weight:700">' + tkA(r.sym) + '</td><td>' + fmtNum2(r.close) + '</td><td>' + priceNowHtml(r.sym) + '</td><td>' + fmtNum2(r.base.pivot) + '</td><td>+' + r.to_pivot_pct.toFixed(1) + '%</td><td style="white-space:nowrap">' + bbSetupSize(r) + '</td><td>' + r.base.days + 'd · ' + r.base.range_pct.toFixed(1) + '%' + (r.base.range_pct > 15 ? ' <span style="color:#b45309">wide</span>' : '') + '</td><td>+' + r.base.prior_move_pct.toFixed(0) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td style="white-space:nowrap">' + fmtNum2(r.ema8) + ' / ' + fmtNum2(r.ema21) + ' / ' + fmtNum2(r.ema50) + '</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
     : '<div class="empty" style="padding:8px">No name passes the full checklist with a tight base today.</div>');
   // reverse-engineered list: volatile washouts (R4)
   const wo = bbData.washouts || [];
   html += '<h3 style="font-size:14px;margin:14px 0 4px">Volatile washouts &mdash; the rule the data found (' + wo.length + ')</h3>' +
     '<div style="color:#6b7280;margin-bottom:6px">ADR 5%+, close 20%+ below the 200 EMA, 50 EMA falling. Tested entry: next open; tested exit: +20% target or &minus;8% stop within 20 sessions. Sorted deepest first.</div>' + (wo.length
-    ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Close</th><th>vs 200 EMA</th><th>50 EMA, 10-day change</th><th>From 52-week high</th><th>ADR</th><th>Days in list</th><th>Earnings</th><th>Flow</th><th style="text-align:left">Other panels</th></tr></thead><tbody>' +
-      wo.map(r => '<tr><td style="text-align:left;font-weight:700">' + tkA(r.sym) + (r.split_flag ? ' <span title="A one-day move matched a stock-split ratio; prices here are not split-adjusted, so verify on a chart" style="color:#b45309">⚠ split?</span>' : '') + '</td><td>' + fmtNum2(r.close) + '</td><td>' + r.vs_e200_pct.toFixed(1) + '%</td><td>' + (r.e50_slope_pct >= 0 ? '+' : '') + r.e50_slope_pct.toFixed(1) + '%</td><td>' + r.from_52w_high_pct.toFixed(1) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td>' + (r.days_in_list > 40 ? '<span style="color:#b45309;font-weight:700">' + r.days_in_list + '</span>' : r.days_in_list) + '</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
+    ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Close</th><th>Price now</th><th>vs 200 EMA</th><th>50 EMA, 10-day change</th><th>From 52-week high</th><th>ADR</th><th>Days in list</th><th>Earnings</th><th>Flow</th><th style="text-align:left">Other panels</th></tr></thead><tbody>' +
+      wo.map(r => '<tr><td style="text-align:left;font-weight:700">' + tkA(r.sym) + (r.split_flag ? ' <span title="A one-day move matched a stock-split ratio; prices here are not split-adjusted, so verify on a chart" style="color:#b45309">⚠ split?</span>' : '') + '</td><td>' + fmtNum2(r.close) + '</td><td>' + priceNowHtml(r.sym) + '</td><td>' + r.vs_e200_pct.toFixed(1) + '%</td><td>' + (r.e50_slope_pct >= 0 ? '+' : '') + r.e50_slope_pct.toFixed(1) + '%</td><td>' + r.from_52w_high_pct.toFixed(1) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td>' + (r.days_in_list > 40 ? '<span style="color:#b45309;font-weight:700">' + r.days_in_list + '</span>' : r.days_in_list) + '</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
     : '<div class="empty" style="padding:8px">No volatile name is 20%+ below its 200 EMA with a falling 50 EMA today.</div>');
   // forward test
   const fs = bbSummary;
@@ -3123,13 +3136,53 @@ function flowBadge(lab) {
   const c = { BULLISH: '#0a9e5c', BEARISH: '#e5484d', NEUTRAL: '#6b7280', THIN: '#9ca3af' }[lab] || '#9ca3af';
   return '<span style="background:' + c + ';color:#fff;border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700">' + esc(lab || 'NO DATA') + '</span>';
 }
+
+// ---- Shared display helpers for the Take 2+, Base & Breakout and Options Flow panels (display only; no rule uses them) ----
+function flowFor(sym) { const r = flowData && flowData.tickers && flowData.tickers[sym]; return r && !r.error ? flowBadge(r.label) : '<span style="color:#9ca3af">—</span>'; }
+// Latest price the page has for a name, INCLUDING a bar still in progress, plus whether that bar is unfinished.
+function livePrice(sym) {
+  const d = data[sym]; if (!d || d.error || !d.closes || !d.closes.length) return null;
+  const n = d.closes.length, live = tpBarDate(d.times[n - 1]) === tpTodayET();
+  const e = nowET(), m = e.getHours() * 60 + e.getMinutes();
+  return { px: d.closes[n - 1], live: live && m < SESSION_CLOSE_MIN + 20, date: d.times[n - 1] };
+}
+function priceNowHtml(sym) {
+  const q = livePrice(sym); if (!q) return '—';
+  return fmtNum2(q.px) + (q.live ? ' <span style="color:#b45309;font-size:10px" title="Today\'s session is still running; this is the latest price in the data, refreshed about every 10 minutes">live</span>' : '');
+}
+// Analyst view: consensus rating when the data has it (filled by the next end-of-day fetch), always the mean target and upside.
+function analystView(sym, price) {
+  const f = fund[sym];
+  if (!f || (f.targetMean == null && !f.recKey)) return '<span style="color:#9ca3af" title="ETF/fund or no analyst coverage">no coverage</span>';
+  const K = { strong_buy: ['STRONG BUY', '#0a9e5c'], buy: ['BUY', '#0a9e5c'], hold: ['HOLD', '#6b7280'], underperform: ['UNDERPERFORM', '#b45309'], sell: ['SELL', '#e5484d'], strong_sell: ['STRONG SELL', '#e5484d'] };
+  const k = f.recKey && K[f.recKey];
+  const badge = k ? '<span style="background:' + k[1] + ';color:#fff;border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700">' + k[0] + '</span> ' : '<span style="color:#9ca3af;font-size:11px" title="Rating text arrives with the next end-of-day data fetch">rating pending</span> ';
+  const up = f.targetMean != null && price ? (f.targetMean / price - 1) * 100 : null;
+  const tgt = f.targetMean != null ? '<span style="font-size:11px">target ' + fmtNum2(f.targetMean) + (up != null ? ' (' + (up >= 0 ? '+' : '') + up.toFixed(0) + '%)' : '') + (f.numAnalysts ? ' · ' + f.numAnalysts + ' analysts' : '') + '</span>' : '';
+  return '<span style="white-space:nowrap">' + badge + '</span><br>' + tgt;
+}
+// Page-standard profit target (entry + 1.5 x the normal daily move, ATR14) and its dollar distance. Same rule the panels were tested on.
+function profitTarget(sym, entry) {
+  const p = computeTradePlan(sym); if (!p || !p.atr) return null;
+  return { tgt: entry + PANEL_TARGET_MULT * p.atr, atr: p.atr };
+}
+// Plain-language reason a name got its label: the rule is relative to the basket median, so show both numbers and the cut.
+function flowTrigger(r) {
+  if (!r || r.error) return '—';
+  const sg = v => (v >= 0 ? '+' : '') + v.toFixed(2);
+  if (r.label === 'THIN') return 'Only ' + flowMoney((r.unusual_call_prem || 0) + (r.unusual_put_prem || 0)) + ' of unusual premium — under $250k, too little to read';
+  const side = r.label === 'BULLISH' ? 'bullish' : r.label === 'BEARISH' ? 'bearish' : 'near the basket';
+  const rule = r.label === 'NEUTRAL' ? 'inside ±0.30 of the basket median' : (r.label === 'BULLISH' ? 'needs +0.30 or more above' : 'needs 0.30 or more below') + ' the basket median';
+  return 'Unusual calls ' + flowMoney(r.unusual_call_prem) + ' vs puts ' + flowMoney(r.unusual_put_prem) + ' → bias ' + sg(r.bias) + ', ' + sg(r.rel) + ' vs basket (' + side + '; ' + rule + ')';
+}
 function flowRow(sym, r, extra) {
-  if (!r || r.error) return '<tr><td style="text-align:left;font-weight:700">' + tkA(sym) + '</td><td>' + flowBadge(null) + '</td>' + (extra != null ? '<td style="text-align:left;white-space:normal">' + extra + '</td>' : '') + '<td colspan="6" style="color:#9ca3af;text-align:left">' + esc(r && r.error || 'not in flow.json') + '</td></tr>';
+  if (!r || r.error) return '<tr><td style="text-align:left;font-weight:700">' + tkA(sym) + '</td><td>' + flowBadge(null) + '</td>' + (extra != null ? '<td style="text-align:left;white-space:normal">' + extra + '</td>' : '') + '<td>—</td><td>' + priceNowHtml(sym) + '</td><td>' + analystView(sym, null) + '</td><td colspan="7" style="color:#9ca3af;text-align:left">' + esc(r && r.error || 'not in flow.json') + '</td></tr>';
   const sg = v => v == null ? '—' : (v >= 0 ? '+' : '') + v.toFixed(2);
   const t = (r.top || [])[0];
   const topTxt = t ? (t.type === 'C' ? 'Call ' : 'Put ') + t.strike + ' ' + t.exp.slice(5) + ' · ' + t.vol.toLocaleString() + ' vs OI ' + t.oi.toLocaleString() + ' · ' + flowMoney(t.prem) + (t.side === 'S' ? ' (likely sold)' : t.side === 'B' ? ' (likely bought)' : '') : '—';
-  return '<tr><td style="text-align:left;font-weight:700">' + tkA(sym) + '</td><td>' + flowBadge(r.label) + '</td>' + (extra != null ? '<td style="text-align:left;white-space:normal;min-width:140px">' + extra + '</td>' : '') +
-    '<td>' + sg(r.bias) + '</td><td>' + sg(r.rel) + '</td>' +
+  const trig = flowTrigger(r);
+  return '<tr><td style="text-align:left;font-weight:700">' + tkA(sym) + '</td><td>' + flowBadge(r.label) + '</td><td>' + (r.spot != null ? fmtNum2(r.spot) : '—') + '</td><td>' + priceNowHtml(sym) + '</td><td style="white-space:normal">' + analystView(sym, r.spot) + '</td>' + (extra != null ? '<td style="text-align:left;white-space:normal;min-width:140px">' + extra + '</td>' : '') +
+    '<td style="text-align:left;white-space:normal;font-size:12px;min-width:170px">' + trig + '</td><td>' + sg(r.bias) + '</td><td>' + sg(r.rel) + '</td>' +
     '<td>' + flowMoney(r.unusual_call_prem) + '</td><td>' + flowMoney(r.unusual_put_prem) + '</td>' +
     '<td>' + (r.act_x == null ? '<span style="color:#9ca3af">building</span>' : r.act_x.toFixed(1) + '×') + '</td>' +
     '<td style="text-align:left;white-space:normal;font-size:12px">' + esc(topTxt) + '</td></tr>';
@@ -3139,7 +3192,7 @@ function renderFlowPanel() {
   if (!el) return;
   if (!flowData || !flowData.tickers) { el.innerHTML = '<div class="empty" style="padding:10px">No flow.json yet. The first reading is written after the next completed US session.</div>'; return; }
   const T = flowData.tickers;
-  const head = extraCol => '<thead><tr><th style="text-align:left">Ticker</th><th>Flow</th>' + (extraCol ? '<th style="text-align:left">' + extraCol + '</th>' : '') + '<th>Bias</th><th>vs basket</th><th>Unusual calls</th><th>Unusual puts</th><th>Activity vs normal</th><th style="text-align:left">Biggest unusual contract</th></tr></thead>';
+  const head = extraCol => '<thead><tr><th style="text-align:left">Ticker</th><th>Flow</th><th>Price (flow date)</th><th>Price now</th><th>Analyst view</th>' + (extraCol ? '<th style="text-align:left">' + extraCol + '</th>' : '') + '<th style="text-align:left" title="The rule that produced the label">What triggered it</th><th>Bias</th><th>vs basket</th><th>Unusual calls</th><th>Unusual puts</th><th>Activity vs normal</th><th style="text-align:left">Biggest unusual contract</th></tr></thead>';
   // 1. names the existing panels flagged today
   const members = [...panelMembers.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
   let html = '<div style="color:#6b7280;margin-bottom:6px">Session ' + esc(flowData.session) + ' · basket median bias ' + (flowData.median_bias >= 0 ? '+' : '') + (+flowData.median_bias).toFixed(2) + ' · rules ' + esc(flowData.rules_version) + '</div>';
@@ -3155,7 +3208,7 @@ function renderFlowPanel() {
   html += '<h3 style="font-size:14px;margin:14px 0 4px">Whole basket &mdash; BULLISH (' + bull.length + ') and BEARISH (' + bear.length + ')</h3>' +
     '<div style="color:#6b7280;margin-bottom:6px">' + Object.entries(counts).map(([k, v]) => k + ' ' + v).join(' · ') + '</div>' +
     '<div style="overflow-x:auto"><table>' + head(null) + '<tbody>' + bull.map(([s, r]) => flowRow(s, r)).join('') +
-    (bear.length ? '<tr><td colspan="8" style="border-top:2px solid #e5e7eb"></td></tr>' : '') + bear.map(([s, r]) => flowRow(s, r)).join('') + '</tbody></table></div>';
+    (bear.length ? '<tr><td colspan="12" style="border-top:2px solid #e5e7eb"></td></tr>' : '') + bear.map(([s, r]) => flowRow(s, r)).join('') + '</tbody></table></div>';
   // 3. its own forward test
   const fs = flowSummary;
   if (fs) {
@@ -3226,8 +3279,9 @@ function initCollapsiblePanels() {
   const ok = await loadData();
   if (!ok) return;
   await loadFlow();
+  try { renderTradePlans(); } catch (e) {}
   loadBB();
-  setInterval(async () => { await loadData(); renderFlowPanel(); loadBB(); }, DATA_REFRESH_MS);
+  setInterval(async () => { await loadData(); renderFlowPanel(); try { renderTradePlans(); } catch (e) {} loadBB(); }, DATA_REFRESH_MS);
 })();
 </script>
 </body>
