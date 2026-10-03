@@ -1,0 +1,76 @@
+name: GF Value
+
+# Display-only: refreshes docs/gf_value.json, which feeds the "GF Value" column in the
+# Performance overview table. Never touches data.json, the panels, TAKE or the forward log.
+#
+# The free GuruFocus Data API plan allows 100 requests a month, so this runs once a day and
+# refreshes only the 3 stalest names (~90 requests a month, hard-capped at 95 by the script).
+# A full lap of the ~107 stocks takes about five weeks.
+#
+# Needs a repository secret named GURUFOCUS_API_KEY. Without it the run exits cleanly and
+# changes nothing.
+on:
+  schedule:
+    - cron: "23 22 * * *"   # once a day, 22:23 UTC. Timing is not critical - GF Value moves slowly.
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "How many names to fetch in this run (each costs 1 of the 100 monthly requests)"
+        required: false
+        default: "3"
+
+permissions:
+  contents: write
+  actions: write   # to dispatch pages.yml after a commit
+
+concurrency:
+  group: gf-value
+  cancel-in-progress: false
+
+jobs:
+  gf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch GF Value
+        id: fetch
+        env:
+          GURUFOCUS_API_KEY: ${{ secrets.GURUFOCUS_API_KEY }}
+          GF_MAX_PER_RUN: ${{ github.event.inputs.count || '3' }}
+        run: python scripts/fetch_gf_value.py
+        continue-on-error: true   # still commit the request counter below, then fail the job
+      - name: Commit
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ ! -f docs/gf_value.json ]; then echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          cp docs/gf_value.json /tmp/gf_value.json
+          pushed=false
+          for i in 1 2 3 4 5; do
+            git fetch origin main -q
+            git reset --hard origin/main -q
+            cp /tmp/gf_value.json docs/gf_value.json
+            git add docs/gf_value.json
+            if git diff --staged --quiet; then echo "changed=false" >> "$GITHUB_OUTPUT"; pushed=true; break; fi
+            git commit -q -m "GF Value update [skip ci]"
+            if git push -q; then pushed=true; echo "changed=true" >> "$GITHUB_OUTPUT"; break; fi
+            echo "Push attempt $i failed, retrying..."; sleep 3
+          done
+          [ "$pushed" = true ] || { echo "::error::Failed to push gf_value.json"; exit 1; }
+      - name: Trigger Pages deploy
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run pages.yml
+      - name: Report fetch failure
+        if: steps.fetch.outcome == 'failure'
+        run: |
+          echo "::error::GF Value fetch failed - see the 'Fetch GF Value' step log above"
+          exit 1

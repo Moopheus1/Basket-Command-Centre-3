@@ -98,7 +98,7 @@
   .dcard-sector { border-top: 1px solid #f3f4f6; margin-top: 10px; padding-top: 8px; font-size: 11px; color: #6b7280; }
   .dcard-sector b { display: block; color: #16181d; font-size: 12.5px; }
   /* Performance overview: freeze Ticker + Price so they stay readable while the rest
-     of the (18-column) table scrolls sideways, and mirror the horizontal scrollbar above
+     of the (20-column) table scrolls sideways, and mirror the horizontal scrollbar above
      the table so it can be dragged without scrolling to the bottom first. */
   .scroll-proxy { overflow-x: auto; overflow-y: hidden; height: 14px; margin-bottom: 2px; }
   .scroll-proxy > div { height: 1px; }
@@ -341,7 +341,7 @@
     <h2>Performance overview</h2>
     <a href="#top" class="jumpbar-inline" style="margin-top:0">↑ Back to top</a>
   </div>
-  <div class="desc">Daily, WTD, MTD, YTD, and 1-year returns from daily closes. Click a column to sort.<br><br><strong>How to read the signal columns — and how much to trust them.</strong> <strong>Momentum</strong> and <strong>Persist</strong> are 0&ndash;100 composite scores, and <strong>Signal</strong> is the nine-tier verdict derived from them (STRONG BUY through SELL). <strong>These were backtested and the ladder does not hold.</strong> Measured over 20 sessions against a 52.8% baseline, WATCH — defined as momentum <em>below</em> 50 with persistence above 70 — was the best-performing label at a 60.9% win rate and +4.44% median, while CAUTION returned +4.49% and STRONG BUY only +2.20%, ranking sixth of nine. AVOID (+1.42%) beat HOLD (+0.20%). In short the colours have little monotonic relationship with what happened next, largely because short-term mean reversion swamps the momentum tilt and the beta and RSI sub-scores penalise exactly the names that run. Treat these three columns as description, not instruction. <strong>Health Score</strong> is supplied in the data feed and has never been tested here. <strong>Analyst Target</strong> deserves particular caution: on point-in-time consensus targets, hit rate within 3 months fell from 84.8% where implied upside was 0&ndash;10% to just 6.3% where it exceeded 100% — the bigger the claim, the less often it landed.<br><br><strong>How to read “vs EMA9/SMA20”.</strong> The word is where the last close sits relative to its 9-day EMA and 20-day SMA — <span style="color:#0a9e5c;font-weight:700">above</span> both, in the <span style="color:#f59e0b;font-weight:700">zone</span> between them, or <span style="color:#e5484d;font-weight:700">below</span> both. The number beside it is how far the close is from EMA9. <strong>Which of the three states a name is in carried no reliable edge</strong> in the backtest: across 241 combined signals, “above both” hit 77.5%, “in zone” 72.7% and “below both” 75.0% — a spread inside noise, with 88% of signals sitting on the pass side. The <em>number</em> is the part that mattered. On the 188 signals above both averages, median drawdown before the outcome was &minus;5.4% when the close was 3&ndash;5% over EMA9, &minus;8.8% at 5&ndash;8% and &minus;9.8% beyond 8%, with the 25th-percentile case falling from &minus;10.0% to &minus;17.0% (correlation &minus;0.308, p&lt;0.001). Hit rate barely moved (&minus;0.076, p=0.303). So <span style="color:#b45309;font-weight:700">⚠</span> above 5% and <span style="color:#e5484d;font-weight:700">⚠⚠</span> above 8% are <strong>drawdown warnings about entry timing, not quality warnings</strong> — an extended name is the same trade bought at a worse moment, and waiting for a pullback toward EMA9 historically gave the same odds with roughly half the pain.</div>
+  <div class="desc">Daily, WTD, MTD, YTD, and 1-year returns from daily closes. Click a column to sort.<br><br><strong>How to read the signal columns — and how much to trust them.</strong> <strong>Momentum</strong> and <strong>Persist</strong> are 0&ndash;100 composite scores, and <strong>Signal</strong> is the nine-tier verdict derived from them (STRONG BUY through SELL). <strong>These were backtested and the ladder does not hold.</strong> Measured over 20 sessions against a 52.8% baseline, WATCH — defined as momentum <em>below</em> 50 with persistence above 70 — was the best-performing label at a 60.9% win rate and +4.44% median, while CAUTION returned +4.49% and STRONG BUY only +2.20%, ranking sixth of nine. AVOID (+1.42%) beat HOLD (+0.20%). In short the colours have little monotonic relationship with what happened next, largely because short-term mean reversion swamps the momentum tilt and the beta and RSI sub-scores penalise exactly the names that run. Treat these three columns as description, not instruction. <strong>Health Score</strong> is supplied in the data feed and has never been tested here. <strong>Analyst Target</strong> deserves particular caution: on point-in-time consensus targets, hit rate within 3 months fell from 84.8% where implied upside was 0&ndash;10% to just 6.3% where it exceeded 100% — the bigger the claim, the less often it landed. <strong>GF Value</strong> is GuruFocus&rsquo;s own estimate of what a share is worth, built from the multiples the stock has historically traded at, its past growth and analysts&rsquo; forecasts. The % beside it is how far that estimate sits above (green) or below (red) today&rsquo;s price &mdash; the same direction as Analyst Target. <strong>It has never been tested here and is display-only: it feeds no panel and no TAKE call.</strong> It is a slow, long-horizon measure with no known bearing on a 20-session trade, and it is least trustworthy on exactly the names this basket is full of &mdash; loss-making, fast-growing or recently listed companies, where GuruFocus often publishes no value at all. Only a few names are refreshed each day, so a value can be up to about five weeks old; hover a cell for its fetch date.<br><br><strong>How to read “vs EMA9/SMA20”.</strong> The word is where the last close sits relative to its 9-day EMA and 20-day SMA — <span style="color:#0a9e5c;font-weight:700">above</span> both, in the <span style="color:#f59e0b;font-weight:700">zone</span> between them, or <span style="color:#e5484d;font-weight:700">below</span> both. The number beside it is how far the close is from EMA9. <strong>Which of the three states a name is in carried no reliable edge</strong> in the backtest: across 241 combined signals, “above both” hit 77.5%, “in zone” 72.7% and “below both” 75.0% — a spread inside noise, with 88% of signals sitting on the pass side. The <em>number</em> is the part that mattered. On the 188 signals above both averages, median drawdown before the outcome was &minus;5.4% when the close was 3&ndash;5% over EMA9, &minus;8.8% at 5&ndash;8% and &minus;9.8% beyond 8%, with the 25th-percentile case falling from &minus;10.0% to &minus;17.0% (correlation &minus;0.308, p&lt;0.001). Hit rate barely moved (&minus;0.076, p=0.303). So <span style="color:#b45309;font-weight:700">⚠</span> above 5% and <span style="color:#e5484d;font-weight:700">⚠⚠</span> above 8% are <strong>drawdown warnings about entry timing, not quality warnings</strong> — an extended name is the same trade bought at a worse moment, and waiting for a pullback toward EMA9 historically gave the same odds with roughly half the pain.</div>
   <div id="perfScrollTop" class="scroll-proxy"><div id="perfScrollTopInner"></div></div>
   <div style="overflow-x:auto" id="perfScroll">
     <table id="perfTable">
@@ -669,6 +669,48 @@ function targetHtml(t, f, price) {
   const n = f.numAnalysts != null ? f.numAnalysts + ' analyst' + (f.numAnalysts === 1 ? '' : 's') : 'analyst count unknown';
   const yUrl = 'https://finance.yahoo.com/quote/' + encodeURIComponent(t) + '/analyst-insights/';
   return '<span title="' + n + '"><a class="tklink" href="' + yUrl + '" target="_blank" rel="noopener noreferrer">' + fmtPrice(f.targetMean) + '</a> ' + pctHtml(upside, {sign:true, arrow:false, dp:1}) + '</span>';
+}
+// ===== GF VALUE (display-only column; reads gf_value.json written by scripts/fetch_gf_value.py) =====
+// GuruFocus's own fair-value estimate. Refreshed a few names a day (free plan = 100 requests a
+// month), so every value carries the date it was fetched. Never feeds a panel, TAKE or the log.
+let gfData = null;
+const GF_STALE_DAYS = 45;
+async function loadGF() {
+  try { const r = await fetch('gf_value.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) gfData = await r.json(); } catch (e) {}
+}
+function gfEntry(t) { return (gfData && gfData.tickers && gfData.tickers[t]) || null; }
+// Sort key: how far the GF Value sits above (+) or below (-) the current price, in %.
+// Same direction as the Analyst Target column: positive = price is below the estimate.
+function gfGap(t, price) {
+  const e = gfEntry(t);
+  return (e && e.gfValue != null && price) ? pct(e.gfValue, price) : null;
+}
+function gfBand(ratio) {   // GuruFocus's own labels for price / GF Value
+  if (ratio < 0.7) return 'Significantly Undervalued';
+  if (ratio < 0.9) return 'Modestly Undervalued';
+  if (ratio <= 1.1) return 'Fairly Valued';
+  if (ratio <= 1.3) return 'Modestly Overvalued';
+  return 'Significantly Overvalued';
+}
+function gfValueHtml(t, price) {
+  const dash = (tip) => '<span style="color:#6b7280" title="' + tip + '">—</span>';
+  const e = gfEntry(t);
+  if (!gfData) return dash('GF Value not loaded yet');
+  if (!e) return dash('Not fetched yet - a few names are refreshed each day');
+  if (e.status === 'etf') return dash('ETF or fund - no GF Value exists');
+  if (e.gfValue == null) return dash('GuruFocus publishes no GF Value for this name (checked ' + esc(e.asof || '?') + ')');
+  if (price == null) return dash('No price');
+  const gap = pct(e.gfValue, price);
+  const ageDays = e.asof ? Math.max(0, Math.floor((Date.now() - new Date(e.asof + 'T00:00:00Z').getTime()) / 86400000)) : null;
+  const stale = ageDays != null && ageDays > GF_STALE_DAYS;
+  const tip = 'GuruFocus: ' + gfBand(price / e.gfValue) + '. Price is ' + Math.abs(pct(price, e.gfValue)).toFixed(0) + '% ' +
+              (price >= e.gfValue ? 'above' : 'below') + ' GF Value. Fetched ' + esc(e.asof || '?') +
+              (ageDays != null ? ' (' + ageDays + ' day' + (ageDays === 1 ? '' : 's') + ' ago)' : '') +
+              (stale ? ' - STALE, treat with care' : '');
+  const url = 'https://www.gurufocus.com/term/gf-value/' + encodeURIComponent(t);
+  return '<span title="' + tip + '"' + (stale ? ' style="opacity:.55"' : '') + '><a class="tklink" href="' + url +
+         '" target="_blank" rel="noopener noreferrer">' + fmtPrice(e.gfValue) + '</a> ' +
+         pctHtml(gap, {sign:true, arrow:false, dp:1}) + (stale ? ' <span style="color:#9ca3af;font-size:11px">stale</span>' : '') + '</span>';
 }
 const LOGO_COLORS = ['#1f2937','#4c7dfc','#0a9e5c','#d97706','#7c3aed','#db2777','#0891b2','#e5484d'];
 function logoColor(t) { let h = 0; for (const c of t) h = (h * 31 + c.charCodeAt(0)) >>> 0; return LOGO_COLORS[h % LOGO_COLORS.length]; }
@@ -1416,7 +1458,7 @@ function renderDetailed(spy, tickers) {
 const COLS = [
   ['sym', 'Ticker'], ['price', 'Price'], ['daily', 'Daily'], ['wtd', 'WTD'], ['mtd', 'MTD'],
   ['ytd', 'YTD'], ['y1', '1Y'], ['vsSpy', 'vs SPY'], ['mapos', 'vs EMA9/SMA20'], ['mom', 'Momentum'], ['per', 'Persist'], ['sig', 'Signal'],
-  ['target', 'Analyst Target'], ['earnings', 'Next Earnings'], ['mcap', 'Market cap'], ['vol', 'Volume'],
+  ['target', 'Analyst Target'], ['gf', 'GF Value'], ['earnings', 'Next Earnings'], ['mcap', 'Market cap'], ['vol', 'Volume'],
   ['health', 'Health Score'], ['rsi', 'RSI (14D)'], ['wrsi', 'Weekly RSI']
 ];
 
@@ -1463,7 +1505,7 @@ function renderTable(spy, tickers) {
     return { sym: t, price: d.price, daily: d.daily, wtd: d.wtd, mtd: d.mtd, ytd: d.ytd, y1: d.y1,
              vsSpy: spy ? d.daily - spy.daily : null, mapos: (maPosition(t) ? maPosition(t).vsEma9 : null),
              mom: d.momScore, per: d.perScore, sig: d.signal,
-             target: targetUpside, earnings: f.nextEarnings, f: f,
+             target: targetUpside, gf: gfGap(t, d.price), earnings: f.nextEarnings, f: f,
              mcap: f.mcap != null ? f.mcap : null, vol: d.vol, health: f.healthScore, rsi: d.rsi, wrsi: d.weeklyRsi };
   });
   rows.sort((a, b) => {
@@ -1477,7 +1519,7 @@ function renderTable(spy, tickers) {
   });
 
   const extraRows = tickers.filter(t => data[t] && data[t].error).map(t =>
-    '<tr><td>' + t + '</td><td colspan="18" style="text-align:left"><span class="down">no data: ' +
+    '<tr><td>' + t + '</td><td colspan="' + (COLS.length - 1) + '" style="text-align:left"><span class="down">no data: ' +
     esc(data[t].error).slice(0, 40) + '</span></td></tr>'
   ).join('');
 
@@ -1495,6 +1537,7 @@ function renderTable(spy, tickers) {
     '<td>' + scoreBadge(r.per) + '</td>' +
     '<td>' + signalBadge(r.sig) + '</td>' +
     '<td>' + targetHtml(r.sym, r.f, r.price) + '</td>' +
+    '<td>' + gfValueHtml(r.sym, r.price) + '</td>' +
     '<td>' + fmtEarnings(r.earnings) + '</td>' +
     '<td>' + fmtMcap(r.mcap) + '</td>' +
     '<td>' + fmtVol(r.vol) + '</td>' +
@@ -2999,6 +3042,7 @@ async function loadData() {
     document.getElementById('cards').innerHTML = '<div class="empty">Could not load data.json — ' + esc(e.message) + '</div>';
     return false;
   }
+  await loadGF();   // display-only GF Value column; a missing file just leaves the column blank
   render();
   return true;
 }
