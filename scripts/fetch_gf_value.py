@@ -226,7 +226,10 @@ def main():
                 if status == 429:
                     raise StopRun("GuruFocus rate/quota limit hit (HTTP 429)")
                 if status == 404:
-                    continue                          # endpoint or symbol not found: try the next endpoint
+                    # endpoint or symbol not found: say so (message only, never the key), then try the next
+                    print("%s: HTTP 404 from %s - %s" % (sym, ep.split("/")[-1],
+                          json.dumps(payload)[:300] if payload is not None else "no body"))
+                    continue
                 if status != 200 or payload is None:
                     raise StopRun("unexpected HTTP %s from %s" % (status, ep.split("/")[-1]))
                 got = find_gf_value(payload)
