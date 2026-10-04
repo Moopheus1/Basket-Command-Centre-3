@@ -1,6 +1,6 @@
 name: GF Value
 
-# Display-only: refreshes docs/gf_value.json, which feeds the "GF Value" column in the
+# Display-only: refreshes docs/gf_value.json, which feeds the "Intrinsic Value" column in the
 # Performance overview table. Never touches data.json, the panels, TAKE or the forward log.
 #
 # The free GuruFocus Data API plan allows 100 requests a month, so this runs once a day and
@@ -9,13 +9,9 @@ name: GF Value
 #
 # Needs a repository secret named GURUFOCUS_API_KEY. Without it the run exits cleanly and
 # changes nothing.
-# PAUSED 2026-10-04: the daily schedule is switched off. With a free-plan key the only endpoint
-# that carries GF Value (/stocks/{symbol}/rankings) returns 404, so a scheduled run would fail
-# every day and spend 2-3 of the 100 monthly requests each time. Manual runs still work. To
-# resume once the key's plan includes rankings, restore:
-#   schedule:
-#     - cron: "23 22 * * *"
 on:
+  schedule:
+    - cron: "23 22 * * *"   # once a day, 22:23 UTC. Timing is not critical - the figure moves slowly.
   workflow_dispatch:
     inputs:
       count:
