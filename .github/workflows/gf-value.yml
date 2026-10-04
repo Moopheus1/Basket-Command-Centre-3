@@ -48,6 +48,7 @@ jobs:
           GURUFOCUS_API_KEY: ${{ secrets.GURUFOCUS_API_KEY }}
           GF_MAX_PER_RUN: ${{ github.event.inputs.count || '3' }}
           GF_ONLY: ${{ github.event.inputs.symbols || '' }}
+          GF_DEBUG: ${{ github.event.inputs.symbols && '1' || '' }}
         run: python scripts/fetch_gf_value.py
         continue-on-error: true   # still commit the request counter below, then fail the job
       - name: Commit

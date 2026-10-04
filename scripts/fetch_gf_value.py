@@ -213,6 +213,16 @@ def main():
             if i == 0 and not recs:
                 raise StopRun("response for %s has no '%s' records - layout changed, parser needs adjusting" % (sym, SECTION))
             cur = str((payload.get("basic_information") or {}).get("currency") or "")
+            if os.environ.get("GF_DEBUG"):
+                print("  DEBUG %s basic_information=%s" % (sym, json.dumps(payload.get("basic_information"))[:300]))
+                for d, src, sec in recs[:6]:
+                    print("  DEBUG %s %s %s iv=%s price=%s fx=%s" % (sym, d, src, sec.get(METRIC),
+                          sec.get("month_end_stock_price"), sec.get("forex_rate")))
+                ttm = payload.get("ttm")
+                print("  DEBUG %s ttm=%s" % (sym, json.dumps(ttm)[:1500] if not isinstance(ttm, dict) else
+                      json.dumps({k: (v if not isinstance(v, dict) else {kk: vv for kk, vv in v.items()
+                                  if "intrinsic" in kk or "lynch" in kk or "graham" in kk or "price" in kk or "date" in kk})
+                                  for k, v in ttm.items()})[:1500]))
             got = extract(payload)
             if got is not None:
                 entry = dict(got, asof=today.isoformat(), status="ok")
