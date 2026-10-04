@@ -1,9 +1,14 @@
 {
  "source": "GuruFocus Data API",
  "calls": {
-  "2026-10": 13
+  "2026-10": 88
  },
  "tickers": {
+  "AAOI": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
   "AAPL": {
    "iv": 101.4,
    "period": "2026-06",
@@ -15,8 +20,181 @@
    "status": "ok",
    "currency": "USD"
   },
+  "ADBE": {
+   "iv": 321.23,
+   "period": "2026-08",
+   "basis": "quarterly",
+   "lynch": 333.47,
+   "medps": 819.94,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "ADEA": {
+   "iv": 20.8,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "medps": 8.78,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "AEHR": {
+   "iv": 4.66,
+   "period": "2026-05",
+   "basis": "quarterly",
+   "graham": 2.03,
+   "medps": 7.63,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
   "AIPO": {
    "status": "etf"
+  },
+  "ALAB": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "AMAT": {
+   "iv": 130.96,
+   "period": "2026-07",
+   "basis": "quarterly",
+   "lynch": 117.61,
+   "graham": 81.43,
+   "medps": 162.98,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "AMD": {
+   "iv": 63.4,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "lynch": 45.5,
+   "graham": 45.54,
+   "medps": 189.5,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "AMKR": {
+   "iv": 23.77,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "graham": 30.73,
+   "medps": 23.27,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "AMZN": {
+   "iv": 50.04,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "lynch": 168.3,
+   "graham": 86.13,
+   "medps": 251.48,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "APLD": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "APP": {
+   "iv": 53.78,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "lynch": 325.25,
+   "graham": 33.54,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "ARM": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "ASML": {
+   "iv": 384.77,
+   "period": "2025-12",
+   "basis": "annually",
+   "lynch": 587.26,
+   "graham": 169.25,
+   "medps": 939.83,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "ASTS": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "AVGO": {
+   "iv": 80.48,
+   "period": "2026-07",
+   "basis": "quarterly",
+   "lynch": 199.3,
+   "medps": 140.13,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "AXTI": {
+   "iv": 8.08,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "graham": 5.51,
+   "medps": 5.24,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "BABA": {
+   "iv": 160.87,
+   "period": "2026-03",
+   "basis": "annually",
+   "lynch": 22.29,
+   "graham": 65.53,
+   "medps": 360.19,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "BB": {
+   "iv": 0.25,
+   "period": "2026-05",
+   "basis": "quarterly",
+   "graham": 0.79,
+   "medps": 4.38,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "BE": {
+   "iv": 0.25,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "graham": 12.97,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "BEP": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "BOT": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
   },
   "BOTT": {
    "status": "etf"
@@ -24,10 +202,132 @@
   "BUG": {
    "status": "etf"
   },
+  "CAMT": {
+   "iv": 13.45,
+   "period": "2025-12",
+   "basis": "annually",
+   "lynch": 64.86,
+   "graham": 29.2,
+   "medps": 41.15,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "CAT": {
+   "iv": 258.07,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "lynch": 363.26,
+   "graham": 123.66,
+   "medps": 335.86,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "CCXI": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "CEG": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "CELH": {
+   "iv": 18.15,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "medps": 84.88,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "CIEN": {
+   "iv": 45.5,
+   "period": "2026-07",
+   "basis": "quarterly",
+   "graham": 47.37,
+   "medps": 77.96,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
   "CIFR": {
    "iv": null,
    "asof": "2026-10-04",
    "status": "none"
+  },
+  "CLFD": {
+   "iv": 21.07,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "medps": 31.81,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "COHR": {
+   "iv": 45.0,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "graham": 43.38,
+   "medps": 80.33,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "COIN": {
+   "iv": 123.01,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "graham": 55.17,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "CRCL": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "CRDO": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "CRM": {
+   "iv": 205.8,
+   "period": "2026-07",
+   "basis": "quarterly",
+   "lynch": 421.0,
+   "medps": 379.97,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "CRWD": {
+   "iv": 16.22,
+   "period": "2026-07",
+   "basis": "quarterly",
+   "graham": 7.91,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "CRWV": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "DELL": {
+   "iv": 132.6,
+   "period": "2026-07",
+   "basis": "quarterly",
+   "lynch": 168.91,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
   },
   "DRAM": {
    "status": "etf"
@@ -38,20 +338,253 @@
   "FOTO": {
    "status": "etf"
   },
+  "FPS": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "GEV": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "GLW": {
+   "iv": 25.78,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "graham": 25.99,
+   "medps": 52.42,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "GOOGL": {
+   "iv": 115.85,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "lynch": 249.01,
+   "graham": 101.65,
+   "medps": 239.5,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
   "HACK": {
    "status": "etf"
+  },
+  "HOOD": {
+   "iv": 16.36,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "graham": 22.26,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "HYMC": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "IBM": {
+   "iv": 153.13,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "lynch": 144.96,
+   "medps": 145.35,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
   },
   "IGV": {
    "status": "etf"
   },
+  "INDI": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "INTC": {
+   "iv": 9.32,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "graham": 17.72,
+   "medps": 34.65,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "IREN": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
   "IWM": {
    "status": "etf"
+  },
+  "JCI": {
+   "iv": 46.6,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "lynch": 26.85,
+   "medps": 72.53,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "JPM": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "KLAC": {
+   "iv": 38.62,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "lynch": 61.22,
+   "graham": 16.68,
+   "medps": 61.79,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "LITE": {
+   "iv": 64.16,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "graham": 83.09,
+   "medps": 113.46,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "LLY": {
+   "iv": 96.45,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "lynch": 787.25,
+   "graham": 74.16,
+   "medps": 716.4,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
   },
   "LYTE": {
    "status": "etf"
   },
+  "MCD": {
+   "iv": 109.75,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "lynch": 99.02,
+   "medps": 309.01,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "META": {
+   "iv": 297.97,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "lynch": 672.88,
+   "graham": 237.73,
+   "medps": 827.03,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "MP": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "MRNA": {
+   "iv": 47.19,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "MRVL": {
+   "iv": 32.01,
+   "period": "2026-07",
+   "basis": "quarterly",
+   "lynch": 82.5,
+   "graham": 13.03,
+   "medps": 89.88,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "MSFT": {
+   "iv": 177.74,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "lynch": 321.19,
+   "graham": 124.67,
+   "medps": 467.66,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "MU": {
+   "iv": 127.27,
+   "period": "2026-05",
+   "basis": "quarterly",
+   "lynch": 801.78,
+   "graham": 298.46,
+   "medps": 220.72,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "NBIS": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
   "NCLD": {
    "status": "etf"
+  },
+  "NET": {
+   "iv": 7.3,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "graham": 9.04,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "NFLX": {
+   "iv": 24.18,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "lynch": 47.05,
+   "medps": 95.87,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "NOK": {
+   "iv": 6.61,
+   "period": "2025-12",
+   "basis": "annually",
+   "graham": 4.66,
+   "medps": 4.82,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "NOW": {
+   "iv": 49.98,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "lynch": 93.85,
+   "medps": 223.45,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
   },
   "NVDA": {
    "iv": 34.02,
@@ -63,6 +596,97 @@
    "asof": "2026-10-04",
    "status": "ok",
    "currency": "USD"
+  },
+  "NVTS": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "OKLO": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "ONDS": {
+   "iv": 0.98,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "ONTO": {
+   "iv": 78.97,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "graham": 44.5,
+   "medps": 100.46,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "ORCL": {
+   "iv": 23.94,
+   "period": "2026-08",
+   "basis": "quarterly",
+   "lynch": 146.81,
+   "graham": 17.64,
+   "medps": 133.79,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "OUST": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "PENG": {
+   "iv": 24.97,
+   "period": "2026-05",
+   "basis": "quarterly",
+   "lynch": 40.86,
+   "graham": 15.06,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "PEP": {
+   "iv": 65.44,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "medps": 186.69,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "PFE": {
+   "iv": 36.44,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "medps": 41.13,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "PL": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
+  },
+  "PLTR": {
+   "iv": 9.08,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "graham": 10.48,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
+  "POET": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
   },
   "POWR": {
    "status": "etf"
@@ -91,10 +715,10 @@
    "status": "etf"
   }
  },
- "updated": "2026-10-04T00:21:03Z",
+ "updated": "2026-10-04T00:23:24Z",
  "coverage": {
   "stocks": 107,
-  "withValue": 3
+  "withValue": 53
  },
  "monthlyCap": 95,
  "lastError": null,
