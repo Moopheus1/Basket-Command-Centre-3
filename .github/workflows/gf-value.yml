@@ -22,6 +22,10 @@ on:
         description: "How many names to fetch in this run (each costs 1 of the 100 monthly requests)"
         required: false
         default: "3"
+      symbols:
+        description: "Optional: comma-separated tickers to fetch instead of the stalest ones (testing)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -47,6 +51,7 @@ jobs:
         env:
           GURUFOCUS_API_KEY: ${{ secrets.GURUFOCUS_API_KEY }}
           GF_MAX_PER_RUN: ${{ github.event.inputs.count || '3' }}
+          GF_ONLY: ${{ github.event.inputs.symbols || '' }}
         run: python scripts/fetch_gf_value.py
         continue-on-error: true   # still commit the request counter below, then fail the job
       - name: Commit
