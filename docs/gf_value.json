@@ -1,10 +1,20 @@
 {
  "source": "GuruFocus Data API",
- "endpoint": null,
  "calls": {
-  "2026-10": 9
+  "2026-10": 13
  },
  "tickers": {
+  "AAPL": {
+   "iv": 101.4,
+   "period": "2026-06",
+   "basis": "quarterly",
+   "lynch": 71.07,
+   "graham": 34.22,
+   "medps": 218.97,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
   "AIPO": {
    "status": "etf"
   },
@@ -13,6 +23,11 @@
   },
   "BUG": {
    "status": "etf"
+  },
+  "CIFR": {
+   "iv": null,
+   "asof": "2026-10-04",
+   "status": "none"
   },
   "DRAM": {
    "status": "etf"
@@ -38,6 +53,17 @@
   "NCLD": {
    "status": "etf"
   },
+  "NVDA": {
+   "iv": 34.02,
+   "period": "2026-07",
+   "basis": "quarterly",
+   "lynch": 175.25,
+   "graham": 36.58,
+   "medps": 257.89,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
   "POWR": {
    "status": "etf"
   },
@@ -50,15 +76,27 @@
   "SPY": {
    "status": "etf"
   },
+  "TSM": {
+   "iv": 91.0,
+   "period": "2025-12",
+   "basis": "annually",
+   "lynch": 297.17,
+   "graham": 87.64,
+   "medps": 198.98,
+   "asof": "2026-10-04",
+   "status": "ok",
+   "currency": "USD"
+  },
   "VOO": {
    "status": "etf"
   }
  },
- "updated": "2026-10-04T00:15:22Z",
+ "updated": "2026-10-04T00:21:03Z",
  "coverage": {
   "stocks": 107,
-  "withValue": 0
+  "withValue": 3
  },
  "monthlyCap": 95,
- "lastError": "could not find a GF Value in any endpoint for AAPL - parser needs adjusting"
+ "lastError": null,
+ "metric": "intrinsic_value_projected_fcf"
 }
