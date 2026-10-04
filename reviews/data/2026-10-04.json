@@ -1,0 +1,407 @@
+{
+ "run_date": "2026-10-04",
+ "rules_version": "v2-2026-09-27",
+ "mixed_versions": false,
+ "last_complete_session": "2026-10-02",
+ "last_logged_session": "2026-10-02",
+ "logged_rows": 74,
+ "logged_days": 6,
+ "deduped_signals": 28,
+ "basket_size": 119,
+ "gate_rule": {
+  "horizon": 20,
+  "min_signals": 60,
+  "min_weeks": 12
+ },
+ "gate": {
+  "All signals": {
+   "signals": 0,
+   "weeks": 0,
+   "open": false
+  },
+  "TAKE": {
+   "signals": 0,
+   "weeks": 0,
+   "open": false
+  },
+  "2+ panels": {
+   "signals": 0,
+   "weeks": 0,
+   "open": false
+  },
+  "1 panel": {
+   "signals": 0,
+   "weeks": 0,
+   "open": false
+  },
+  "Panel: Bull Flag": {
+   "signals": 0,
+   "weeks": 0,
+   "open": false
+  },
+  "Panel: Golden Cross": {
+   "signals": 0,
+   "weeks": 0,
+   "open": false
+  },
+  "Panel: Intraday Breakout": {
+   "signals": 0,
+   "weeks": 0,
+   "open": false
+  },
+  "Panel: RS Leader": {
+   "signals": 0,
+   "weeks": 0,
+   "open": false
+  },
+  "Panel: Weekly Pick": {
+   "signals": 0,
+   "weeks": 0,
+   "open": false
+  },
+  "Size: FULL": {
+   "signals": 0,
+   "weeks": 0,
+   "open": false
+  },
+  "Size: HALF": {
+   "signals": 0,
+   "weeks": 0,
+   "open": false
+  },
+  "Size: IGNORE": {
+   "signals": 0,
+   "weeks": 0,
+   "open": false
+  },
+  "QQQ above 50-day": {
+   "signals": 0,
+   "weeks": 0,
+   "open": false
+  },
+  "QQQ below 50-day": {
+   "signals": 0,
+   "weeks": 0,
+   "open": false
+  }
+ },
+ "any_gate_open": false,
+ "official_test": {
+  "success_test": "TAKE hit rate >= random + 10 points AND TAKE average return > random (random scored with the same 2.0x target), on >= 20 scored TAKEs",
+  "verdict": "NOT ENOUGH DATA YET — need 20+ scored TAKE signals",
+  "scored_signals": 0,
+  "take_scored": 0
+ },
+ "take_pace": {
+  "take_lost_to_official_dedupe": [
+   "2026-09-30 PFE"
+  ],
+  "take_logged": 1,
+  "logged_days": 6,
+  "per_session": 0.167,
+  "sessions_until_20_scored": 134
+ },
+ "table": {
+  "All signals": {
+   "5": {
+    "n": 11,
+    "dates": 1,
+    "weeks": 1,
+    "avg_return": 0.009,
+    "avg_basket": 0.0187,
+    "avg_excess": -0.0097,
+    "median_excess": 0.0052,
+    "beat_basket_rate": 0.545,
+    "date_avg_excess": -0.0097,
+    "t_by_date": null
+   },
+   "10": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "20": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "logged": 28
+  },
+  "TAKE": {
+   "5": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "10": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "20": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "logged": 1
+  },
+  "2+ panels": {
+   "5": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "10": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "20": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "logged": 1
+  },
+  "1 panel": {
+   "5": {
+    "n": 11,
+    "dates": 1,
+    "weeks": 1,
+    "avg_return": 0.009,
+    "avg_basket": 0.0187,
+    "avg_excess": -0.0097,
+    "median_excess": 0.0052,
+    "beat_basket_rate": 0.545,
+    "date_avg_excess": -0.0097,
+    "t_by_date": null
+   },
+   "10": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "20": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "logged": 28
+  },
+  "Panel: Bull Flag": {
+   "5": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "10": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "20": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "logged": 2
+  },
+  "Panel: Golden Cross": {
+   "5": {
+    "n": 8,
+    "dates": 1,
+    "weeks": 1,
+    "avg_return": -0.0015,
+    "avg_basket": 0.0187,
+    "avg_excess": -0.0202,
+    "median_excess": 0,
+    "beat_basket_rate": 0.5,
+    "date_avg_excess": -0.0202,
+    "t_by_date": null
+   },
+   "10": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "20": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "logged": 17
+  },
+  "Panel: Intraday Breakout": {
+   "5": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "10": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "20": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "logged": 2
+  },
+  "Panel: RS Leader": {
+   "5": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "10": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "20": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "logged": 1
+  },
+  "Panel: Weekly Pick": {
+   "5": {
+    "n": 3,
+    "dates": 1,
+    "weeks": 1,
+    "avg_return": 0.0368,
+    "avg_basket": 0.0187,
+    "avg_excess": 0.0181,
+    "median_excess": 0.0357,
+    "beat_basket_rate": 0.667,
+    "date_avg_excess": 0.0181,
+    "t_by_date": null
+   },
+   "10": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "20": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "logged": 9
+  },
+  "Size: FULL": {
+   "5": {
+    "n": 10,
+    "dates": 1,
+    "weeks": 1,
+    "avg_return": 0.0058,
+    "avg_basket": 0.0187,
+    "avg_excess": -0.0129,
+    "median_excess": 0,
+    "beat_basket_rate": 0.5,
+    "date_avg_excess": -0.0129,
+    "t_by_date": null
+   },
+   "10": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "20": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "logged": 26
+  },
+  "Size: HALF": {
+   "5": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "10": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "20": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "logged": 1
+  },
+  "Size: IGNORE": {
+   "5": {
+    "n": 1,
+    "dates": 1,
+    "weeks": 1,
+    "avg_return": 0.0408,
+    "avg_basket": 0.0187,
+    "avg_excess": 0.0221,
+    "median_excess": 0.0221,
+    "beat_basket_rate": 1,
+    "date_avg_excess": 0.0221,
+    "t_by_date": null
+   },
+   "10": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "20": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "logged": 2
+  },
+  "QQQ above 50-day": {
+   "5": {
+    "n": 11,
+    "dates": 1,
+    "weeks": 1,
+    "avg_return": 0.009,
+    "avg_basket": 0.0187,
+    "avg_excess": -0.0097,
+    "median_excess": 0.0052,
+    "beat_basket_rate": 0.545,
+    "date_avg_excess": -0.0097,
+    "t_by_date": null
+   },
+   "10": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "20": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "logged": 28
+  },
+  "QQQ below 50-day": {
+   "5": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "10": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "20": {
+    "n": 0,
+    "dates": 0,
+    "weeks": 0
+   },
+   "logged": 0
+  }
+ }
+}
