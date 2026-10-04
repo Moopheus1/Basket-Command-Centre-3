@@ -2,7 +2,7 @@
  "source": "GuruFocus Data API",
  "endpoint": null,
  "calls": {
-  "2026-10": 2
+  "2026-10": 4
  },
  "tickers": {
   "AIPO": {
@@ -54,7 +54,7 @@
    "status": "etf"
   }
  },
- "updated": "2026-10-04T00:11:38Z",
+ "updated": "2026-10-04T00:12:24Z",
  "coverage": {
   "stocks": 107,
   "withValue": 0
