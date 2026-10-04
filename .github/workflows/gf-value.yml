@@ -9,9 +9,13 @@ name: GF Value
 #
 # Needs a repository secret named GURUFOCUS_API_KEY. Without it the run exits cleanly and
 # changes nothing.
+# PAUSED 2026-10-04: the daily schedule is switched off. With a free-plan key the only endpoint
+# that carries GF Value (/stocks/{symbol}/rankings) returns 404, so a scheduled run would fail
+# every day and spend 2-3 of the 100 monthly requests each time. Manual runs still work. To
+# resume once the key's plan includes rankings, restore:
+#   schedule:
+#     - cron: "23 22 * * *"
 on:
-  schedule:
-    - cron: "23 22 * * *"   # once a day, 22:23 UTC. Timing is not critical - GF Value moves slowly.
   workflow_dispatch:
     inputs:
       count:
