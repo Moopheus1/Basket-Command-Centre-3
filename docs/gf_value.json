@@ -1,7 +1,7 @@
 {
  "source": "GuruFocus Data API",
  "calls": {
-  "2026-10": 90
+  "2026-10": 95
  },
  "tickers": {
   "AAOI": {
@@ -715,7 +715,7 @@
    "status": "etf"
   }
  },
- "updated": "2026-10-04T00:25:37Z",
+ "updated": "2026-10-04T00:40:53Z",
  "coverage": {
   "stocks": 107,
   "withValue": 53
