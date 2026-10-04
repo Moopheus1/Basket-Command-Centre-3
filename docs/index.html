@@ -98,7 +98,7 @@
   .dcard-sector { border-top: 1px solid #f3f4f6; margin-top: 10px; padding-top: 8px; font-size: 11px; color: #6b7280; }
   .dcard-sector b { display: block; color: #16181d; font-size: 12.5px; }
   /* Performance overview: freeze Ticker + Price so they stay readable while the rest
-     of the (20-column) table scrolls sideways, and mirror the horizontal scrollbar above
+     of the (21-column) table scrolls sideways, and mirror the horizontal scrollbar above
      the table so it can be dragged without scrolling to the bottom first. */
   .scroll-proxy { overflow-x: auto; overflow-y: hidden; height: 14px; margin-bottom: 2px; }
   .scroll-proxy > div { height: 1px; }
@@ -341,7 +341,7 @@
     <h2>Performance overview</h2>
     <a href="#top" class="jumpbar-inline" style="margin-top:0">↑ Back to top</a>
   </div>
-  <div class="desc">Daily, WTD, MTD, YTD, and 1-year returns from daily closes. Click a column to sort.<br><br><strong>How to read the signal columns — and how much to trust them.</strong> <strong>Momentum</strong> and <strong>Persist</strong> are 0&ndash;100 composite scores, and <strong>Signal</strong> is the nine-tier verdict derived from them (STRONG BUY through SELL). <strong>These were backtested and the ladder does not hold.</strong> Measured over 20 sessions against a 52.8% baseline, WATCH — defined as momentum <em>below</em> 50 with persistence above 70 — was the best-performing label at a 60.9% win rate and +4.44% median, while CAUTION returned +4.49% and STRONG BUY only +2.20%, ranking sixth of nine. AVOID (+1.42%) beat HOLD (+0.20%). In short the colours have little monotonic relationship with what happened next, largely because short-term mean reversion swamps the momentum tilt and the beta and RSI sub-scores penalise exactly the names that run. Treat these three columns as description, not instruction. <strong>Health Score</strong> is supplied in the data feed and has never been tested here. <strong>Analyst Target</strong> deserves particular caution: on point-in-time consensus targets, hit rate within 3 months fell from 84.8% where implied upside was 0&ndash;10% to just 6.3% where it exceeded 100% — the bigger the claim, the less often it landed. <strong>Valuation vs own history</strong> asks one question: is this stock dear or cheap compared with how the market has usually priced <em>it</em>? From the company&rsquo;s own SEC filings it tracks four multiples over the last ten years &mdash; price to earnings, to sales, to book value and to free cash flow &mdash; and reports where today sits in that range. The bold number is a percentile: <span style="color:#e5484d;font-weight:700">80+</span> means dearer than at least 80% of its own last ten years, <span style="color:#0a9e5c;font-weight:700">20 or less</span> means cheaper than at least 80% of them. The grey dollar figure is what the share would cost at its usual multiples. <strong>How far to trust it.</strong> Checked against GuruFocus&rsquo;s published GF Value on 41 of these names, it ranked them almost the same way (rank agreement 0.88) and gave the same under/fair/over verdict on 31, the opposite on one (AVGO); the dollar figure was typically 21% away, so read the percentile first and the dollars loosely. A growth adjustment was tried and dropped because it made the fit worse on names it had not seen. <strong>What it cannot do.</strong> It is a valuation measure, not an oversold/overbought timing signal &mdash; that is what the RSI columns show &mdash; and nothing here has been tested against the next 20 sessions. It misleads when a business has permanently changed: AMZN reads as the cheapest of its decade only because its multiples shrank as it matured, and a company that changed its business (a reverse merger) carries a meaningless history. Most fast-running names here sit in the 90s, which is a description of the run, not a sell signal. Foreign companies that do not file in US dollars, and very new listings, are blank; hover a dash for the reason. <strong>Display-only: it feeds no panel and no TAKE call.</strong> Refreshed weekly; hover a cell for each yardstick.<br><br><strong>How to read “vs EMA9/SMA20”.</strong> The word is where the last close sits relative to its 9-day EMA and 20-day SMA — <span style="color:#0a9e5c;font-weight:700">above</span> both, in the <span style="color:#f59e0b;font-weight:700">zone</span> between them, or <span style="color:#e5484d;font-weight:700">below</span> both. The number beside it is how far the close is from EMA9. <strong>Which of the three states a name is in carried no reliable edge</strong> in the backtest: across 241 combined signals, “above both” hit 77.5%, “in zone” 72.7% and “below both” 75.0% — a spread inside noise, with 88% of signals sitting on the pass side. The <em>number</em> is the part that mattered. On the 188 signals above both averages, median drawdown before the outcome was &minus;5.4% when the close was 3&ndash;5% over EMA9, &minus;8.8% at 5&ndash;8% and &minus;9.8% beyond 8%, with the 25th-percentile case falling from &minus;10.0% to &minus;17.0% (correlation &minus;0.308, p&lt;0.001). Hit rate barely moved (&minus;0.076, p=0.303). So <span style="color:#b45309;font-weight:700">⚠</span> above 5% and <span style="color:#e5484d;font-weight:700">⚠⚠</span> above 8% are <strong>drawdown warnings about entry timing, not quality warnings</strong> — an extended name is the same trade bought at a worse moment, and waiting for a pullback toward EMA9 historically gave the same odds with roughly half the pain.</div>
+  <div class="desc">Daily, WTD, MTD, YTD, and 1-year returns from daily closes. Click a column to sort.<br><br><strong>How to read the signal columns — and how much to trust them.</strong> <strong>Momentum</strong> and <strong>Persist</strong> are 0&ndash;100 composite scores, and <strong>Signal</strong> is the nine-tier verdict derived from them (STRONG BUY through SELL). <strong>These were backtested and the ladder does not hold.</strong> Measured over 20 sessions against a 52.8% baseline, WATCH — defined as momentum <em>below</em> 50 with persistence above 70 — was the best-performing label at a 60.9% win rate and +4.44% median, while CAUTION returned +4.49% and STRONG BUY only +2.20%, ranking sixth of nine. AVOID (+1.42%) beat HOLD (+0.20%). In short the colours have little monotonic relationship with what happened next, largely because short-term mean reversion swamps the momentum tilt and the beta and RSI sub-scores penalise exactly the names that run. Treat these three columns as description, not instruction. <strong>Health Score</strong> is supplied in the data feed and has never been tested here. <strong>Analyst Target</strong> deserves particular caution: on point-in-time consensus targets, hit rate within 3 months fell from 84.8% where implied upside was 0&ndash;10% to just 6.3% where it exceeded 100% — the bigger the claim, the less often it landed. <strong>Valuation vs own history</strong> asks one question: is this stock dear or cheap compared with how the market has usually priced <em>it</em>? From the company&rsquo;s own SEC filings it tracks four multiples over the last ten years &mdash; price to earnings, to sales, to book value and to free cash flow &mdash; and reports where today sits in that range. The bold number is a percentile: <span style="color:#e5484d;font-weight:700">80+</span> means dearer than at least 80% of its own last ten years, <span style="color:#0a9e5c;font-weight:700">20 or less</span> means cheaper than at least 80% of them. The grey dollar figure is what the share would cost at its usual multiples. <strong>How far to trust it.</strong> Checked against GuruFocus&rsquo;s published GF Value on 41 of these names, it ranked them almost the same way (rank agreement 0.88) and gave the same under/fair/over verdict on 31, the opposite on one (AVGO); the dollar figure was typically 21% away, so read the percentile first and the dollars loosely. A growth adjustment was tried and dropped because it made the fit worse on names it had not seen. <strong>What it cannot do.</strong> It is a valuation measure, not an oversold/overbought timing signal &mdash; that is what the RSI columns show &mdash; and nothing here has been tested against the next 20 sessions. It misleads when a business has permanently changed: AMZN reads as the cheapest of its decade only because its multiples shrank as it matured, and a company that changed its business (a reverse merger) carries a meaningless history. Most fast-running names here sit in the 90s, which is a description of the run, not a sell signal. Foreign companies (TSM, ASML, BABA and the like) cannot be modelled from US filings, so for those the cell shows <a href="https://www.alphaspread.com" target="_blank" rel="noopener noreferrer">Alpha Spread</a>&rsquo;s published intrinsic value instead, labelled as such and linked to its source page &mdash; a different method, with no percentile, and not checked here. Very new listings are blank; hover a dash for the reason. <strong>Display-only: it feeds no panel and no TAKE call.</strong> Refreshed weekly; hover a cell for each yardstick. <strong>GuruFocus Intrinsic Value</strong>, in the next column, is GuruFocus&rsquo;s &ldquo;Projected FCF&rdquo; figure (not its headline GF Value, which the free data plan does not supply): roughly six years&rsquo; average free cash flow times a growth multiple, plus 80% of book equity, per share. It looks backwards, so it sits far below the price for nearly every fast-grower here and reads as a floor rather than a target; &asymp; marks a rougher figure from a foreign company&rsquo;s annual report. The % is how far it sits above (green) or below (red) today&rsquo;s price. Only about three names refresh a day, so a value can be five weeks old. Display-only.<br><br><strong>How to read “vs EMA9/SMA20”.</strong> The word is where the last close sits relative to its 9-day EMA and 20-day SMA — <span style="color:#0a9e5c;font-weight:700">above</span> both, in the <span style="color:#f59e0b;font-weight:700">zone</span> between them, or <span style="color:#e5484d;font-weight:700">below</span> both. The number beside it is how far the close is from EMA9. <strong>Which of the three states a name is in carried no reliable edge</strong> in the backtest: across 241 combined signals, “above both” hit 77.5%, “in zone” 72.7% and “below both” 75.0% — a spread inside noise, with 88% of signals sitting on the pass side. The <em>number</em> is the part that mattered. On the 188 signals above both averages, median drawdown before the outcome was &minus;5.4% when the close was 3&ndash;5% over EMA9, &minus;8.8% at 5&ndash;8% and &minus;9.8% beyond 8%, with the 25th-percentile case falling from &minus;10.0% to &minus;17.0% (correlation &minus;0.308, p&lt;0.001). Hit rate barely moved (&minus;0.076, p=0.303). So <span style="color:#b45309;font-weight:700">⚠</span> above 5% and <span style="color:#e5484d;font-weight:700">⚠⚠</span> above 8% are <strong>drawdown warnings about entry timing, not quality warnings</strong> — an extended name is the same trade bought at a worse moment, and waiting for a pullback toward EMA9 historically gave the same odds with roughly half the pain.</div>
   <div style="overflow-x:auto">
     <table>
       <thead><tr id="goldenTheadRow"></tr></thead>
@@ -939,6 +939,15 @@ function valuationHtml(t, price) {
   if (!valData) return dash('Valuation not loaded yet');
   if (!e) return dash('Not computed yet - refreshed weekly');
   if (e.status === 'etf') return dash('ETF or fund - no company filings to value');
+  if (e.status !== 'ok' && e.alt && e.alt.value != null) {
+    const g = price != null ? pct(e.alt.value, price) : null;
+    const tip = 'NOT the own model: this is the intrinsic value published by ' + e.alt.src + ', shown because the filings of a foreign company cannot be modelled here. ' +
+                (g != null ? 'It is ' + Math.abs(g).toFixed(0) + '% ' + (g >= 0 ? 'above' : 'below') + ' today\'s price. ' : '') +
+                'Read ' + (e.alt.asof || '?') + '. No percentile is available. Click to open the source page.';
+    return '<span title="' + esc(tip) + '"><span style="color:#9ca3af;font-size:10.5px">Alpha Spread</span> ' +
+           '<a class="tklink" href="' + esc(e.alt.url) + '" target="_blank" rel="noopener noreferrer">' + fmtPrice(e.alt.value) + '</a> ' +
+           pctHtml(g, {sign:true, arrow:false, dp:0}) + '</span>';
+  }
   if (e.status !== 'ok') return dash(e.status);
   const color = e.pct >= 80 ? '#e5484d' : e.pct <= 20 ? '#0a9e5c' : '#6b7280';
   const word = e.pct >= 80 ? 'expensive' : e.pct <= 20 ? 'cheap' : 'mid-range';
@@ -957,6 +966,48 @@ function valuationHtml(t, price) {
   return '<span title="' + esc(tip) + '"' + (stale ? ' style="opacity:.55"' : '') + '>' +
          '<span style="color:' + color + ';font-weight:700">' + e.pct + '</span><span style="color:#9ca3af;font-size:11px">/100</span> ' +
          '<span style="color:#6b7280;font-size:11.5px">' + fmtPrice(e.fair) + '</span></span>';
+}
+// ===== GURUFOCUS INTRINSIC VALUE (display-only column; reads gf_value.json written by scripts/fetch_gf_value.py) =====
+// The figure is GuruFocus's "Intrinsic Value: Projected FCF" - NOT its headline "GF Value", which
+// a free-plan key cannot reach. Refreshed a few names a day (free plan = 100 requests a month),
+// so every value carries its fetch date and financial period. Never feeds a panel, TAKE or the log.
+let gfData = null;
+const GF_STALE_DAYS = 45;
+async function loadGF() {
+  try { const r = await fetch('gf_value.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) gfData = await r.json(); } catch (e) {}
+}
+function gfEntry(t) { return (gfData && gfData.tickers && gfData.tickers[t]) || null; }
+// Sort key: how far the intrinsic value sits above (+) or below (-) the current price, in %.
+// Same direction as the Analyst Target column: positive = price is below the estimate.
+function gfGap(t, price) {
+  const e = gfEntry(t);
+  return (e && e.iv != null && price) ? pct(e.iv, price) : null;
+}
+function gfValueHtml(t, price) {
+  const dash = (tip) => '<span style="color:#6b7280" title="' + tip + '">—</span>';
+  const e = gfEntry(t);
+  if (!gfData) return dash('Intrinsic value not loaded yet');
+  if (!e) return dash('Not fetched yet - a few names are refreshed each day');
+  if (e.status === 'etf') return dash('ETF or fund - no intrinsic value exists');
+  if (e.iv == null) return dash('GuruFocus has no positive Projected-FCF value for this name - typical of loss-making or recently listed companies (checked ' + esc(e.asof || '?') + ')');
+  if (price == null) return dash('No price');
+  if (e.currency && e.currency !== 'USD') return dash('GuruFocus reports this one in ' + esc(e.currency) + ', so it cannot be compared with the USD price');
+  const gap = pct(e.iv, price);
+  const ageDays = e.asof ? Math.max(0, Math.floor((Date.now() - new Date(e.asof + 'T00:00:00Z').getTime()) / 86400000)) : null;
+  const stale = ageDays != null && ageDays > GF_STALE_DAYS;
+  const rough = e.basis === 'annually';
+  const other = [['Peter Lynch fair value', e.lynch], ['Graham number', e.graham], ['Median price-to-sales value', e.medps]]
+    .filter(x => x[1] != null).map(x => x[0] + ' ' + fmtPrice(x[1])).join(' · ');
+  const tip = 'GuruFocus Intrinsic Value: Projected FCF. Price is ' + (price / e.iv).toFixed(2) + 'x this figure. ' +
+              'From financials for ' + esc(e.period || '?') + (e.basis === 'annually' ? ' (annual)' : '') + '; fetched ' + esc(e.asof || '?') +
+              (ageDays != null ? ' (' + ageDays + ' day' + (ageDays === 1 ? '' : 's') + ' ago)' : '') +
+              (stale ? ' - STALE, treat with care' : '') + '.' +
+              (rough ? ' ROUGH: this company files annually, so the figure is from its last annual report and can differ from the current one on GuruFocus (BABA showed $161 here against $121 on GuruFocus when checked).' : '') +
+              (other ? ' Other GuruFocus figures, same period: ' + other + '.' : '');
+  const url = 'https://www.gurufocus.com/term/intrinsic-value-projected-fcf/' + encodeURIComponent(t);
+  return '<span title="' + tip + '"' + (stale ? ' style="opacity:.55"' : '') + '><a class="tklink" href="' + url +
+         '" target="_blank" rel="noopener noreferrer">' + (rough ? '≈' : '') + fmtPrice(e.iv) + '</a> ' +
+         pctHtml(gap, {sign:true, arrow:false, dp:1}) + (stale ? ' <span style="color:#9ca3af;font-size:11px">stale</span>' : '') + '</span>';
 }
 const LOGO_COLORS = ['#1f2937','#4c7dfc','#0a9e5c','#d97706','#7c3aed','#db2777','#0891b2','#e5484d'];
 function logoColor(t) { let h = 0; for (const c of t) h = (h * 31 + c.charCodeAt(0)) >>> 0; return LOGO_COLORS[h % LOGO_COLORS.length]; }
@@ -1704,7 +1755,7 @@ function renderDetailed(spy, tickers) {
 const COLS = [
   ['sym', 'Ticker'], ['price', 'Price'], ['daily', 'Daily'], ['wtd', 'WTD'], ['mtd', 'MTD'],
   ['ytd', 'YTD'], ['y1', '1Y'], ['vsSpy', 'vs SPY'], ['mapos', 'vs EMA9/SMA20'], ['mom', 'Momentum'], ['per', 'Persist'], ['sig', 'Signal'],
-  ['target', 'Analyst Target'], ['val', 'Valuation vs own history'], ['earnings', 'Next Earnings'], ['mcap', 'Market cap'], ['vol', 'Volume'],
+  ['target', 'Analyst Target'], ['val', 'Valuation vs own history'], ['gf', 'GuruFocus Intrinsic Value'], ['earnings', 'Next Earnings'], ['mcap', 'Market cap'], ['vol', 'Volume'],
   ['health', 'Health Score'], ['rsi', 'RSI (14D)'], ['wrsi', 'Weekly RSI']
 ];
 
@@ -1751,7 +1802,7 @@ function renderTable(spy, tickers) {
     return { sym: t, price: d.price, daily: d.daily, wtd: d.wtd, mtd: d.mtd, ytd: d.ytd, y1: d.y1,
              vsSpy: spy ? d.daily - spy.daily : null, mapos: (maPosition(t) ? maPosition(t).vsEma9 : null),
              mom: d.momScore, per: d.perScore, sig: d.signal,
-             target: targetUpside, val: valPct(t), earnings: f.nextEarnings, f: f,
+             target: targetUpside, val: valPct(t), gf: gfGap(t, d.price), earnings: f.nextEarnings, f: f,
              mcap: f.mcap != null ? f.mcap : null, vol: d.vol, health: f.healthScore, rsi: d.rsi, wrsi: d.weeklyRsi };
   });
   rows.sort((a, b) => {
@@ -1784,6 +1835,7 @@ function renderTable(spy, tickers) {
     '<td>' + signalBadge(r.sig) + '</td>' +
     '<td>' + targetHtml(r.sym, r.f, r.price) + '</td>' +
     '<td>' + valuationHtml(r.sym, r.price) + '</td>' +
+    '<td>' + gfValueHtml(r.sym, r.price) + '</td>' +
     '<td>' + fmtEarnings(r.earnings) + '</td>' +
     '<td>' + fmtMcap(r.mcap) + '</td>' +
     '<td>' + fmtVol(r.vol) + '</td>' +
@@ -3289,6 +3341,7 @@ async function loadData() {
     return false;
   }
   await loadValuation();   // display-only valuation column; a missing file just leaves the column blank
+  await loadGF();          // display-only GuruFocus column, same rule
   render();
   return true;
 }

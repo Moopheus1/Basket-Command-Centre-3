@@ -30,11 +30,18 @@ DATA: SEC EDGAR (free, official) + Yahoo month-end prices and split history via 
 The SEC requires automated users to identify themselves with a contact email; it is read
 from the SEC_CONTACT_EMAIL environment variable (a GitHub secret) and never written to disk.
 Without it the script exits cleanly and leaves the existing file alone.
-US-dollar SEC filers only: foreign companies reporting in another currency are skipped.
+US-dollar SEC filers only. FOREIGN companies (those filing form 20-F or 40-F, e.g. TSM, ASML,
+BABA) cannot be modelled this way, so for those names only the script records Alpha Spread's
+published intrinsic value as a clearly-labelled third-party figure, with a link back to the
+Alpha Spread page. That is at most a handful of page reads a week. Note: Alpha Spread's terms
+permit republishing with credit and a link but say automated tools must not be used on the
+site; the owner chose to accept that for these few names. Remove ALPHA_SPREAD below to stop.
 """
 import datetime as dt
+import html
 import json
 import os
+import re
 import statistics
 import sys
 import time
@@ -46,6 +53,9 @@ DATA_PATH = os.path.join(ROOT, "docs", "data.json")
 OUT_PATH = os.path.join(ROOT, "docs", "valuation.json")
 CIK_MAP_URL = "https://raw.githubusercontent.com/jadchaar/sec-cik-mapper/main/mappings/stocks/ticker_to_cik.json"
 FACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK%010d.json"
+
+ALPHA_SPREAD = "https://www.alphaspread.com/security/%s/%s/summary"   # set to None to disable
+ALPHA_EXCHANGES = ("nyse", "nasdaq")
 
 YEARS = 10
 FILING_LAG_DAYS = 45      # a quarter's figures are treated as known 45 days after it ends
@@ -215,6 +225,50 @@ def evaluate(facts, px, price, mcap):
             "fundamentalsTo": max(l["asof"] for l in legs.values())}
 
 
+def is_foreign(facts):
+    """True when the company reports to the SEC on the foreign-issuer forms (20-F / 40-F)."""
+    for ns in facts.get("facts", {}).values():
+        for tag in ns.values():
+            for units in tag.get("units", {}).values():
+                for x in units[-3:]:
+                    if str(x.get("form", "")).startswith(("20-F", "40-F")):
+                        return True
+    return False
+
+
+def parse_alpha_spread(page):
+    """Pull the base-case intrinsic value (USD) out of an Alpha Spread summary page, or None."""
+    t = re.sub(r"<script.*?</script>|<style.*?</style>", " ", page, flags=re.S)
+    t = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", t)))
+    # thousands may be separated by a comma or a space ("1 277.6 USD")
+    m = re.search(r"under the Base Case is (-?\d[\d,\s\u00a0\u202f]*(?:\.\d+)?) USD", t)
+    if not m:
+        return None
+    v = float(re.sub(r"[,\s\u00a0\u202f]", "", m.group(1)))
+    return round(v, 2) if v > 0 else None
+
+
+def alpha_spread(sym):
+    """Third-party intrinsic value for a foreign name: {'src','value','url','asof'} or None."""
+    if not ALPHA_SPREAD:
+        return None
+    for ex in ALPHA_EXCHANGES:
+        url = ALPHA_SPREAD % (ex, sym.lower())
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; BCC3-Dashboard)"})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                final, page = r.geturl(), r.read().decode("utf-8", "replace")
+        except Exception:       # noqa: BLE001 - try the next exchange, then give up quietly
+            time.sleep(2)
+            continue
+        v = parse_alpha_spread(page)
+        time.sleep(2)                              # be gentle: a handful of pages, seconds apart
+        if v is not None:
+            return {"src": "Alpha Spread", "value": v, "url": final,
+                    "asof": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")}
+    return None
+
+
 # ---------------------------------------------------------------- data fetching
 def read_tickers():
     out = []
@@ -270,7 +324,7 @@ def main():
         print("CIK list not refreshed (%s) - using the saved one" % e)
 
     tickers = read_tickers()
-    out, used_cik, n_ok, n_kept = {}, {}, 0, 0
+    out, used_cik, n_ok, n_kept, n_alt = {}, {}, 0, 0, 0
     for sym in tickers:
         e = data.get(sym) or {}
         bars = e.get("bars") or []
@@ -305,6 +359,12 @@ def main():
             res["computed"] = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
             res["priceUsed"] = bars[-1][4]
             n_ok += 1
+        elif is_foreign(facts):
+            res["status"] = "Foreign company - its filings cannot be modelled here"
+            alt = alpha_spread(sym) or (prior_t.get(sym) or {}).get("alt")   # keep the last one if the read fails
+            if alt:
+                res["alt"] = alt
+                n_alt += 1
         out[sym] = res
 
     stocks = sum(1 for v in out.values() if v.get("status") != "etf")
@@ -318,7 +378,7 @@ def main():
     with open(OUT_PATH, "w") as f:
         json.dump(result, f, separators=(",", ":"))
         f.write("\n")
-    print("Computed %d, kept %d from last run, of %d stocks." % (n_ok, n_kept, stocks))
+    print("Computed %d, kept %d from last run, %d foreign names from Alpha Spread, of %d stocks." % (n_ok, n_kept, n_alt, stocks))
     return 0
 
 

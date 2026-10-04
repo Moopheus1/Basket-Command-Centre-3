@@ -1,6 +1,6 @@
 name: GF Value
 
-# Display-only: refreshes docs/gf_value.json, which feeds the "Intrinsic Value" column in the
+# Display-only: refreshes docs/gf_value.json, which feeds the "GuruFocus Intrinsic Value" column in the
 # Performance overview table. Never touches data.json, the panels, TAKE or the forward log.
 #
 # The free GuruFocus Data API plan allows 100 requests a month, so this runs once a day and
@@ -9,10 +9,9 @@ name: GF Value
 #
 # Needs a repository secret named GURUFOCUS_API_KEY. Without it the run exits cleanly and
 # changes nothing.
-# RETIRED 2026-10-04: the dashboard column now comes from scripts/valuation_model.py (own model,
-# SEC filings). The schedule is off so this no longer spends GuruFocus requests; it can still be
-# run by hand. Its last output stays in docs/gf_value.json but is not shown on the page.
 on:
+  schedule:
+    - cron: "23 22 * * *"   # once a day, 22:23 UTC. Timing is not critical - the figure moves slowly.
   workflow_dispatch:
     inputs:
       count:
