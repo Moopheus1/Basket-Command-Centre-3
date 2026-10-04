@@ -3340,25 +3340,35 @@ function syncBottomJumpbar() {
 const PNL_KEY = 'bcc3_collapsed_panels';
 function pnlLoad() { try { return new Set(JSON.parse(localStorage.getItem(PNL_KEY) || '[]')); } catch (e) { return new Set(); } }
 function pnlSave(set) { try { localStorage.setItem(PNL_KEY, JSON.stringify([...set])); } catch (e) {} }
+// Panels that start hidden: long, and they repeat what the Performance overview table already
+// shows for every ticker. Opening one is remembered per browser, like any other panel choice.
+const PNL_DEFAULT_COLLAPSED = new Set(['detailedPanel', 'watchlistPanel']);
+const PNL_OPENED_KEY = 'bcc3_opened_panels';
+function pnlOpenedLoad() { try { return new Set(JSON.parse(localStorage.getItem(PNL_OPENED_KEY) || '[]')); } catch (e) { return new Set(); } }
+function pnlOpenedSave(set) { try { localStorage.setItem(PNL_OPENED_KEY, JSON.stringify([...set])); } catch (e) {} }
 function setPanelCollapsed(panel, collapsed, save) {
   panel.classList.toggle('collapsed', collapsed);
   const b = panel.querySelector(':scope > .pnl-toggle');
   if (b) { b.textContent = collapsed ? '▸ Show' : '▾ Hide'; b.setAttribute('aria-expanded', String(!collapsed)); }
-  if (save !== false) { const s = pnlLoad(); collapsed ? s.add(panel.id) : s.delete(panel.id); pnlSave(s); }
+  if (save !== false) {
+    const s = pnlLoad(); collapsed ? s.add(panel.id) : s.delete(panel.id); pnlSave(s);
+    if (PNL_DEFAULT_COLLAPSED.has(panel.id)) { const o = pnlOpenedLoad(); collapsed ? o.delete(panel.id) : o.add(panel.id); pnlOpenedSave(o); }
+  }
 }
 function setAllPanels(collapsed) {
   document.querySelectorAll('div.panel[id]').forEach(p => setPanelCollapsed(p, collapsed, false));
   pnlSave(collapsed ? new Set([...document.querySelectorAll('div.panel[id]')].map(p => p.id)) : new Set());
+  pnlOpenedSave(collapsed ? new Set() : new Set(PNL_DEFAULT_COLLAPSED));
 }
 function initCollapsiblePanels() {
-  const saved = pnlLoad();
+  const saved = pnlLoad(), opened = pnlOpenedLoad();
   document.querySelectorAll('div.panel[id]').forEach(p => {
     if (p.querySelector(':scope > .pnl-toggle')) return;
     const b = document.createElement('button');
     b.className = 'pnl-toggle'; b.type = 'button';
     b.addEventListener('click', () => setPanelCollapsed(p, !p.classList.contains('collapsed')));
     p.insertBefore(b, p.firstChild);
-    setPanelCollapsed(p, saved.has(p.id), false);
+    setPanelCollapsed(p, saved.has(p.id) || (PNL_DEFAULT_COLLAPSED.has(p.id) && !opened.has(p.id)), false);
   });
   // a menu link to a hidden panel opens it
   document.querySelectorAll('.jumpbar a[href^="#"]').forEach(a => a.addEventListener('click', () => {
