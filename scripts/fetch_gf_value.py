@@ -42,7 +42,9 @@ OUT_PATH = os.path.join(ROOT, "docs", "gf_value.json")
 API_BASE = "https://api.gurufocus.com/data"
 # Tried in order for a ticker until one yields a GF Value. The one that works is
 # remembered in gf_value.json ("endpoint") so later runs spend one request per ticker.
-ENDPOINTS = ["/stocks/{sym}/rankings", "/stocks/{sym}/valuations"]
+# The last entry is GuruFocus's older API (token goes in the path; the URL is never printed).
+LEGACY = "legacy:/stock/{sym}/summary"
+ENDPOINTS = ["/stocks/{sym}/rankings", "/stocks/{sym}/valuations", LEGACY]
 
 MAX_PER_RUN = int(os.environ.get("GF_MAX_PER_RUN", "3"))
 MONTHLY_CAP = int(os.environ.get("GF_MONTHLY_CAP", "95"))
@@ -152,7 +154,10 @@ def key_paths(obj, prefix="", depth=0, out=None):
 
 def call(path, key):
     """One API request. Returns (parsed_json_or_None, http_status)."""
-    req = urllib.request.Request(API_BASE + path, headers={
+    url = API_BASE + path
+    if path.startswith("legacy:"):
+        url = "https://api.gurufocus.com/public/user/" + key + path[len("legacy:"):]
+    req = urllib.request.Request(url, headers={
         "Authorization": key, "Accept": "application/json", "User-Agent": "bcc3-gf-value/1.0"})
     try:
         with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
@@ -220,6 +225,10 @@ def main():
                 payload, status = call(ep.format(sym=sym), key)
                 used += 1
                 state["calls"][month] = used
+                if status in (401, 403) and ep == LEGACY:
+                    print("%s: older API refused this key (HTTP %d) - %s" % (sym, status,
+                          str((payload or {}).get("error", ""))[:200] if isinstance(payload, dict) else ""))
+                    continue
                 if status in (401, 403):
                     raise StopRun("GuruFocus rejected the API key or plan (HTTP %d: %s)" % (
                         status, (payload or {}).get("message", "no message") if isinstance(payload, dict) else "no message"))
