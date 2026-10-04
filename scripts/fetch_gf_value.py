@@ -142,6 +142,44 @@ def extract(payload):
     return None
 
 
+def model_v0(payload, years=10):
+    """PROTOTYPE (printed in test runs only, not stored): a GF-Value-style figure built from
+    GuruFocus's own raw history. For each of four yardsticks (earnings, sales, book value,
+    free cash flow per share) take the multiple the stock typically traded at over the last
+    `years` annual reports (the median) and apply it to the latest 12-month figure. The
+    model value is the median of the yardsticks that could be computed.
+    """
+    legs = {"pe": "eps_without_nri", "ps": "revenue_per_share", "pb": "book_value_per_share",
+            "pfcf": "free_cash_flow_per_share"}
+    ann = [r for r in (payload.get("annually") or []) if isinstance(r, dict) and isinstance(r.get("per_share_data"), dict)]
+    ann.sort(key=lambda r: str(r.get("date") or ""), reverse=True)
+    ttm = (payload.get("ttm") or {}).get("per_share_data") or {}
+    out = {}
+    for leg, field in legs.items():
+        mults = []
+        for r in ann[:years]:
+            px, m = to_num(r["per_share_data"].get("month_end_stock_price")), to_num(r["per_share_data"].get(field))
+            if px and m and px > 0 and m > 0:
+                mults.append(px / m)
+        cur = to_num(ttm.get(field))
+        if cur is None and ann:
+            cur = to_num(ann[0]["per_share_data"].get(field))
+        if len(mults) >= 3 and cur and cur > 0:
+            mults.sort()
+            med = mults[len(mults) // 2] if len(mults) % 2 else (mults[len(mults) // 2 - 1] + mults[len(mults) // 2]) / 2
+            out[leg] = {"n": len(mults), "median_multiple": round(med, 2), "current": round(cur, 3), "value": round(med * cur, 2)}
+    vals = sorted(v["value"] for v in out.values())
+    blend = None
+    if len(vals) >= 2:
+        blend = vals[len(vals) // 2] if len(vals) % 2 else (vals[len(vals) // 2 - 1] + vals[len(vals) // 2]) / 2
+    growth = {}
+    if ann:
+        vq = ann[0].get("valuationand_quality") or {}
+        growth = {k: vq.get(k) for k in ("growth_revenue_per_share", "growth_per_share_eps", "ebitda_5y_growth")}
+    return {"blend": round(blend, 2) if blend else None, "legs": out, "years_of_history": len(ann),
+            "ttm_fields": sorted(k for k in ttm.keys())[:25], "growth": growth}
+
+
 def call(path, key):
     """One API request. Returns (parsed_json_or_None, http_status)."""
     req = urllib.request.Request(API_BASE + path, headers={
@@ -218,6 +256,7 @@ def main():
                 for d, src, sec in recs[:6]:
                     print("  DEBUG %s %s %s iv=%s price=%s fx=%s" % (sym, d, src, sec.get(METRIC),
                           sec.get("month_end_stock_price"), sec.get("forex_rate")))
+                print("  MODEL %s %s" % (sym, json.dumps(model_v0(payload))))
                 ttm = payload.get("ttm")
                 print("  DEBUG %s ttm=%s" % (sym, json.dumps(ttm)[:1500] if not isinstance(ttm, dict) else
                       json.dumps({k: (v if not isinstance(v, dict) else {kk: vv for kk, vv in v.items()
