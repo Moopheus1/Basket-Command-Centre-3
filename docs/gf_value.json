@@ -721,6 +721,6 @@
   "withValue": 53
  },
  "monthlyCap": 95,
- "lastError": null,
+ "lastError": "monthly cap of 95 requests reached for 2026-10",
  "metric": "intrinsic_value_projected_fcf"
 }
