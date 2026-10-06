@@ -19,6 +19,6 @@
   "success_test": "Washout entries (one per stock per 10 sessions) must reach +20% before -8% at least 5 points more often than any ADR>=5% name on the same dates, on >= 60 scored entries. Fixed 1 Oct 2026.",
   "verdict": "NOT ENOUGH DATA YET - 0/60 scored washout entries (each needs 20 sessions)"
  },
- "updated": "2026-10-06T05:53:20+00:00",
+ "updated": "2026-10-06T06:03:18+00:00",
  "verdict": "NOT ENOUGH DATA YET - 0/20 scored triggers (each needs 40 sessions after the breakout)"
 }
