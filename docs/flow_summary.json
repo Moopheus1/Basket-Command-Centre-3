@@ -1,9 +1,9 @@
 {
  "rules_version": "flow-v1-2026-10-01",
- "logged_rows": 328,
- "logged_sessions": 4,
+ "logged_rows": 404,
+ "logged_sessions": 5,
  "by_label": {},
  "verdict": "NOT ENOUGH DATA YET - 0/40 scored BULLISH readings at 10 sessions",
  "success_test": "BULLISH readings must beat the basket average over 10 sessions by >= 1.0 point on average AND in >= 55% of cases, on >= 40 scored readings. Fixed 1 Oct 2026.",
- "updated": "2026-10-06T20:26:09Z"
+ "updated": "2026-10-07T20:26:37Z"
 }
