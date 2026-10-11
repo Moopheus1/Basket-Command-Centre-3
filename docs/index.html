@@ -171,7 +171,6 @@
   <a href="#deathPanel">↓ Death cross</a>
   <a href="#performancePanel">↓ Performance</a>
   <a href="#detailedPanel">↓ Ticker cards</a>
-  <a href="#watchlistPanel">↓ Watchlist</a>
 </div>
 
 <div class="statgrid" id="stats"></div>
@@ -354,14 +353,8 @@
 
 <div class="panel" id="detailedPanel">
   <h2>Detailed ticker cards</h2>
-  <div class="desc">Last close, 3-month daily trend line, 1M/3M/1Y returns, 52-week range position, market cap, beta, volume vs 20-day average, daily RSI(14), weekly RSI(14), sector, and industry.</div>
+  <div class="desc">Last close, 3-month daily trend line, 1M/3M/1Y returns, 52-week range position, market cap, beta, volume vs 20-day average, daily RSI(14), weekly RSI(14), sector, and industry. Hide a ticker with the &times; on its card. To track a NEW ticker or restore a hidden one, edit <b>tickers.txt</b> or re-run the workflow in the GitHub repo.</div>
   <div class="dcards" id="dcards"></div>
-</div>
-
-<div class="panel" id="watchlistPanel">
-  <h2>Watchlist</h2>
-  <div class="desc">Hide a ticker with the &times; on its card. To track a NEW ticker or restore a hidden one, edit <b>tickers.txt</b> or re-run the workflow in the GitHub repo.</div>
-  <div class="cards" id="cards"></div>
 </div>
 
 <div class="jumpbar" id="jumpbarBottom" style="margin:14px 0 20px">
@@ -370,7 +363,6 @@
   <a href="#deathPanel">Death cross</a>
   <a href="#performancePanel">Performance</a>
   <a href="#detailedPanel">Ticker cards</a>
-  <a href="#watchlistPanel">Watchlist</a>
 </div>
 
 <script>
@@ -921,21 +913,8 @@ function render() {
   document.getElementById('stats').innerHTML = statsHtml;
   fitPillLinesToCard();
 
-  document.getElementById('cards').innerHTML = tickers.length ? tickers.map(t => {
-    const d = data[t];
-    const isB = BENCHMARKS.has(t);
-    const rm = PINNED.has(t) ? '' : '<button class="rm" title="Hide ' + t + '" onclick="hideTicker(\'' + t + '\')">×</button>';
-    let body;
-    if (!d) body = '<div class="price">no data</div>';
-    else if (d.error) body = '<div class="errmsg">' + esc(d.error).slice(0, 60) + '</div>';
-    else {
-      const vsSpy = spy && t !== 'SPY' ? d.daily - spy.daily : (t === 'SPY' ? 0 : null);
-      body = '<div class="price">' + fmtPrice(d.price) + ' <span class="chg">' + pctHtml(d.daily) + '</span></div>' +
-             '<div class="vs"><span>vs SPY</span>' + (vsSpy == null ? '—' : pctHtml(vsSpy, {sign:true, arrow:false})) + '</div>';
-    }
-    return '<div class="card' + (isB ? ' benchmark' : '') + '">' +
-      rm + '<div class="tick"><a class="tklink" href="' + rallyLink(t) + '" target="_blank" rel="noopener noreferrer">' + t + '</a>' + (isB ? ' <span class="etf">BENCH</span>' : (ETF_TICKERS.has(t) ? ' <span class="etf">ETF</span>' : '')) + '</div>' + body + '</div>';
-  }).join('') : '<div class="empty">No data yet. Run the "Update market data" workflow in GitHub Actions once, then reload.</div>';
+  // (Watchlist panel removed: the Detailed ticker cards and Performance table show the same tickers.)
+  if (!tickers.length) document.getElementById('stats').innerHTML = '<div class="empty">No data yet. Run the "Update market data" workflow in GitHub Actions once, then reload.</div>';
 
   clearDerivedCaches();
   renderDetailed(spy, tickers);
@@ -1567,7 +1546,7 @@ function cmfBadge(v) {
 }
 
 const INTRADAY_BREAKOUT_COLS = [
-  ['rank','#'], ['sym','Ticker'], ['price','Price'], ['daily','Day %'], ['cmf','CMF(20)'], ['volRatio','Vol vs 20d Median'],
+  ['rank','#'], ['sym','Ticker'], ['price','Price'], ['target','Target'], ['daily','Day %'], ['cmf','CMF(20)'], ['volRatio','Vol vs 20d Median'],
   ['vol','Volume'], ['mcap','Market Cap'],
   ['moveVsAtr','Move vs Typical Day'], ['offHighToday','Off Today\'s High'], ['premkt','Pre-Mkt Gap'], ['earningsFlag','Earnings'], ['newHigh','New 20D High'], ['rsi','RSI (14D)'], ['plan','Plan']
 ];
@@ -1632,7 +1611,7 @@ function renderIntradayBreakout(stocks) {
     const cmf = computeCMF(t);
     if (dayPct != null && dayPct >= BREAKOUT_MIN_DAY_PCT && cmf != null && cmf > CMF_MIN) {
       const f = fund[t] || {};
-      candidates.push({ sym: t, price: d.price, daily: dayPct, cmf: cmf, volRatio: volRatio, vol: d.vol, mcap: (f.mcap != null ? f.mcap : null),
+      candidates.push({ sym: t, price: d.price, target: panelTargetVal(t, d.price), daily: dayPct, cmf: cmf, volRatio: volRatio, vol: d.vol, mcap: (f.mcap != null ? f.mcap : null),
                          offHighToday: offHighToday, moveVsAtr: moveVsAtr,
                          premkt: f.premarketGapPct, earningsFlag: f.earningsFlag, newHigh: newHigh, rsi: d.rsi });
     }
@@ -1674,6 +1653,7 @@ function renderIntradayBreakout(stocks) {
       '<span style="font-weight:700;color:#374151" title="Today\'s move size divided by this stock\'s own typical daily range (ATR14). This is a MAGNITUDE measure only, not a directional signal - it does not mean the move is due to reverse. A stock already stretched relative to its own normal range can keep extending much further on a strong catalyst (e.g. earnings), or can reverse immediately - this number carries no information either way about which happens next. It only tells you how large today is FOR THIS STOCK compared to its own normal day, useful mainly for comparing across different tickers whose normal volatility differs a lot.">' + c.moveVsAtr.toFixed(1) + 'x</span>';
     return '<tr>' + rankCell + '<td><a class="tklink" href="' + rallyLink(c.sym) + '" target="_blank" rel="noopener noreferrer">' + c.sym + '</a></td>' +
       '<td>' + fmtPrice(c.price) + '</td>' +
+      '<td style="white-space:nowrap">' + panelTargetCell(c.sym, c.price) + '</td>' +
       '<td>' + pctHtml(c.daily, {sign:true, dp:1}) + '</td>' +
       '<td>' + cmfBadge(c.cmf) + '</td>' +
       '<td><span style="font-weight:700;color:#6b7280">' + c.volRatio.toFixed(1) + 'x</span></td>' +
@@ -1687,7 +1667,7 @@ function renderIntradayBreakout(stocks) {
                  '<span style="color:#6b7280">—</span>') + '</td>' +
       '<td>' + (c.newHigh ? '<span style="color:#0a9e5c;font-weight:700">Yes</span>' : '<span style="color:#6b7280">no</span>') + '</td>' +
       '<td>' + rsiBadge(c.rsi) + '</td><td>' + planChip(c.sym) + '</td></tr>';
-  }).join('') : '<tr><td colspan="15" class="empty">No stocks currently meet both the ' + BREAKOUT_MIN_DAY_PCT + '%+ move and the CMF(20) > ' + CMF_MIN + ' buying-pressure condition.</td></tr>';
+  }).join('') : '<tr><td colspan="16" class="empty">No stocks currently meet both the ' + BREAKOUT_MIN_DAY_PCT + '%+ move and the CMF(20) > ' + CMF_MIN + ' buying-pressure condition.</td></tr>';
 }
 function setIntradayBreakoutSort(col) {
   if (intradayBreakoutSortCol === col) intradayBreakoutSortDir = -intradayBreakoutSortDir; else { intradayBreakoutSortCol = col; intradayBreakoutSortDir = col === 'sym' ? 1 : -1; }
@@ -1695,7 +1675,7 @@ function setIntradayBreakoutSort(col) {
 }
 
 const BULL_FLAG_COLS = [
-  ['rank','#'], ['sym','Ticker'], ['price','Price'], ['daily','Day %'], ['offHigh','Off 20D High'],
+  ['rank','#'], ['sym','Ticker'], ['price','Price'], ['target','Target'], ['daily','Day %'], ['offHigh','Off 20D High'],
   ['cmf','CMF(20)'], ['sellVolRatio','Selling Vol vs Normal'], ['vol','Volume'], ['mcap','Market Cap'],
   ['rsi','RSI (14D)'], ['wrsi','Weekly RSI'], ['plan','Plan']
 ];
@@ -1754,7 +1734,7 @@ function renderBullFlag(stocks) {
 
     if (d.rsi == null || d.rsi < BULL_FLAG_RSI_MIN || d.rsi > BULL_FLAG_RSI_MAX) continue;
 
-    candidates.push({ sym: t, price: d.price, daily: d.daily, offHigh: offHigh, cmf: cmf, sellVolRatio: sellVolRatio, vol: d.vol, mcap: (fund[t] ? fund[t].mcap : null), rsi: d.rsi, wrsi: d.weeklyRsi });
+    candidates.push({ sym: t, price: d.price, target: panelTargetVal(t, d.price), daily: d.daily, offHigh: offHigh, cmf: cmf, sellVolRatio: sellVolRatio, vol: d.vol, mcap: (fund[t] ? fund[t].mcap : null), rsi: d.rsi, wrsi: d.weeklyRsi });
   }
 
   if (bullFlagSortCol !== 'rank') {
@@ -1778,6 +1758,7 @@ function renderBullFlag(stocks) {
   el.innerHTML = candidates.length ? candidates.map(c =>
     '<tr><td>' + c.rank + '</td><td><a class="tklink" href="' + rallyLink(c.sym) + '" target="_blank" rel="noopener noreferrer">' + c.sym + '</a></td>' +
     '<td>' + fmtPrice(c.price) + '</td>' +
+    '<td style="white-space:nowrap">' + panelTargetCell(c.sym, c.price) + '</td>' +
     '<td>' + pctHtml(c.daily, {sign:true, dp:1}) + '</td>' +
     '<td><span style="font-weight:700;color:#374151">-' + c.offHigh.toFixed(1) + '%</span></td>' +
     '<td>' + cmfBadge(c.cmf) + '</td>' +
@@ -1786,7 +1767,7 @@ function renderBullFlag(stocks) {
     '<td>' + fmtMcap(c.mcap) + '</td>' +
     '<td>' + rsiBadge(c.rsi) + '</td>' +
     '<td>' + rsiBadge(c.wrsi) + '</td><td>' + planChip(c.sym) + '</td></tr>'
-  ).join('') : '<tr><td colspan="12" class="empty">No stocks currently meet all four bull flag conditions.</td></tr>';
+  ).join('') : '<tr><td colspan="13" class="empty">No stocks currently meet all four bull flag conditions.</td></tr>';
 }
 function setBullFlagSort(col) {
   if (bullFlagSortCol === col) bullFlagSortDir = -bullFlagSortDir; else { bullFlagSortCol = col; bullFlagSortDir = col === 'sym' ? 1 : -1; }
@@ -2996,7 +2977,7 @@ async function loadData() {
                     earningsFlag: entry.earningsFlag || null };
     }
   } catch (e) {
-    document.getElementById('cards').innerHTML = '<div class="empty">Could not load data.json — ' + esc(e.message) + '</div>';
+    document.getElementById('stats').innerHTML = '<div class="empty" style="color:#b91c1c;font-weight:700">Could not load data.json — ' + esc(e.message) + '</div>';
     return false;
   }
   render();
@@ -3045,6 +3026,14 @@ function bbRiskSize(entry, stop) {
   const sh = Math.floor(TP_CAPITAL * 0.01 / risk);
   return sh.toLocaleString() + ' sh (' + (risk / entry * 100).toFixed(1) + '% stop)';
 }
+// Target-price cell for the ranked panels' tables: reference entry (last close) + 1.5x the normal daily move,
+// the same tested target the Trade plan card shows. Display only - it does not change which names qualify.
+const PANEL_TARGET_TIP = 'Take-profit level the panel was tested with: entry + 1.5x the normal daily move (ATR14), sold there or at the close of session 20, no stop. Shown from the last close; the tested entry is the NEXT open, so your real target moves with your fill. If the name is also in a second panel (a TAKE), the tested target is 2x instead - see its Trade plan card.';
+function panelTargetVal(sym, entry) { const t = profitTarget(sym, entry); return t ? t.tgt : null; }
+function panelTargetCell(sym, entry) {
+  const t = profitTarget(sym, entry); if (!t || !(entry > 0)) return '<span style="color:#6b7280">—</span>';
+  return '<span title="' + PANEL_TARGET_TIP + '"><strong>' + fmtPrice(t.tgt) + '</strong> <span style="color:#6b7280;font-size:11px">(+' + (t.tgt / entry * 100 - 100).toFixed(1) + '%)</span></span>';
+}
 function bbTP(sym, entry) {
   const t = profitTarget(sym, entry); if (!t) return '—';
   return '<strong>' + fmtNum2(t.tgt) + '</strong> <span style="color:#6b7280;font-size:11px">(+' + (t.tgt / entry * 100 - 100).toFixed(1) + '%)</span>';
@@ -3087,15 +3076,15 @@ function renderBBPanel() {
   // setups
   const su = bbData.setups || [];
   html += '<h3 style="font-size:14px;margin:12px 0 4px">In a base now &mdash; checklist passes, waiting for the trigger price (' + su.length + ')</h3>' + (su.length
-    ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Close</th><th>Price now</th><th>Trigger price</th><th>To trigger</th><th title="Buy on a break above the trigger price, stop at the base low, risk 1% of capital">Proposed size</th><th>Base</th><th>Prior run</th><th>ADR</th><th>8 / 21 / 50 EMA</th><th>Earnings</th><th>Flow</th><th style="text-align:left">Other panels</th></tr></thead><tbody>' +
-      su.map(r => '<tr><td style="text-align:left;font-weight:700">' + tkA(r.sym) + '</td><td>' + fmtNum2(r.close) + '</td><td>' + priceNowHtml(r.sym) + '</td><td>' + fmtNum2(r.base.pivot) + '</td><td>+' + r.to_pivot_pct.toFixed(1) + '%</td><td style="white-space:nowrap">' + bbSetupSize(r) + '</td><td>' + r.base.days + 'd · ' + r.base.range_pct.toFixed(1) + '%' + (r.base.range_pct > 15 ? ' <span style="color:#b45309">wide</span>' : '') + '</td><td>+' + r.base.prior_move_pct.toFixed(0) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td style="white-space:nowrap">' + fmtNum2(r.ema8) + ' / ' + fmtNum2(r.ema21) + ' / ' + fmtNum2(r.ema50) + '</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
+    ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Close</th><th>Price now</th><th>Trigger price</th><th>To trigger</th><th title="Not a live target: the name has not broken out. This is where the page-standard take profit would sit IF it breaks out and you were filled at the trigger price: trigger price + 1.5x the normal daily move. The thesis exit is different - hold until a close below the 21 EMA.">Target if triggered</th><th title="Buy on a break above the trigger price, stop at the base low, risk 1% of capital">Proposed size</th><th>Base</th><th>Prior run</th><th>ADR</th><th>8 / 21 / 50 EMA</th><th>Earnings</th><th>Flow</th><th style="text-align:left">Other panels</th></tr></thead><tbody>' +
+      su.map(r => '<tr><td style="text-align:left;font-weight:700">' + tkA(r.sym) + '</td><td>' + fmtNum2(r.close) + '</td><td>' + priceNowHtml(r.sym) + '</td><td>' + fmtNum2(r.base.pivot) + '</td><td>+' + r.to_pivot_pct.toFixed(1) + '%</td><td style="white-space:nowrap">' + bbTP(r.sym, r.base.pivot) + '</td><td style="white-space:nowrap">' + bbSetupSize(r) + '</td><td>' + r.base.days + 'd · ' + r.base.range_pct.toFixed(1) + '%' + (r.base.range_pct > 15 ? ' <span style="color:#b45309">wide</span>' : '') + '</td><td>+' + r.base.prior_move_pct.toFixed(0) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td style="white-space:nowrap">' + fmtNum2(r.ema8) + ' / ' + fmtNum2(r.ema21) + ' / ' + fmtNum2(r.ema50) + '</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
     : '<div class="empty" style="padding:8px">No name passes the full checklist with a tight base today.</div>');
   // reverse-engineered list: volatile washouts (R4)
   const wo = bbData.washouts || [];
   html += '<h3 style="font-size:14px;margin:14px 0 4px">Volatile washouts &mdash; the rule the data found (' + wo.length + ')</h3>' +
     '<div style="color:#6b7280;margin-bottom:6px">ADR 5%+, close 20%+ below the 200 EMA, 50 EMA falling. Tested entry: next open; tested exit: +20% target or &minus;8% stop within 20 sessions. Sorted deepest first.</div>' + (wo.length
-    ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Close</th><th>Price now</th><th>vs 200 EMA</th><th>50 EMA, 10-day change</th><th>From 52-week high</th><th>ADR</th><th>Days in list</th><th>Earnings</th><th>Flow</th><th style="text-align:left">Other panels</th></tr></thead><tbody>' +
-      wo.map(r => '<tr><td style="text-align:left;font-weight:700">' + tkA(r.sym) + (r.split_flag ? ' <span title="A one-day move matched a stock-split ratio; prices here are not split-adjusted, so verify on a chart" style="color:#b45309">⚠ split?</span>' : '') + '</td><td>' + fmtNum2(r.close) + '</td><td>' + priceNowHtml(r.sym) + '</td><td>' + r.vs_e200_pct.toFixed(1) + '%</td><td>' + (r.e50_slope_pct >= 0 ? '+' : '') + r.e50_slope_pct.toFixed(1) + '%</td><td>' + r.from_52w_high_pct.toFixed(1) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td>' + (r.days_in_list > 40 ? '<span style="color:#b45309;font-weight:700">' + r.days_in_list + '</span>' : r.days_in_list) + '</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
+    ? '<div style="overflow-x:auto"><table><thead><tr><th style="text-align:left">Ticker</th><th>Close</th><th>Price now</th><th title="The tested exit for this list: +20% from the entry. Shown from the last close; the tested entry is the next open.">Target (+20%)</th><th title="The tested exit for this list: -8% from the entry, checked before the target. It was hit first 53% of the time in the test.">Stop (&minus;8%)</th><th>vs 200 EMA</th><th>50 EMA, 10-day change</th><th>From 52-week high</th><th>ADR</th><th>Days in list</th><th>Earnings</th><th>Flow</th><th style="text-align:left">Other panels</th></tr></thead><tbody>' +
+      wo.map(r => '<tr><td style="text-align:left;font-weight:700">' + tkA(r.sym) + (r.split_flag ? ' <span title="A one-day move matched a stock-split ratio; prices here are not split-adjusted, so verify on a chart" style="color:#b45309">⚠ split?</span>' : '') + '</td><td>' + fmtNum2(r.close) + '</td><td>' + priceNowHtml(r.sym) + '</td><td><strong>' + fmtNum2(r.close * 1.20) + '</strong></td><td>' + fmtNum2(r.close * 0.92) + '</td><td>' + r.vs_e200_pct.toFixed(1) + '%</td><td>' + (r.e50_slope_pct >= 0 ? '+' : '') + r.e50_slope_pct.toFixed(1) + '%</td><td>' + r.from_52w_high_pct.toFixed(1) + '%</td><td>' + r.adr_pct.toFixed(1) + '%</td><td>' + (r.days_in_list > 40 ? '<span style="color:#b45309;font-weight:700">' + r.days_in_list + '</span>' : r.days_in_list) + '</td><td>' + earn(r.days_to_earnings) + '</td><td>' + flow(r.sym) + '</td><td style="text-align:left">' + pnl(r.sym) + '</td></tr>').join('') + '</tbody></table></div>'
     : '<div class="empty" style="padding:8px">No volatile name is 20%+ below its 200 EMA with a falling 50 EMA today.</div>');
   // forward test
   const fs = bbSummary;
@@ -3247,7 +3236,7 @@ function pnlLoad() { try { return new Set(JSON.parse(localStorage.getItem(PNL_KE
 function pnlSave(set) { try { localStorage.setItem(PNL_KEY, JSON.stringify([...set])); } catch (e) {} }
 // Panels that start hidden: long, and they repeat what the Performance overview table already
 // shows for every ticker. Opening one is remembered per browser, like any other panel choice.
-const PNL_DEFAULT_COLLAPSED = new Set(['detailedPanel', 'watchlistPanel']);
+const PNL_DEFAULT_COLLAPSED = new Set(['detailedPanel']);
 const PNL_OPENED_KEY = 'bcc3_opened_panels';
 function pnlOpenedLoad() { try { return new Set(JSON.parse(localStorage.getItem(PNL_OPENED_KEY) || '[]')); } catch (e) { return new Set(); } }
 function pnlOpenedSave(set) { try { localStorage.setItem(PNL_OPENED_KEY, JSON.stringify([...set])); } catch (e) {} }
