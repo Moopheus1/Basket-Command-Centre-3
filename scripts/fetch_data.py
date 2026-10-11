@@ -29,6 +29,7 @@ authoritative refresh and a silent stale entry would hide a real problem.
 Uses yfinance (Yahoo Finance).
 """
 import json
+import math
 import os
 import time
 from datetime import datetime, timezone, date
@@ -43,6 +44,46 @@ import premarket_watch
 
 DATA_PATH = "docs/data.json"
 ET = ZoneInfo("America/New_York")
+
+
+def _finite(v):
+    """True for a real, usable number (not None, not NaN, not +/-inf)."""
+    return isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
+
+
+def valid_bar(bar):
+    """A bar is usable only if its timestamp and all four prices are real numbers.
+    Yahoo sometimes returns a row whose Close (or another price) is NaN - on
+    2026-10-10 it did so for the latest bar of every ticker, and because NaN is
+    not valid JSON the browser rejected the whole data.json and the dashboard
+    showed no tickers at all. Such a bar is treated as missing, never written."""
+    return (isinstance(bar, (list, tuple)) and len(bar) >= 6
+            and _finite(bar[0]) and all(_finite(v) for v in bar[1:5]))
+
+
+def clean_bars(bars):
+    """Drop unusable bars; a missing/NaN volume on an otherwise good bar becomes 0."""
+    out = []
+    for b in bars or []:
+        if not valid_bar(b):
+            continue
+        b = list(b)
+        if not _finite(b[5]):
+            b[5] = 0
+        out.append(b)
+    return out
+
+
+def sanitize(obj):
+    """Final safety net before writing: replace any NaN/inf left anywhere in the
+    output (e.g. a NaN beta or gap%) with null, so the file is always valid JSON."""
+    if isinstance(obj, float):
+        return obj if math.isfinite(obj) else None
+    if isinstance(obj, dict):
+        return {k: sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [sanitize(v) for v in obj]
+    return obj
 
 
 def read_tickers(path="tickers.txt"):
@@ -119,6 +160,7 @@ def fetch_full(symbol):
             ])
         except (ValueError, TypeError):
             continue
+    bars = clean_bars(bars)  # drops any row Yahoo returned with a NaN price
     if len(bars) < 2:
         raise ValueError("not enough valid bars")
     info = {}
@@ -168,20 +210,26 @@ def fetch_today_bar(symbol):
     midnight_et = pd.Timestamp(d, tz="America/New_York")
     ts = int(midnight_et.timestamp())
     vol_sum = h["Volume"].sum()
-    return [
+    # Use the first/last minute that actually has a price: a NaN in the first or
+    # last 1-minute row must not become the day's open or close.
+    opens, closes = h["Open"].dropna(), h["Close"].dropna()
+    if opens.empty or closes.empty:
+        return None
+    bar = [
         ts,
-        round(float(h["Open"].iloc[0]), 4),
-        round(float(h["High"].max()), 4),
+        round(float(opens.iloc[0]), 4),
+        round(float(h["High"].max()), 4),   # pandas max/min already ignore NaN
         round(float(h["Low"].min()), 4),
-        round(float(h["Close"].iloc[-1]), 4),
+        round(float(closes.iloc[-1]), 4),
         int(vol_sum) if vol_sum == vol_sum else 0,  # NaN check
     ]
+    return bar if valid_bar(bar) else None  # None = skip, prior data is kept
 
 
 def merge_today_bar(existing_bars, today_bar):
     """Replace today's bar if the last existing bar is already today,
     otherwise append it. existing_bars may be empty (new ticker)."""
-    bars = list(existing_bars)
+    bars = clean_bars(existing_bars)  # also clears any bad bar left by an earlier run
     if bars and bars[-1][0] == today_bar[0]:
         bars[-1] = today_bar
     else:
@@ -189,12 +237,25 @@ def merge_today_bar(existing_bars, today_bar):
     return bars
 
 
-def run_eod(tickers):
+def keep_newer_prior_bars(new_bars, prior_bars):
+    """If the fresh history stops short of what we already had (because Yahoo's
+    newest row was unusable and got dropped), keep the valid newer bars from the
+    previous data.json rather than losing that session until the next fetch."""
+    if not new_bars:
+        return new_bars
+    last_ts = new_bars[-1][0]
+    return new_bars + [b for b in clean_bars(prior_bars) if b[0] > last_ts]
+
+
+def run_eod(tickers, existing=None):
     out = {"asof": datetime.now(timezone.utc).isoformat(timespec="seconds"), "tickers": {}}
+    prior_tickers = (existing or {}).get("tickers", {})
     failed = []
     for sym in tickers:
         try:
-            out["tickers"][sym] = fetch_full(sym)
+            entry = fetch_full(sym)
+            entry["bars"] = keep_newer_prior_bars(entry["bars"], (prior_tickers.get(sym) or {}).get("bars"))
+            out["tickers"][sym] = entry
             print(f"OK   {sym}: {len(out['tickers'][sym]['bars'])} bars")
         except Exception as e:
             failed.append(sym)
@@ -318,7 +379,7 @@ def main():
     else:
         if mode == "intraday":
             print("[intraday] no existing docs/data.json found — falling back to full eod fetch")
-        out = run_eod(tickers)
+        out = run_eod(tickers, existing)
 
     # Health score check runs on its OWN schedule (the 4am ET early-ping
     # cron - see .github/workflows/update-data.yml), deliberately
@@ -357,9 +418,25 @@ def main():
     except Exception as e:
         print(f"[alerts] check failed, not blocking data write: {e}")
 
+    # SAFEGUARD: never publish a data.json the browser cannot read.
+    #  1. Drop any bar with a NaN price from every ticker (covers bars carried over
+    #     from an earlier bad run as well as this one), then null out any other NaN.
+    #  2. Serialise with allow_nan=False BEFORE opening the file, so if anything
+    #     non-finite were still present the run fails here and the last good
+    #     docs/data.json stays in place (opening the file first would truncate it).
+    dropped = 0
+    for sym, entry in out["tickers"].items():
+        if isinstance(entry, dict) and isinstance(entry.get("bars"), list):
+            cleaned = clean_bars(entry["bars"])
+            dropped += len(entry["bars"]) - len(cleaned)
+            entry["bars"] = cleaned
+    if dropped:
+        print(f"[safeguard] dropped {dropped} bar(s) with a missing/NaN price")
+    payload = json.dumps(sanitize(out), separators=(",", ":"), allow_nan=False)
+
     os.makedirs("docs", exist_ok=True)
     with open(DATA_PATH, "w") as f:
-        json.dump(out, f, separators=(",", ":"))
+        f.write(payload)
     print(f"Wrote {DATA_PATH} (mode={mode}, health_check={is_health_check_run or bootstrap}, "
           f"premarket_check={is_premarket_check_run or bootstrap})")
 
