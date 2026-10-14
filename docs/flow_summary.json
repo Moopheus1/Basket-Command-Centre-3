@@ -1,34 +1,34 @@
 {
  "rules_version": "flow-v1-2026-10-01",
- "logged_rows": 726,
- "logged_sessions": 9,
+ "logged_rows": 811,
+ "logged_sessions": 10,
  "by_label": {
   "BULLISH": {
    "5d": {
-    "n": 97,
-    "avg_return_pct": -3.02,
-    "avg_vs_basket_pct": 0.52,
-    "right_direction_vs_basket_pct": 53.6
+    "n": 118,
+    "avg_return_pct": -4.65,
+    "avg_vs_basket_pct": -0.02,
+    "right_direction_vs_basket_pct": 53.4
    }
   },
   "BEARISH": {
    "5d": {
-    "n": 93,
-    "avg_return_pct": -1.85,
-    "avg_vs_basket_pct": 1.77,
-    "right_direction_vs_basket_pct": 38.7
+    "n": 122,
+    "avg_return_pct": -2.74,
+    "avg_vs_basket_pct": 2.33,
+    "right_direction_vs_basket_pct": 36.9
    }
   },
   "NEUTRAL": {
    "5d": {
-    "n": 138,
-    "avg_return_pct": -2.93,
-    "avg_vs_basket_pct": 0.7,
-    "right_direction_vs_basket_pct": 53.6
+    "n": 164,
+    "avg_return_pct": -3.94,
+    "avg_vs_basket_pct": 0.65,
+    "right_direction_vs_basket_pct": 53.7
    }
   }
  },
  "verdict": "NOT ENOUGH DATA YET - 0/40 scored BULLISH readings at 10 sessions",
  "success_test": "BULLISH readings must beat the basket average over 10 sessions by >= 1.0 point on average AND in >= 55% of cases, on >= 40 scored readings. Fixed 1 Oct 2026.",
- "updated": "2026-10-13T20:27:08Z"
+ "updated": "2026-10-14T20:26:00Z"
 }
