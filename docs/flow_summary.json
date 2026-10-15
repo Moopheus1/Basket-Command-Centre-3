@@ -1,34 +1,52 @@
 {
  "rules_version": "flow-v1-2026-10-01",
- "logged_rows": 811,
- "logged_sessions": 10,
+ "logged_rows": 897,
+ "logged_sessions": 11,
  "by_label": {
   "BULLISH": {
    "5d": {
-    "n": 118,
-    "avg_return_pct": -4.65,
-    "avg_vs_basket_pct": -0.02,
-    "right_direction_vs_basket_pct": 53.4
+    "n": 144,
+    "avg_return_pct": -5.06,
+    "avg_vs_basket_pct": -0.04,
+    "right_direction_vs_basket_pct": 52.1
+   },
+   "10d": {
+    "n": 22,
+    "avg_return_pct": -6.58,
+    "avg_vs_basket_pct": 1.31,
+    "right_direction_vs_basket_pct": 45.5
    }
   },
   "BEARISH": {
    "5d": {
-    "n": 122,
-    "avg_return_pct": -2.74,
-    "avg_vs_basket_pct": 2.33,
-    "right_direction_vs_basket_pct": 36.9
+    "n": 154,
+    "avg_return_pct": -3.04,
+    "avg_vs_basket_pct": 2.38,
+    "right_direction_vs_basket_pct": 38.3
+   },
+   "10d": {
+    "n": 23,
+    "avg_return_pct": -5.84,
+    "avg_vs_basket_pct": 2.05,
+    "right_direction_vs_basket_pct": 43.5
    }
   },
   "NEUTRAL": {
    "5d": {
-    "n": 164,
-    "avg_return_pct": -3.94,
+    "n": 188,
+    "avg_return_pct": -4.14,
+    "avg_vs_basket_pct": 0.73,
+    "right_direction_vs_basket_pct": 53.2
+   },
+   "10d": {
+    "n": 32,
+    "avg_return_pct": -7.25,
     "avg_vs_basket_pct": 0.65,
-    "right_direction_vs_basket_pct": 53.7
+    "right_direction_vs_basket_pct": 53.1
    }
   }
  },
- "verdict": "NOT ENOUGH DATA YET - 0/40 scored BULLISH readings at 10 sessions",
+ "verdict": "NOT ENOUGH DATA YET - 22/40 scored BULLISH readings at 10 sessions",
  "success_test": "BULLISH readings must beat the basket average over 10 sessions by >= 1.0 point on average AND in >= 55% of cases, on >= 40 scored readings. Fixed 1 Oct 2026.",
- "updated": "2026-10-14T20:26:00Z"
+ "updated": "2026-10-15T20:25:55Z"
 }
