@@ -1,8 +1,8 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-10-16T19:56:37.111Z",
- "logged_rows": 177,
- "logged_days": 15,
+ "updated": "2026-10-16T22:58:14.487Z",
+ "logged_rows": 186,
+ "logged_days": 16,
  "scored_signals": 0,
  "success_test": "TAKE hit rate >= random + 10 points AND TAKE average return > random (random scored with the same 2.0x target), on >= 20 scored TAKEs",
  "verdict": "NOT ENOUGH DATA YET — need 20+ scored TAKE signals",
