@@ -1,52 +1,52 @@
 {
  "rules_version": "flow-v1-2026-10-01",
- "logged_rows": 897,
- "logged_sessions": 11,
+ "logged_rows": 985,
+ "logged_sessions": 12,
  "by_label": {
   "BULLISH": {
    "5d": {
-    "n": 144,
-    "avg_return_pct": -5.06,
-    "avg_vs_basket_pct": -0.04,
-    "right_direction_vs_basket_pct": 52.1
+    "n": 169,
+    "avg_return_pct": -6.06,
+    "avg_vs_basket_pct": 0.01,
+    "right_direction_vs_basket_pct": 50.9
    },
    "10d": {
-    "n": 22,
-    "avg_return_pct": -6.58,
-    "avg_vs_basket_pct": 1.31,
-    "right_direction_vs_basket_pct": 45.5
+    "n": 50,
+    "avg_return_pct": -9.23,
+    "avg_vs_basket_pct": 1.61,
+    "right_direction_vs_basket_pct": 48.0
    }
   },
   "BEARISH": {
    "5d": {
-    "n": 154,
-    "avg_return_pct": -3.04,
-    "avg_vs_basket_pct": 2.38,
-    "right_direction_vs_basket_pct": 38.3
+    "n": 186,
+    "avg_return_pct": -3.91,
+    "avg_vs_basket_pct": 2.66,
+    "right_direction_vs_basket_pct": 36.0
    },
    "10d": {
-    "n": 23,
-    "avg_return_pct": -5.84,
-    "avg_vs_basket_pct": 2.05,
-    "right_direction_vs_basket_pct": 43.5
+    "n": 45,
+    "avg_return_pct": -9.25,
+    "avg_vs_basket_pct": 1.22,
+    "right_direction_vs_basket_pct": 46.7
    }
   },
   "NEUTRAL": {
    "5d": {
-    "n": 188,
-    "avg_return_pct": -4.14,
-    "avg_vs_basket_pct": 0.73,
-    "right_direction_vs_basket_pct": 53.2
+    "n": 213,
+    "avg_return_pct": -5.19,
+    "avg_vs_basket_pct": 0.53,
+    "right_direction_vs_basket_pct": 52.1
    },
    "10d": {
-    "n": 32,
-    "avg_return_pct": -7.25,
-    "avg_vs_basket_pct": 0.65,
-    "right_direction_vs_basket_pct": 53.1
+    "n": 67,
+    "avg_return_pct": -9.74,
+    "avg_vs_basket_pct": 0.91,
+    "right_direction_vs_basket_pct": 53.7
    }
   }
  },
- "verdict": "NOT ENOUGH DATA YET - 22/40 scored BULLISH readings at 10 sessions",
+ "verdict": "FAIL - BULLISH flow did not beat the basket by enough to be worth using",
  "success_test": "BULLISH readings must beat the basket average over 10 sessions by >= 1.0 point on average AND in >= 55% of cases, on >= 40 scored readings. Fixed 1 Oct 2026.",
- "updated": "2026-10-15T20:25:55Z"
+ "updated": "2026-10-16T23:01:40Z"
 }
