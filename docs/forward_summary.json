@@ -1,26 +1,92 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-10-23T17:36:07.851Z",
- "logged_rows": 220,
- "logged_days": 20,
- "scored_signals": 0,
+ "updated": "2026-10-23T20:39:51.737Z",
+ "logged_rows": 229,
+ "logged_days": 21,
+ "scored_signals": 11,
  "success_test": "TAKE hit rate >= random + 10 points AND TAKE average return > random (random scored with the same 2.0x target), on >= 20 scored TAKEs",
  "verdict": "NOT ENOUGH DATA YET — need 20+ scored TAKE signals",
  "random_baseline": {
-  "n": 0
+  "n": 119,
+  "hit_rate": 0.58,
+  "avg_return": -0.0733,
+  "median_dip": -0.06,
+  "bad_case_dip": -0.2606
  },
  "random_baseline_2x": {
-  "n": 0
+  "n": 119,
+  "hit_rate": 0.513,
+  "avg_return": -0.0796,
+  "median_dip": -0.0648,
+  "bad_case_dip": -0.2886
  },
  "all_signals": {
-  "n": 0
+  "n": 11,
+  "hit_rate": 0.727,
+  "avg_return": -0.0086,
+  "median_dip": -0.0168,
+  "bad_case_dip": -0.1522
  },
  "take": {
   "n": 0
  },
- "by_n_panels": {},
- "by_size": {},
- "by_panel": {},
- "by_qqq_above_50d": {},
- "by_breadth": {}
+ "by_n_panels": {
+  "1 panel": {
+   "n": 11,
+   "hit_rate": 0.727,
+   "avg_return": -0.0086,
+   "median_dip": -0.0168,
+   "bad_case_dip": -0.1522
+  }
+ },
+ "by_size": {
+  "FULL": {
+   "n": 10,
+   "hit_rate": 0.7,
+   "avg_return": -0.0176,
+   "median_dip": -0.0168,
+   "bad_case_dip": -0.1522
+  },
+  "IGNORE": {
+   "n": 1,
+   "hit_rate": 1,
+   "avg_return": 0.0817,
+   "median_dip": -0.0065,
+   "bad_case_dip": -0.0065
+  }
+ },
+ "by_panel": {
+  "Weekly Pick": {
+   "n": 3,
+   "hit_rate": 0.667,
+   "avg_return": -0.0634,
+   "median_dip": -0.0118,
+   "bad_case_dip": -0.2986
+  },
+  "Golden Cross": {
+   "n": 8,
+   "hit_rate": 0.75,
+   "avg_return": 0.012,
+   "median_dip": -0.0168,
+   "bad_case_dip": -0.0725
+  }
+ },
+ "by_qqq_above_50d": {
+  "QQQ above 50d": {
+   "n": 11,
+   "hit_rate": 0.727,
+   "avg_return": -0.0086,
+   "median_dip": -0.0168,
+   "bad_case_dip": -0.1522
+  }
+ },
+ "by_breadth": {
+  "breadth > 50%": {
+   "n": 11,
+   "hit_rate": 0.727,
+   "avg_return": -0.0086,
+   "median_dip": -0.0168,
+   "bad_case_dip": -0.1522
+  }
+ }
 }
