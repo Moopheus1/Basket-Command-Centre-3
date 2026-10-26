@@ -1,6 +1,6 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-10-26T08:23:22.667Z",
+ "updated": "2026-10-26T08:37:12.329Z",
  "logged_rows": 230,
  "logged_days": 21,
  "scored_signals": 11,
@@ -18,7 +18,7 @@
   "hit_rate": 0.513,
   "avg_return": -0.0796,
   "median_dip": -0.0648,
-  "bad_case_dip": -0.2886
+  "bad_case_dip": -0.2887
  },
  "all_signals": {
   "n": 11,
@@ -59,7 +59,7 @@
   "Weekly Pick": {
    "n": 3,
    "hit_rate": 0.667,
-   "avg_return": -0.0634,
+   "avg_return": -0.0635,
    "median_dip": -0.0118,
    "bad_case_dip": -0.2986
   },
