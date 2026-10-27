@@ -1,6 +1,6 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-10-27T08:40:32.727Z",
+ "updated": "2026-10-27T08:43:27.251Z",
  "logged_rows": 240,
  "logged_days": 22,
  "scored_signals": 17,
@@ -9,14 +9,14 @@
  "random_baseline": {
   "n": 238,
   "hit_rate": 0.588,
-  "avg_return": -0.0688,
+  "avg_return": -0.0689,
   "median_dip": -0.0515,
   "bad_case_dip": -0.2601
  },
  "random_baseline_2x": {
   "n": 238,
   "hit_rate": 0.504,
-  "avg_return": -0.0792,
+  "avg_return": -0.0793,
   "median_dip": -0.0646,
   "bad_case_dip": -0.2757
  },
