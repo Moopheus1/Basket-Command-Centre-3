@@ -1,52 +1,52 @@
 {
  "rules_version": "flow-v1-2026-10-01",
- "logged_rows": 1453,
- "logged_sessions": 18,
+ "logged_rows": 1537,
+ "logged_sessions": 19,
  "by_label": {
   "BULLISH": {
    "5d": {
-    "n": 303,
-    "avg_return_pct": -5.85,
-    "avg_vs_basket_pct": -0.41,
-    "right_direction_vs_basket_pct": 47.5
+    "n": 331,
+    "avg_return_pct": -5.31,
+    "avg_vs_basket_pct": -0.46,
+    "right_direction_vs_basket_pct": 47.4
    },
    "10d": {
-    "n": 192,
-    "avg_return_pct": -11.83,
-    "avg_vs_basket_pct": -0.01,
-    "right_direction_vs_basket_pct": 49.5
+    "n": 211,
+    "avg_return_pct": -11.36,
+    "avg_vs_basket_pct": -0.03,
+    "right_direction_vs_basket_pct": 49.3
    }
   },
   "BEARISH": {
    "5d": {
-    "n": 350,
-    "avg_return_pct": -3.96,
-    "avg_vs_basket_pct": 1.77,
-    "right_direction_vs_basket_pct": 41.4
+    "n": 373,
+    "avg_return_pct": -3.65,
+    "avg_vs_basket_pct": 1.63,
+    "right_direction_vs_basket_pct": 42.1
    },
    "10d": {
-    "n": 214,
-    "avg_return_pct": -8.18,
-    "avg_vs_basket_pct": 3.56,
-    "right_direction_vs_basket_pct": 38.8
+    "n": 245,
+    "avg_return_pct": -8.09,
+    "avg_vs_basket_pct": 2.98,
+    "right_direction_vs_basket_pct": 40.0
    }
   },
   "NEUTRAL": {
    "5d": {
-    "n": 411,
-    "avg_return_pct": -4.62,
-    "avg_vs_basket_pct": 0.42,
-    "right_direction_vs_basket_pct": 51.6
+    "n": 434,
+    "avg_return_pct": -4.31,
+    "avg_vs_basket_pct": 0.38,
+    "right_direction_vs_basket_pct": 51.2
    },
    "10d": {
-    "n": 242,
-    "avg_return_pct": -10.61,
-    "avg_vs_basket_pct": 1.12,
-    "right_direction_vs_basket_pct": 52.9
+    "n": 270,
+    "avg_return_pct": -10.12,
+    "avg_vs_basket_pct": 1.06,
+    "right_direction_vs_basket_pct": 52.6
    }
   }
  },
  "verdict": "FAIL - BULLISH flow did not beat the basket by enough to be worth using",
  "success_test": "BULLISH readings must beat the basket average over 10 sessions by >= 1.0 point on average AND in >= 55% of cases, on >= 40 scored readings. Fixed 1 Oct 2026.",
- "updated": "2026-10-26T20:25:46Z"
+ "updated": "2026-10-27T20:25:41Z"
 }
