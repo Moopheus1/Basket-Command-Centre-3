@@ -1,6 +1,6 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-10-28T08:37:26.322Z",
+ "updated": "2026-10-28T08:40:17.191Z",
  "logged_rows": 250,
  "logged_days": 23,
  "scored_signals": 19,
@@ -94,7 +94,7 @@
   "Intraday Breakout": {
    "n": 2,
    "hit_rate": 0.5,
-   "avg_return": -0.0621,
+   "avg_return": -0.062,
    "median_dip": -0.0137,
    "bad_case_dip": -0.2632
   }
