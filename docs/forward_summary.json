@@ -1,6 +1,6 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-10-30T22:29:29.650Z",
+ "updated": "2026-10-30T23:58:30.345Z",
  "logged_rows": 278,
  "logged_days": 26,
  "scored_signals": 29,
@@ -23,7 +23,7 @@
  "all_signals": {
   "n": 29,
   "hit_rate": 0.724,
-  "avg_return": -0.0147,
+  "avg_return": -0.0148,
   "median_dip": -0.0168,
   "bad_case_dip": -0.1262
  },
@@ -34,7 +34,7 @@
   "1 panel": {
    "n": 29,
    "hit_rate": 0.724,
-   "avg_return": -0.0147,
+   "avg_return": -0.0148,
    "median_dip": -0.0168,
    "bad_case_dip": -0.1262
   }
@@ -43,7 +43,7 @@
   "FULL": {
    "n": 26,
    "hit_rate": 0.731,
-   "avg_return": -0.0111,
+   "avg_return": -0.0112,
    "median_dip": -0.0137,
    "bad_case_dip": -0.1262
   },
@@ -57,7 +57,7 @@
   "HALF": {
    "n": 2,
    "hit_rate": 0.5,
-   "avg_return": -0.1096,
+   "avg_return": -0.1099,
    "median_dip": -0.0773,
    "bad_case_dip": -0.3526
   }
@@ -103,7 +103,7 @@
   "QQQ above 50d": {
    "n": 29,
    "hit_rate": 0.724,
-   "avg_return": -0.0147,
+   "avg_return": -0.0148,
    "median_dip": -0.0168,
    "bad_case_dip": -0.1262
   }
@@ -112,7 +112,7 @@
   "breadth > 50%": {
    "n": 29,
    "hit_rate": 0.724,
-   "avg_return": -0.0147,
+   "avg_return": -0.0148,
    "median_dip": -0.0168,
    "bad_case_dip": -0.1262
   }
