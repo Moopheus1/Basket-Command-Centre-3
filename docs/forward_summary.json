@@ -1,6 +1,6 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-10-30T08:37:19.566Z",
+ "updated": "2026-10-30T08:40:10.709Z",
  "logged_rows": 266,
  "logged_days": 25,
  "scored_signals": 20,
@@ -66,7 +66,7 @@
   "Weekly Pick": {
    "n": 6,
    "hit_rate": 0.667,
-   "avg_return": -0.0664,
+   "avg_return": -0.0665,
    "median_dip": -0.0115,
    "bad_case_dip": -0.2986
   },
