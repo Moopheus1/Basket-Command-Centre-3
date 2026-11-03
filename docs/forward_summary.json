@@ -1,51 +1,51 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-03T21:13:41.111Z",
- "logged_rows": 289,
- "logged_days": 27,
- "scored_signals": 33,
+ "updated": "2026-11-03T21:23:57.327Z",
+ "logged_rows": 295,
+ "logged_days": 28,
+ "scored_signals": 35,
  "success_test": "TAKE hit rate >= random + 10 points AND TAKE average return > random (random scored with the same 2.0x target), on >= 20 scored TAKEs",
  "verdict": "NOT ENOUGH DATA YET — need 20+ scored TAKE signals",
  "random_baseline": {
-  "n": 720,
-  "hit_rate": 0.479,
-  "avg_return": -0.0968,
-  "median_dip": -0.1041,
-  "bad_case_dip": -0.2986
+  "n": 840,
+  "hit_rate": 0.452,
+  "avg_return": -0.1046,
+  "median_dip": -0.141,
+  "bad_case_dip": -0.3022
  },
  "random_baseline_2x": {
-  "n": 720,
-  "hit_rate": 0.386,
-  "avg_return": -0.1079,
-  "median_dip": -0.1622,
-  "bad_case_dip": -0.3063
+  "n": 840,
+  "hit_rate": 0.367,
+  "avg_return": -0.1144,
+  "median_dip": -0.1733,
+  "bad_case_dip": -0.308
  },
  "all_signals": {
-  "n": 33,
-  "hit_rate": 0.727,
-  "avg_return": -0.0186,
-  "median_dip": -0.022,
-  "bad_case_dip": -0.1262
+  "n": 35,
+  "hit_rate": 0.714,
+  "avg_return": -0.0185,
+  "median_dip": -0.0235,
+  "bad_case_dip": -0.1522
  },
  "take": {
   "n": 0
  },
  "by_n_panels": {
   "1 panel": {
-   "n": 33,
-   "hit_rate": 0.727,
-   "avg_return": -0.0186,
-   "median_dip": -0.022,
-   "bad_case_dip": -0.1262
+   "n": 35,
+   "hit_rate": 0.714,
+   "avg_return": -0.0185,
+   "median_dip": -0.0235,
+   "bad_case_dip": -0.1522
   }
  },
  "by_size": {
   "FULL": {
-   "n": 30,
-   "hit_rate": 0.733,
-   "avg_return": -0.0158,
-   "median_dip": -0.0168,
-   "bad_case_dip": -0.1262
+   "n": 31,
+   "hit_rate": 0.71,
+   "avg_return": -0.0191,
+   "median_dip": -0.022,
+   "bad_case_dip": -0.1522
   },
   "IGNORE": {
    "n": 1,
@@ -55,19 +55,19 @@
    "bad_case_dip": -0.0065
   },
   "HALF": {
-   "n": 2,
-   "hit_rate": 0.5,
-   "avg_return": -0.1099,
+   "n": 3,
+   "hit_rate": 0.667,
+   "avg_return": -0.046,
    "median_dip": -0.0773,
    "bad_case_dip": -0.3526
   }
  },
  "by_panel": {
   "Weekly Pick": {
-   "n": 10,
-   "hit_rate": 0.6,
-   "avg_return": -0.0937,
-   "median_dip": -0.0118,
+   "n": 11,
+   "hit_rate": 0.545,
+   "avg_return": -0.0957,
+   "median_dip": -0.088,
    "bad_case_dip": -0.3153
   },
   "Golden Cross": {
@@ -92,29 +92,29 @@
    "bad_case_dip": -0.2112
   },
   "Intraday Breakout": {
-   "n": 2,
-   "hit_rate": 0.5,
-   "avg_return": -0.0621,
-   "median_dip": -0.0137,
+   "n": 3,
+   "hit_rate": 0.667,
+   "avg_return": -0.0142,
+   "median_dip": -0.0242,
    "bad_case_dip": -0.2632
   }
  },
  "by_qqq_above_50d": {
   "QQQ above 50d": {
-   "n": 33,
-   "hit_rate": 0.727,
-   "avg_return": -0.0186,
-   "median_dip": -0.022,
-   "bad_case_dip": -0.1262
+   "n": 35,
+   "hit_rate": 0.714,
+   "avg_return": -0.0185,
+   "median_dip": -0.0235,
+   "bad_case_dip": -0.1522
   }
  },
  "by_breadth": {
   "breadth > 50%": {
-   "n": 33,
-   "hit_rate": 0.727,
-   "avg_return": -0.0186,
-   "median_dip": -0.022,
-   "bad_case_dip": -0.1262
+   "n": 35,
+   "hit_rate": 0.714,
+   "avg_return": -0.0185,
+   "median_dip": -0.0235,
+   "bad_case_dip": -0.1522
   }
  }
 }
