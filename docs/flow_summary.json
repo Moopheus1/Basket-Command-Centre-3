@@ -1,52 +1,52 @@
 {
  "rules_version": "flow-v1-2026-10-01",
- "logged_rows": 1852,
- "logged_sessions": 23,
+ "logged_rows": 1936,
+ "logged_sessions": 24,
  "by_label": {
   "BULLISH": {
    "5d": {
-    "n": 420,
-    "avg_return_pct": -4.45,
-    "avg_vs_basket_pct": -0.44,
-    "right_direction_vs_basket_pct": 47.6
+    "n": 443,
+    "avg_return_pct": -4.78,
+    "avg_vs_basket_pct": -0.68,
+    "right_direction_vs_basket_pct": 46.7
    },
    "10d": {
-    "n": 303,
-    "avg_return_pct": -8.96,
-    "avg_vs_basket_pct": -0.18,
-    "right_direction_vs_basket_pct": 49.2
+    "n": 331,
+    "avg_return_pct": -8.82,
+    "avg_vs_basket_pct": -0.42,
+    "right_direction_vs_basket_pct": 48.9
    }
   },
   "BEARISH": {
    "5d": {
-    "n": 483,
-    "avg_return_pct": -3.06,
-    "avg_vs_basket_pct": 1.14,
-    "right_direction_vs_basket_pct": 43.9
+    "n": 506,
+    "avg_return_pct": -3.26,
+    "avg_vs_basket_pct": 1.01,
+    "right_direction_vs_basket_pct": 44.7
    },
    "10d": {
-    "n": 350,
-    "avg_return_pct": -6.52,
-    "avg_vs_basket_pct": 2.19,
-    "right_direction_vs_basket_pct": 42.9
+    "n": 373,
+    "avg_return_pct": -6.43,
+    "avg_vs_basket_pct": 1.99,
+    "right_direction_vs_basket_pct": 44.2
    }
   },
   "NEUTRAL": {
    "5d": {
-    "n": 550,
-    "avg_return_pct": -3.69,
-    "avg_vs_basket_pct": 0.02,
-    "right_direction_vs_basket_pct": 49.8
+    "n": 588,
+    "avg_return_pct": -3.82,
+    "avg_vs_basket_pct": 0.03,
+    "right_direction_vs_basket_pct": 50.0
    },
    "10d": {
-    "n": 411,
-    "avg_return_pct": -8.27,
-    "avg_vs_basket_pct": 0.25,
-    "right_direction_vs_basket_pct": 50.9
+    "n": 434,
+    "avg_return_pct": -8.13,
+    "avg_vs_basket_pct": 0.14,
+    "right_direction_vs_basket_pct": 51.2
    }
   }
  },
  "verdict": "FAIL - BULLISH flow did not beat the basket by enough to be worth using",
  "success_test": "BULLISH readings must beat the basket average over 10 sessions by >= 1.0 point on average AND in >= 55% of cases, on >= 40 scored readings. Fixed 1 Oct 2026.",
- "updated": "2026-11-02T21:25:47Z"
+ "updated": "2026-11-03T21:26:21Z"
 }
