@@ -1,29 +1,29 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-03T08:40:47.487Z",
+ "updated": "2026-11-03T08:44:01.331Z",
  "logged_rows": 289,
  "logged_days": 27,
  "scored_signals": 33,
  "success_test": "TAKE hit rate >= random + 10 points AND TAKE average return > random (random scored with the same 2.0x target), on >= 20 scored TAKEs",
  "verdict": "NOT ENOUGH DATA YET — need 20+ scored TAKE signals",
  "random_baseline": {
-  "n": 714,
+  "n": 720,
   "hit_rate": 0.479,
-  "avg_return": -0.0979,
-  "median_dip": -0.1089,
-  "bad_case_dip": -0.2992
+  "avg_return": -0.0968,
+  "median_dip": -0.1041,
+  "bad_case_dip": -0.2986
  },
  "random_baseline_2x": {
-  "n": 714,
-  "hit_rate": 0.387,
-  "avg_return": -0.1091,
-  "median_dip": -0.1643,
+  "n": 720,
+  "hit_rate": 0.386,
+  "avg_return": -0.1079,
+  "median_dip": -0.1622,
   "bad_case_dip": -0.3063
  },
  "all_signals": {
   "n": 33,
   "hit_rate": 0.727,
-  "avg_return": -0.0185,
+  "avg_return": -0.0186,
   "median_dip": -0.022,
   "bad_case_dip": -0.1262
  },
@@ -34,7 +34,7 @@
   "1 panel": {
    "n": 33,
    "hit_rate": 0.727,
-   "avg_return": -0.0185,
+   "avg_return": -0.0186,
    "median_dip": -0.022,
    "bad_case_dip": -0.1262
   }
@@ -57,7 +57,7 @@
   "HALF": {
    "n": 2,
    "hit_rate": 0.5,
-   "avg_return": -0.1096,
+   "avg_return": -0.1099,
    "median_dip": -0.0773,
    "bad_case_dip": -0.3526
   }
@@ -66,7 +66,7 @@
   "Weekly Pick": {
    "n": 10,
    "hit_rate": 0.6,
-   "avg_return": -0.0936,
+   "avg_return": -0.0937,
    "median_dip": -0.0118,
    "bad_case_dip": -0.3153
   },
@@ -103,7 +103,7 @@
   "QQQ above 50d": {
    "n": 33,
    "hit_rate": 0.727,
-   "avg_return": -0.0185,
+   "avg_return": -0.0186,
    "median_dip": -0.022,
    "bad_case_dip": -0.1262
   }
@@ -112,7 +112,7 @@
   "breadth > 50%": {
    "n": 33,
    "hit_rate": 0.727,
-   "avg_return": -0.0185,
+   "avg_return": -0.0186,
    "median_dip": -0.022,
    "bad_case_dip": -0.1262
   }
