@@ -3335,7 +3335,8 @@ function initCollapsiblePanels() {
 }
 
 // ===== SPY PDH / PDL (display-only; reads the SPY bars already loaded from data.json; never touches TAKE, any panel rule or the forward log) =====
-// ===== SPY current-week + prior-week PDH/PDL check (display only; same bars as above, nothing else reads or writes it) =====
+// ===== SPY current-week + previous-week PDH/PDL check (display only; same bars as above, nothing else reads or writes it) =====
+// One three-candle chart per weekday, same format as the main chart: day before, previous day (PD), the weekday being tested.
 function spyWeeksHtml(d, liveIdx) {
   const n = d.times.length;
   const dateOf = i => tpBarDate(d.times[i]);
@@ -3343,6 +3344,8 @@ function spyWeeksHtml(d, liveIdx) {
   const addDays = (ds, k) => { const dt = new Date(ds + 'T00:00:00Z'); dt.setUTCDate(dt.getUTCDate() + k); return dt.toISOString().slice(0, 10); };
   const mondayOf = ds => addDays(ds, -((dow(ds) + 6) % 7));
   const usd = v => '$' + v.toFixed(2);
+  const dayTxt = ds => new Date(ds + 'T00:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
+  const halo = ' paint-order="stroke" stroke="#fff" stroke-width="4" stroke-linejoin="round"';
   const weeks = new Map();
   for (let i = 1; i < n; i++) { const wk = mondayOf(dateOf(i)); if (!weeks.has(wk)) weeks.set(wk, []); weeks.get(wk).push(i); }
   // next session after the last completed bar: its levels (PDH/PDL) are already known, so show them as "not traded yet"
@@ -3354,76 +3357,91 @@ function spyWeeksHtml(d, liveIdx) {
   }
   const keys = [...weeks.keys()].sort().reverse().slice(0, 2);
   const NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-  const W = 760, XL = 56, XR = 700, T = 20, B = 252, slot = (XR - XL) / 5;
-  const halo = 'stroke="#fff" stroke-width="3" paint-order="stroke"';
-  const cards = keys.map((wk, wi) => {
-    const idxs = weeks.get(wk), days = [null, null, null, null, null];
-    idxs.forEach(i => { const w = dow(dateOf(i)); if (w >= 1 && w <= 5) days[w - 1] = i; });
-    const isPend = pend && pend.wk === wk;
-    let lo = Infinity, hi = -Infinity;
-    idxs.forEach(i => { lo = Math.min(lo, d.lows[i], d.lows[i - 1]); hi = Math.max(hi, d.highs[i], d.highs[i - 1]); });
-    if (isPend) { lo = Math.min(lo, pend.pdl); hi = Math.max(hi, pend.pdh); }
+
+  // one chart: [day before, PD, the day tested]; ti = index of the day tested (null if it has not traded yet)
+  const W = 540, XL = 54, XR = 524, T = 16, B = 200, CX = [132, 272, 412], HW = 24;
+  const mini = (pi, ti, dateStr, verdict, vcol, isLive, blue) => {
+    if (pi < 1) return '';
+    const pdh = d.highs[pi], pdl = d.lows[pi];
+    const bars = [pi - 1, pi].concat(ti != null ? [ti] : []).map(j => ({ o: d.opens[j], h: d.highs[j], l: d.lows[j], c: d.closes[j] }));
+    let lo = Math.min(...bars.map(b => b.l)), hi = Math.max(...bars.map(b => b.h));
     const pad = (hi - lo) * 0.1 || 1; lo -= pad; hi += pad;
     const Y = p => T + (hi - p) / (hi - lo) * (B - T);
-    const step = [0.5, 1, 2, 5, 10, 20, 25, 50, 100].find(x => x >= (hi - lo) / 5) || 100;
-    let s = '', rows = '';
+    const step = [0.5, 1, 2, 5, 10, 20, 25, 50, 100].find(x => x >= (hi - lo) / 4) || 100;
+    let s = '';
     for (let k = Math.ceil(lo / step); k <= Math.floor(hi / step); k++) {
       const v = k * step, yy = Y(v).toFixed(1);
-      s += '<line x1="' + XL + '" y1="' + yy + '" x2="' + XR + '" y2="' + yy + '" stroke="#eef0f3" stroke-width="1"/><text x="' + (XL - 6) + '" y="' + (+yy + 3) + '" text-anchor="end" font-size="10" fill="#9ca3af">' + v.toLocaleString() + '</text>';
+      s += '<line x1="' + XL + '" y1="' + yy + '" x2="' + XR + '" y2="' + yy + '" stroke="#e5e7eb" stroke-width="1"/><text x="' + (XL - 7) + '" y="' + (+yy + 4) + '" text-anchor="end" font-size="11" fill="#6b7280">$' + v.toLocaleString() + '</text>';
     }
-    let done = 0, touched = 0, liveTxt = ''; const none = [];
-    const lvl = (cx, pdh, pdl, dim, x1) => {
-      const o = dim ? ' opacity="0.8"' : '', x2 = cx + 16;
-      return '<line x1="' + x1 + '" y1="' + Y(pdh).toFixed(1) + '" x2="' + x2 + '" y2="' + Y(pdh).toFixed(1) + '" stroke="#2563eb" stroke-width="1.6" stroke-dasharray="5 3"' + o + '/>' +
-             '<line x1="' + x1 + '" y1="' + Y(pdl).toFixed(1) + '" x2="' + x2 + '" y2="' + Y(pdl).toFixed(1) + '" stroke="#d97706" stroke-width="1.6" stroke-dasharray="5 3"' + o + '/>' +
-             '<text x="' + (x2 + 4) + '" y="' + (Y(pdh) + 4).toFixed(1) + '" font-size="11.5" font-weight="700" fill="#2563eb" ' + halo + '>' + usd(pdh) + '</text>' +
-             '<text x="' + (x2 + 4) + '" y="' + (Y(pdl) + 4).toFixed(1) + '" font-size="11.5" font-weight="700" fill="#b45309" ' + halo + '>' + usd(pdl) + '</text>';
-    };
-    // a day's lines start at the wick tip of the previous trading day's candle (its high / low) and run across this day's candle
-    const startX = k => (k > 0 && days[k - 1] != null) ? XL + slot * (k - 0.5) - 8 : XL + slot * (k + 0.5) - 58;
+    bars.forEach((b, i) => {
+      const x = CX[i], col = b.c >= b.o ? '#0a9e5c' : '#e5484d';
+      const yo = Y(b.o), yc = Y(b.c);
+      s += '<line x1="' + x + '" y1="' + Y(b.h).toFixed(1) + '" x2="' + x + '" y2="' + Y(b.l).toFixed(1) + '" stroke="' + col + '" stroke-width="1.5"/>' +
+           '<rect x="' + (x - HW) + '" y="' + Math.min(yo, yc).toFixed(1) + '" width="' + (HW * 2) + '" height="' + Math.max(Math.abs(yo - yc), 2).toFixed(1) + '" rx="2" fill="' + col + '" fill-opacity="' + (i === 2 && isLive ? 0.55 : 0.85) + '"/>';
+    });
+    const yH = Y(pdh), yL = Y(pdl);
+    s += '<line x1="' + (CX[1] - HW) + '" y1="' + yH.toFixed(1) + '" x2="' + XR + '" y2="' + yH.toFixed(1) + '" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="6 4"/>' +
+         '<line x1="' + (CX[1] - HW) + '" y1="' + yL.toFixed(1) + '" x2="' + XR + '" y2="' + yL.toFixed(1) + '" stroke="#d97706" stroke-width="1.5" stroke-dasharray="6 4"/>' +
+         '<text x="' + XR + '" y="' + (yH - 6).toFixed(1) + '" text-anchor="end" font-size="12" font-weight="700" fill="#2563eb"' + halo + '>PDH ' + usd(pdh) + '</text>' +
+         '<text x="' + XR + '" y="' + (yL + 16).toFixed(1) + '" text-anchor="end" font-size="12" font-weight="700" fill="#d97706"' + halo + '>PDL ' + usd(pdl) + '</text>';
+    if (ti != null) {
+      const px = d.closes[ti], yP = Y(px);
+      s += '<circle cx="' + CX[2] + '" cy="' + yP.toFixed(1) + '" r="5" fill="#111827" stroke="#fff" stroke-width="2"/>' +
+           '<text x="' + (CX[2] - HW - 8) + '" y="' + (yP + 4).toFixed(1) + '" text-anchor="end" font-size="12" font-weight="700" fill="#111827"' + halo + '>' + (isLive ? 'Now ' : 'Close ') + usd(px) + '</text>';
+    }
+    const labs = [dayTxt(dateOf(pi - 1)), dayTxt(dateOf(pi)) + ' · PD', dayTxt(dateStr) + (isLive ? ' · live' : '')];
+    labs.forEach((lab, i) => { s += '<text x="' + CX[i] + '" y="' + (B + 20) + '" text-anchor="middle" font-size="12" fill="#374151">' + esc(lab) + '</text>'; });
+    s += '<text x="' + CX[2] + '" y="' + (B + 39) + '" text-anchor="middle" font-size="12.5" font-weight="700" fill="' + vcol + '">' + esc(verdict) + '</text>';
+    return '<div style="border:1px solid ' + (blue ? '#bfd3fb' : '#e9eaee') + ';border-radius:12px;padding:4px 6px;min-width:0">' +
+      '<svg viewBox="0 0 ' + W + ' 248" width="100%" role="img" aria-label="' + esc(dayTxt(dateStr) + ': ' + verdict + '. PDH ' + usd(pdh) + ', PDL ' + usd(pdl)) + '">' + s + '</svg></div>';
+  };
+
+  const heads = [], minis = [];
+  keys.forEach((wk, wi) => {
+    const idxs = weeks.get(wk), days = [null, null, null, null, null];
+    idxs.forEach(i => { const w = dow(dateOf(i)); if (w >= 1 && w <= 5) days[w - 1] = i; });
+    const isPend = pend && pend.wk === wk, blue = wi === 0;
+    let done = 0, touched = 0, liveTxt = '', rows = ''; const none = [], mk = [];
     const td = 'padding:4px 5px;border-top:1px solid #eef0f3;white-space:nowrap;text-align:left';
     days.forEach((i, k) => {
-      const cx = XL + slot * (k + 0.5);
       if (i == null) {
         if (isPend && pend.k === k) {
           const dn = parseInt(pend.date.slice(8), 10);
-          s += lvl(cx, pend.pdh, pend.pdl, true, startX(k)) + '<text x="' + cx + '" y="' + (B + 18) + '" text-anchor="middle" font-size="12" fill="#374151">' + NAMES[k] + ' ' + dn + '</text><text x="' + cx + '" y="' + (B + 35) + '" text-anchor="middle" font-size="12" font-weight="700" fill="#6b7280">not traded yet</text>';
-          rows += '<tr><td style="' + td + ';font-weight:700">' + NAMES[k] + ' ' + dn + '</td><td style="' + td + ';color:#2563eb;font-weight:700">' + usd(pend.pdh) + '</td><td style="' + td + ';color:#9ca3af">&ndash;</td><td style="' + td + ';color:#b45309;font-weight:700">' + usd(pend.pdl) + '</td><td style="' + td + ';color:#9ca3af">&ndash;</td><td style="' + td + ';color:#6b7280;font-weight:700">Not traded yet &mdash; these are the levels to watch</td></tr>';
+          mk.push(mini(n - 1, null, pend.date, 'not traded yet', '#6b7280', false, blue));
+          rows += '<tr><td style="' + td + ';font-weight:700">' + NAMES[k] + ' ' + dn + '</td><td style="' + td + ';color:#2563eb;font-weight:700">' + usd(pend.pdh) + '</td><td style="' + td + ';color:#9ca3af">&ndash;</td><td style="' + td + ';color:#b45309;font-weight:700">' + usd(pend.pdl) + '</td><td style="' + td + ';color:#9ca3af">&ndash;</td><td style="' + td + ';color:#6b7280;font-weight:700">Not traded yet</td></tr>';
         } else {
-          s += '<text x="' + cx + '" y="' + (B + 18) + '" text-anchor="middle" font-size="12" fill="#c4c8cf">' + NAMES[k] + '</text><text x="' + cx + '" y="' + (B + 35) + '" text-anchor="middle" font-size="12" fill="#c4c8cf">&ndash;</text>';
+          mk.push('<div style="border:1px dashed #e5e7eb;border-radius:12px;padding:12px;color:#c4c8cf;font-size:13px">' + NAMES[k] + ' &ndash; no data</div>');
           rows += '<tr><td style="' + td + ';color:#c4c8cf">' + NAMES[k] + '</td><td style="' + td + ';color:#c4c8cf" colspan="5">no data</td></tr>';
         }
         return;
       }
-      const o = d.opens[i], h = d.highs[i], l = d.lows[i], c = d.closes[i], pdh = d.highs[i - 1], pdl = d.lows[i - 1];
-      const hitH = h >= pdh, hitL = l <= pdl, isLive = i === liveIdx;
-      const col = c >= o ? '#0a9e5c' : '#e5484d';
-      const yo = Y(o), yc = Y(c), dn = parseInt(dateOf(i).slice(8), 10);
-      s += '<line x1="' + (cx - 8) + '" y1="' + Y(h).toFixed(1) + '" x2="' + (cx - 8) + '" y2="' + Y(l).toFixed(1) + '" stroke="' + col + '" stroke-width="1.5"/>' +
-           '<rect x="' + (cx - 19) + '" y="' + Math.min(yo, yc).toFixed(1) + '" width="22" height="' + Math.max(Math.abs(yo - yc), 2).toFixed(1) + '" rx="2" fill="' + col + '" fill-opacity="' + (isLive ? 0.45 : 0.85) + '"/>' +
-           lvl(cx, pdh, pdl, false, startX(k));
+      const h = d.highs[i], l = d.lows[i], pdh = d.highs[i - 1], pdl = d.lows[i - 1], isLive = i === liveIdx;
+      const hitH = h >= pdh, hitL = l <= pdl, dn = parseInt(dateOf(i).slice(8), 10);
       const lab = hitH && hitL ? 'HIT H + L' : hitH ? 'HIT H' : hitL ? 'HIT L' : 'NOT HIT';
       const lc = hitH && hitL ? '#374151' : hitH ? '#2563eb' : hitL ? '#b45309' : '#e5484d';
-      s += '<text x="' + cx + '" y="' + (B + 18) + '" text-anchor="middle" font-size="12" fill="#374151">' + NAMES[k] + ' ' + dn + '</text>' +
-           '<text x="' + cx + '" y="' + (B + 35) + '" text-anchor="middle" font-size="12" font-weight="700" fill="' + lc + '">' + (isLive ? 'so far: ' : '') + lab + '</text>';
-      const verdict = lab === 'NOT HIT' ? (isLive ? 'neither line yet' : 'NOT HIT &mdash; inside day') : (hitH && hitL ? 'HIT both PDH and PDL' : hitH ? 'HIT PDH' : 'HIT PDL');
+      const verdict = lab === 'NOT HIT' ? (isLive ? 'neither line yet' : 'NOT HIT — inside day') : (hitH && hitL ? 'HIT both PDH and PDL' : hitH ? 'HIT PDH' : 'HIT PDL');
+      mk.push(mini(i - 1, i, dateOf(i), (isLive ? 'so far: ' : '') + verdict, isLive && lab === 'NOT HIT' ? '#6b7280' : lc, isLive, blue));
       const cellH = hitH ? '<span style="color:#2563eb;font-weight:700">' + usd(h) + ' &#10003; +' + usd(h - pdh) + '</span>' : usd(h) + ' <span style="color:#9ca3af">(' + usd(pdh - h) + ' short)</span>';
       const cellL = hitL ? '<span style="color:#b45309;font-weight:700">' + usd(l) + ' &#10003; &minus;' + usd(pdl - l) + '</span>' : usd(l) + ' <span style="color:#9ca3af">(' + usd(l - pdl) + ' short)</span>';
-      rows += '<tr><td style="' + td + ';font-weight:700">' + NAMES[k] + ' ' + dn + (isLive ? ' <span style="color:#6b7280;font-weight:400">(live)</span>' : '') + '</td><td style="' + td + ';color:#2563eb;font-weight:700">' + usd(pdh) + '</td><td style="' + td + '">' + cellH + '</td><td style="' + td + ';color:#b45309;font-weight:700">' + usd(pdl) + '</td><td style="' + td + '">' + cellL + '</td><td style="' + td + ';font-weight:700;color:' + lc + '">' + (isLive ? 'So far: ' : '') + verdict + '</td></tr>';
+      rows += '<tr><td style="' + td + ';font-weight:700">' + NAMES[k] + ' ' + dn + (isLive ? ' <span style="color:#6b7280;font-weight:400">(live)</span>' : '') + '</td><td style="' + td + ';color:#2563eb;font-weight:700">' + usd(pdh) + '</td><td style="' + td + '">' + cellH + '</td><td style="' + td + ';color:#b45309;font-weight:700">' + usd(pdl) + '</td><td style="' + td + '">' + cellL + '</td><td style="' + td + ';font-weight:700;color:' + (isLive && lab === 'NOT HIT' ? '#6b7280' : lc) + '">' + (isLive ? 'So far: ' : '') + verdict + '</td></tr>';
       if (isLive) liveTxt = NAMES[k] + ' so far: ' + (lab === 'NOT HIT' ? 'neither line yet' : lab.replace('HIT ', ''));
       else { done++; if (lab === 'NOT HIT') none.push(NAMES[k] + ' ' + dn); else touched++; }
     });
     const label = new Date(wk + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
     const title = wi === 0 ? 'Current week &mdash; week of ' + label : 'Previous week (for comparison) &mdash; week of ' + label;
-    return '<div style="border:1px solid ' + (wi === 0 ? '#2563eb' : '#e9eaee') + ';border-radius:12px;padding:10px 12px;min-width:0">' +
+    heads.push('<div style="border:1px solid ' + (blue ? '#2563eb' : '#e9eaee') + ';border-radius:12px;padding:10px 12px;min-width:0">' +
       '<div style="font-weight:700;font-size:15px">' + title + '</div>' +
-      '<div style="font-size:13px;margin:2px 0 4px;color:' + (none.length ? '#b45309' : '#0a9e5c') + '"><strong>' + touched + ' of ' + done + '</strong> completed days hit their PDH or PDL' + (none.length ? ' &middot; inside day (neither hit): ' + none.join(', ') : '') + (liveTxt ? ' <span style="color:#6b7280">&middot; ' + liveTxt + '</span>' : '') + '</div>' +
-      '<svg viewBox="0 0 ' + W + ' 296" width="100%" role="img" aria-label="' + title.replace(/&mdash;/g, '-') + ': daily candles with each day\'s previous-day high and low prices">' + s + '</svg>' +
-      '<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:11.5px;width:100%"><thead><tr style="text-align:left;color:#6b7280"><th style="padding:4px 5px;text-align:left">Day</th><th style="padding:4px 5px;text-align:left">PDH (line)</th><th style="padding:4px 5px;text-align:left">Day high</th><th style="padding:4px 5px;text-align:left">PDL (line)</th><th style="padding:4px 5px;text-align:left">Day low</th><th style="padding:4px 5px;text-align:left">Result</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+      '<div style="font-size:13px;margin:2px 0 6px;color:' + (none.length ? '#b45309' : '#0a9e5c') + '"><strong>' + touched + ' of ' + done + '</strong> completed days hit their PDH or PDL' + (none.length ? ' &middot; inside day (neither hit): ' + none.join(', ') : '') + (liveTxt ? ' <span style="color:#6b7280">&middot; ' + liveTxt + '</span>' : '') + '</div>' +
+      '<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:11.5px;width:100%"><thead><tr style="text-align:left;color:#6b7280"><th style="padding:4px 5px;text-align:left">Day</th><th style="padding:4px 5px;text-align:left">PDH</th><th style="padding:4px 5px;text-align:left">Day high</th><th style="padding:4px 5px;text-align:left">PDL</th><th style="padding:4px 5px;text-align:left">Day low</th><th style="padding:4px 5px;text-align:left">Result</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>');
+    minis.push(mk);
   });
+  // previous week on the left, current week on the right; one row per weekday so Mon sits beside Mon
+  const order = [1, 0].filter(x => x < keys.length);
+  let grid = order.map(x => heads[x]).join('');
+  for (let k = 0; k < 5; k++) grid += order.map(x => minis[x][k]).join('');
   return '<h3 style="font-size:14px;margin:16px 0 4px">This week &mdash; did each weekday hit its own PDH or PDL?</h3>' +
-    '<div style="color:#6b7280;margin-bottom:8px">Each dashed line starts at the tip of the previous day\'s candle &mdash; its high (blue, the PDH) and its low (amber, the PDL) &mdash; and runs across the next day\'s candle, with the dollar price written at the end. So Tuesday\'s lines are Monday\'s high and low. Monday\'s lines come from the prior Friday, which is not drawn. The table under each chart gives that day\'s actual high and low. <strong>HIT</strong> = the day traded to or through that line. <span style="color:#e5484d;font-weight:700">NOT HIT</span> = an inside day, the 5% case.</div>' +
-    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:14px;align-items:start">' + cards.slice().reverse().join('') + '</div>';
+    '<div style="color:#6b7280;margin-bottom:8px">Each chart is the same view as the one above: the day before, the previous day (<strong>PD</strong>), and the weekday being tested. The PD candle\'s high (blue, the PDH) and low (amber, the PDL) are carried across to the tested day\'s candle. <strong>HIT</strong> = that day traded to or through the line. <span style="color:#e5484d;font-weight:700">NOT HIT</span> = an inside day, the 5% case.</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:14px;align-items:start">' + grid + '</div>';
 }
 
 function renderSpyLevels() {
