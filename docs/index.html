@@ -3368,6 +3368,22 @@ function renderSpyLevels() {
       tile('Down to PDL', px >= PDL ? usd(px - PDL) : '&mdash;') + tile('Up to PDH', px <= PDH ? usd(PDH - px) : '&mdash;') +
     '</div><div style="margin:4px 0 8px;font-weight:700;color:' + scol + '">' + pxLabel + ' ' + usd(px) + ' is ' + status + '</div>';
 
+  // Why it is watched: how often a session's range touched the previous session's high or low, measured live on the bars this page already has (completed sessions only).
+  let sess = 0, touched = 0, touchedMargin = 0;
+  for (let i = 1; i <= pd; i++) {
+    sess++;
+    if (d.highs[i] >= d.highs[i - 1] || d.lows[i] <= d.lows[i - 1]) touched++;
+    if (d.highs[i] >= d.highs[i - 1] + 0.5 || d.lows[i] <= d.lows[i - 1] - 0.5) touchedMargin++;
+  }
+  if (sess >= 60) {
+    const pc = v => Math.round(v / sess * 100);
+    const monYr = t => new Date(t * 1000).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+    html += '<div style="margin:6px 0 10px;padding:10px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;line-height:1.5">' +
+      '<strong>Why this is watched.</strong> On most days SPY trades through either the previous day\'s high (dashed blue line) or its low (dashed amber line). In this dashboard\'s own SPY data (' + monYr(d.times[0]) + ' &ndash; ' + monYr(d.times[pd]) + '), one or both was touched on <strong>' + touched + ' of ' + sess + ' sessions (' + pc(touched) + '%)</strong>. ' +
+      'So the working expectation is that one of the two lines gets hit, and a day that touches neither (an inside day: ' + (sess - touched) + ' of ' + sess + ', ' + pc(sess - touched) + '%) is the exception. ' +
+      '<span style="color:#6b7280">&ldquo;Touched&rdquo; counts any tick through the line; requiring a $0.50 move beyond it gives ' + pc(touchedMargin) + '%. Daily bars only: this measures the previous regular-session range, not the overnight (Globex) range.</span></div>';
+  }
+
   const XL = 62, XR = 640, T = 18, B = 262, CX = [180, 340, 500];
   let lo = Math.min(...bars.map(b => b.l), px), hi = Math.max(...bars.map(b => b.h), px);
   const pad = (hi - lo) * 0.08 || 1; lo -= pad; hi += pad;
