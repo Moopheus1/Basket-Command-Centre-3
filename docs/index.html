@@ -3335,6 +3335,67 @@ function initCollapsiblePanels() {
 }
 
 // ===== SPY PDH / PDL (display-only; reads the SPY bars already loaded from data.json; never touches TAKE, any panel rule or the forward log) =====
+// ===== SPY week-by-week PDH/PDL check (display only; same bars as above, nothing else reads or writes it) =====
+let spyWeeksShown = 8;
+function spyMoreWeeks() { spyWeeksShown += 8; try { renderSpyLevels(); } catch (e) {} }
+function spyWeeksHtml(d, liveIdx) {
+  const n = d.times.length;
+  const dateOf = i => tpBarDate(d.times[i]);
+  const utc = i => new Date(dateOf(i) + 'T00:00:00Z');
+  const mondayOf = i => { const dt = utc(i); dt.setUTCDate(dt.getUTCDate() - ((dt.getUTCDay() + 6) % 7)); return dt.toISOString().slice(0, 10); };
+  const weeks = new Map();
+  for (let i = 1; i < n; i++) { const wk = mondayOf(i); if (!weeks.has(wk)) weeks.set(wk, []); weeks.get(wk).push(i); }
+  const allKeys = [...weeks.keys()].sort().reverse();
+  const keys = allKeys.slice(0, spyWeeksShown);
+  const NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+  const W = 460, XL = 46, XR = 452, T = 14, B = 196, slot = (XR - XL) / 5;
+  let totDone = 0, totTouched = 0;
+  const cells = keys.map(wk => {
+    const idxs = weeks.get(wk), days = [null, null, null, null, null];
+    idxs.forEach(i => { const w = utc(i).getUTCDay(); if (w >= 1 && w <= 5) days[w - 1] = i; });
+    let lo = Infinity, hi = -Infinity;
+    idxs.forEach(i => { lo = Math.min(lo, d.lows[i], d.lows[i - 1]); hi = Math.max(hi, d.highs[i], d.highs[i - 1]); });
+    const pad = (hi - lo) * 0.08 || 1; lo -= pad; hi += pad;
+    const Y = p => T + (hi - p) / (hi - lo) * (B - T);
+    const step = [0.5, 1, 2, 5, 10, 20, 25, 50, 100].find(x => x >= (hi - lo) / 4) || 100;
+    let s = '';
+    for (let k = Math.ceil(lo / step); k <= Math.floor(hi / step); k++) {
+      const v = k * step, yy = Y(v).toFixed(1);
+      s += '<line x1="' + XL + '" y1="' + yy + '" x2="' + XR + '" y2="' + yy + '" stroke="#eef0f3" stroke-width="1"/><text x="' + (XL - 6) + '" y="' + (+yy + 3) + '" text-anchor="end" font-size="10" fill="#9ca3af">' + v.toLocaleString() + '</text>';
+    }
+    let done = 0, touched = 0, liveTxt = ''; const none = [];
+    days.forEach((i, k) => {
+      const cx = XL + slot * (k + 0.5);
+      if (i == null) { s += '<text x="' + cx + '" y="' + (B + 16) + '" text-anchor="middle" font-size="11" fill="#c4c8cf">' + NAMES[k] + '</text><text x="' + cx + '" y="' + (B + 32) + '" text-anchor="middle" font-size="11" fill="#c4c8cf">&ndash;</text>'; return; }
+      const o = d.opens[i], h = d.highs[i], l = d.lows[i], c = d.closes[i], pdh = d.highs[i - 1], pdl = d.lows[i - 1];
+      const hitH = h >= pdh, hitL = l <= pdl, isLive = i === liveIdx;
+      const col = c >= o ? '#0a9e5c' : '#e5484d';
+      const yo = Y(o), yc = Y(c);
+      s += '<line x1="' + cx + '" y1="' + Y(h).toFixed(1) + '" x2="' + cx + '" y2="' + Y(l).toFixed(1) + '" stroke="' + col + '" stroke-width="1.5"/>' +
+           '<rect x="' + (cx - 11) + '" y="' + Math.min(yo, yc).toFixed(1) + '" width="22" height="' + Math.max(Math.abs(yo - yc), 2).toFixed(1) + '" rx="2" fill="' + col + '" fill-opacity="' + (isLive ? 0.45 : 0.85) + '"/>' +
+           '<line x1="' + (cx - 34) + '" y1="' + Y(pdh).toFixed(1) + '" x2="' + (cx + 34) + '" y2="' + Y(pdh).toFixed(1) + '" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="5 3"/>' +
+           '<line x1="' + (cx - 34) + '" y1="' + Y(pdl).toFixed(1) + '" x2="' + (cx + 34) + '" y2="' + Y(pdl).toFixed(1) + '" stroke="#d97706" stroke-width="1.5" stroke-dasharray="5 3"/>';
+      const lab = hitH && hitL ? 'H + L' : hitH ? 'H' : hitL ? 'L' : 'none';
+      const lc = hitH && hitL ? '#374151' : hitH ? '#2563eb' : hitL ? '#d97706' : '#e5484d';
+      s += '<text x="' + cx + '" y="' + (B + 16) + '" text-anchor="middle" font-size="11" fill="#374151">' + NAMES[k] + ' ' + parseInt(dateOf(i).slice(8), 10) + '</text>' +
+           '<text x="' + cx + '" y="' + (B + 32) + '" text-anchor="middle" font-size="11" font-weight="700" fill="' + lc + '">' + (isLive ? 'so far: ' : '') + lab + '</text>';
+      if (isLive) liveTxt = NAMES[k] + ' so far: ' + (lab === 'none' ? 'neither line yet' : lab);
+      else { done++; if (lab === 'none') none.push(NAMES[k] + ' ' + parseInt(dateOf(i).slice(8), 10)); else touched++; }
+    });
+    totDone += done; totTouched += touched;
+    const label = new Date(wk + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+    return '<div style="border:1px solid #e9eaee;border-radius:12px;padding:8px 10px">' +
+      '<div style="font-weight:700">Week of ' + label + '</div>' +
+      '<div style="font-size:12px;margin-bottom:2px;color:' + (none.length ? '#b45309' : '#0a9e5c') + '">' + touched + ' of ' + done + ' completed days touched their PDH or PDL' + (none.length ? ' &middot; inside day: ' + none.join(', ') : '') + (liveTxt ? ' <span style="color:#6b7280">&middot; ' + liveTxt + '</span>' : '') + '</div>' +
+      '<svg viewBox="0 0 ' + W + ' 236" width="100%" role="img" aria-label="Week of ' + label + ': daily candles with each day\'s previous-day high and low">' + s + '</svg></div>';
+  });
+  const more = allKeys.length > keys.length;
+  return '<h3 style="font-size:14px;margin:16px 0 4px">Week by week &mdash; did each weekday touch its own PDH or PDL?</h3>' +
+    '<div style="color:#6b7280;margin-bottom:8px">Each day shows its own previous-day high (blue dashes) and low (amber dashes); Monday uses the previous Friday. <strong>H</strong> = the day traded up to its PDH, <strong>L</strong> = down to its PDL, <span style="color:#e5484d;font-weight:700">none</span> = an inside day. Across the ' + keys.length + ' weeks shown: <strong>' + totTouched + ' of ' + totDone + ' completed days</strong> touched at least one line.</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px">' + cells.join('') + '</div>' +
+    (more ? '<div style="margin-top:10px"><button type="button" onclick="spyMoreWeeks()" style="border:1px solid #d1d5db;background:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px">Show 8 more weeks</button></div>' : '');
+}
+
 function renderSpyLevels() {
   const el = document.getElementById('spyLevelsBody');
   if (!el) return;
@@ -3412,7 +3473,7 @@ function renderSpyLevels() {
   [dayTxt(bars[0].t), dayTxt(PD.t) + ' · PD', liveToday ? 'Today · live' : 'Next session'].forEach((lab, i) => {
     s += '<text x="' + CX[i] + '" y="284" text-anchor="middle" font-size="12" fill="#374151">' + esc(lab) + '</text>';
   });
-  html += '<svg viewBox="0 0 680 296" width="100%" style="max-width:760px;display:block" role="img" aria-label="SPY daily candles with the previous-day high ' + usd(PDH) + ' and low ' + usd(PDL) + ' carried forward, and the current price ' + usd(px) + '">' + s + '</svg>' +
+  html += '<svg viewBox="0 0 680 296" width="100%" style="max-width:760px;display:block" role="img" aria-label="SPY daily candles with the previous-day high ' + usd(PDH) + ' and low ' + usd(PDL) + ' carried forward, and the current price ' + usd(px) + '">' + s + '</svg>' + spyWeeksHtml(d, liveToday ? n - 1 : -1) +
     '<div style="color:#9ca3af;font-size:11px;margin-top:4px">Data as of ' + esc(asofStr || '') + ' (Yahoo Finance via data.json).</div>';
   el.innerHTML = html;
 }
