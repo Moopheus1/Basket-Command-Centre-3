@@ -174,13 +174,13 @@
   <a href="#detailedPanel">↓ Ticker cards</a>
 </div>
 
-<div class="statgrid" id="stats"></div>
-
 <div class="panel" id="spyLevelsPanel">
   <h2><span style="background:#475569;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">SPY LEVELS &middot; DISPLAY ONLY</span>Previous-day high and low (PDH / PDL)</h2>
   <div class="desc">The high and low of SPY's last <em>completed</em> US session, drawn forward across today's candle. It reads the same <code>data.json</code> every other panel uses, so it refreshes with them (about every 10 minutes during the session). Display only: it is not part of TAKE, Weekly Picks, any ranked panel or the forward log. Before the 9:30am ET open the price shown is the last close, because the data has no pre-market price. Yahoo's close can differ from the official close by a few cents.</div>
   <div id="spyLevelsBody" style="font-size:13px"></div>
 </div>
+
+<div class="statgrid" id="stats"></div>
 
 <div class="desc" style="margin:0 0 6px;font-weight:600">Panels are ordered by BACKTESTED hit rate (entry next open, target = entry + 1.5&times;ATR14, no stop, 20-session max hold, Jan&ndash;Aug 2026). Buying on a RANDOM day hits that same target <strong>62.3%</strong> of the time (n=799) &mdash; that is the number every panel below must be read against. A 78% hit rate is roughly +16 points of edge, not 78 points of skill. One regime only: an 8-month tech bull market. In a flat or falling market these converge toward each other and the order may not hold. Bull Flag and Intraday Breakout now use CMF(20) &gt; 0.20 in place of their original raw-volume rules; their numbers above are post-swap. The top three (79.2 / 78.3 / 77.9) are within noise of each other on samples of 53&ndash;95 &mdash; read the panels as two tiers, not four ranks, and note that these figures come from a single 8-month sample that has now been searched many times over.</div>
 
