@@ -1,22 +1,22 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-06T01:44:03.309Z",
+ "updated": "2026-11-06T01:46:56.012Z",
  "logged_rows": 318,
  "logged_days": 30,
  "scored_signals": 39,
  "success_test": "TAKE hit rate >= random + 10 points AND TAKE average return > random (random scored with the same 2.0x target), on >= 20 scored TAKEs",
  "verdict": "NOT ENOUGH DATA YET — need 20+ scored TAKE signals",
  "random_baseline": {
-  "n": 1071,
-  "hit_rate": 0.419,
-  "avg_return": -0.1247,
-  "median_dip": -0.1695,
+  "n": 1079,
+  "hit_rate": 0.416,
+  "avg_return": -0.125,
+  "median_dip": -0.1707,
   "bad_case_dip": -0.3192
  },
  "random_baseline_2x": {
-  "n": 1071,
-  "hit_rate": 0.34,
-  "avg_return": -0.1341,
+  "n": 1079,
+  "hit_rate": 0.337,
+  "avg_return": -0.1344,
   "median_dip": -0.1917,
   "bad_case_dip": -0.3246
  },
