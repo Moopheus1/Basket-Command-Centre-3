@@ -3379,7 +3379,7 @@ function spyWeeksHtml(d, liveIdx) {
              '<text x="' + (cx + 18) + '" y="' + (Y(pdh) - 4).toFixed(1) + '" font-size="11.5" font-weight="700" fill="#2563eb" ' + halo + '>' + usd(pdh) + '</text>' +
              '<text x="' + (cx + 18) + '" y="' + (Y(pdl) + 13).toFixed(1) + '" font-size="11.5" font-weight="700" fill="#b45309" ' + halo + '>' + usd(pdl) + '</text>';
     };
-    const td = 'padding:5px 8px;border-top:1px solid #eef0f3;white-space:nowrap;text-align:left';
+    const td = 'padding:4px 5px;border-top:1px solid #eef0f3;white-space:nowrap;text-align:left';
     days.forEach((i, k) => {
       const cx = XL + slot * (k + 0.5);
       if (i == null) {
@@ -3404,7 +3404,7 @@ function spyWeeksHtml(d, liveIdx) {
       const lc = hitH && hitL ? '#374151' : hitH ? '#2563eb' : hitL ? '#b45309' : '#e5484d';
       s += '<text x="' + cx + '" y="' + (B + 18) + '" text-anchor="middle" font-size="12" fill="#374151">' + NAMES[k] + ' ' + dn + '</text>' +
            '<text x="' + cx + '" y="' + (B + 35) + '" text-anchor="middle" font-size="12" font-weight="700" fill="' + lc + '">' + (isLive ? 'so far: ' : '') + lab + '</text>';
-      const verdict = lab === 'NOT HIT' ? 'NOT HIT &mdash; inside day' : (hitH && hitL ? 'HIT both PDH and PDL' : hitH ? 'HIT PDH' : 'HIT PDL');
+      const verdict = lab === 'NOT HIT' ? (isLive ? 'neither line yet' : 'NOT HIT &mdash; inside day') : (hitH && hitL ? 'HIT both PDH and PDL' : hitH ? 'HIT PDH' : 'HIT PDL');
       const cellH = hitH ? '<span style="color:#2563eb;font-weight:700">' + usd(h) + ' &#10003; +' + usd(h - pdh) + '</span>' : usd(h) + ' <span style="color:#9ca3af">(' + usd(pdh - h) + ' short)</span>';
       const cellL = hitL ? '<span style="color:#b45309;font-weight:700">' + usd(l) + ' &#10003; &minus;' + usd(pdl - l) + '</span>' : usd(l) + ' <span style="color:#9ca3af">(' + usd(l - pdl) + ' short)</span>';
       rows += '<tr><td style="' + td + ';font-weight:700">' + NAMES[k] + ' ' + dn + (isLive ? ' <span style="color:#6b7280;font-weight:400">(live)</span>' : '') + '</td><td style="' + td + ';color:#2563eb;font-weight:700">' + usd(pdh) + '</td><td style="' + td + '">' + cellH + '</td><td style="' + td + ';color:#b45309;font-weight:700">' + usd(pdl) + '</td><td style="' + td + '">' + cellL + '</td><td style="' + td + ';font-weight:700;color:' + lc + '">' + (isLive ? 'So far: ' : '') + verdict + '</td></tr>';
@@ -3413,15 +3413,15 @@ function spyWeeksHtml(d, liveIdx) {
     });
     const label = new Date(wk + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
     const title = wi === 0 ? 'Current week &mdash; week of ' + label : 'Previous week (for comparison) &mdash; week of ' + label;
-    return '<div style="border:1px solid ' + (wi === 0 ? '#2563eb' : '#e9eaee') + ';border-radius:12px;padding:10px 12px;margin-bottom:14px;max-width:860px">' +
+    return '<div style="border:1px solid ' + (wi === 0 ? '#2563eb' : '#e9eaee') + ';border-radius:12px;padding:10px 12px;min-width:0">' +
       '<div style="font-weight:700;font-size:15px">' + title + '</div>' +
       '<div style="font-size:13px;margin:2px 0 4px;color:' + (none.length ? '#b45309' : '#0a9e5c') + '"><strong>' + touched + ' of ' + done + '</strong> completed days hit their PDH or PDL' + (none.length ? ' &middot; inside day (neither hit): ' + none.join(', ') : '') + (liveTxt ? ' <span style="color:#6b7280">&middot; ' + liveTxt + '</span>' : '') + '</div>' +
       '<svg viewBox="0 0 ' + W + ' 296" width="100%" role="img" aria-label="' + title.replace(/&mdash;/g, '-') + ': daily candles with each day\'s previous-day high and low prices">' + s + '</svg>' +
-      '<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:12.5px;width:100%"><thead><tr style="text-align:left;color:#6b7280"><th style="padding:4px 8px;text-align:left">Day</th><th style="padding:4px 8px;text-align:left">PDH (line)</th><th style="padding:4px 8px;text-align:left">Day high</th><th style="padding:4px 8px;text-align:left">PDL (line)</th><th style="padding:4px 8px;text-align:left">Day low</th><th style="padding:4px 8px;text-align:left">Result</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+      '<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:11.5px;width:100%"><thead><tr style="text-align:left;color:#6b7280"><th style="padding:4px 5px;text-align:left">Day</th><th style="padding:4px 5px;text-align:left">PDH (line)</th><th style="padding:4px 5px;text-align:left">Day high</th><th style="padding:4px 5px;text-align:left">PDL (line)</th><th style="padding:4px 5px;text-align:left">Day low</th><th style="padding:4px 5px;text-align:left">Result</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
   });
   return '<h3 style="font-size:14px;margin:16px 0 4px">This week &mdash; did each weekday hit its own PDH or PDL?</h3>' +
     '<div style="color:#6b7280;margin-bottom:8px">Each weekday gets its own previous-day high (blue dashes) and previous-day low (amber dashes), with the dollar price written next to each line; Monday uses the previous Friday. The table under each chart gives that day\'s actual high and low. <strong>HIT</strong> = the day traded to or through that line. <span style="color:#e5484d;font-weight:700">NOT HIT</span> = an inside day, the 5% case.</div>' +
-    cards.join('');
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:14px;align-items:start">' + cards.slice().reverse().join('') + '</div>';
 }
 
 function renderSpyLevels() {
