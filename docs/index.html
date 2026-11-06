@@ -3372,20 +3372,22 @@ function spyWeeksHtml(d, liveIdx) {
       s += '<line x1="' + XL + '" y1="' + yy + '" x2="' + XR + '" y2="' + yy + '" stroke="#eef0f3" stroke-width="1"/><text x="' + (XL - 6) + '" y="' + (+yy + 3) + '" text-anchor="end" font-size="10" fill="#9ca3af">' + v.toLocaleString() + '</text>';
     }
     let done = 0, touched = 0, liveTxt = ''; const none = [];
-    const lvl = (cx, pdh, pdl, dim) => {
-      const o = dim ? ' opacity="0.8"' : '';
-      return '<line x1="' + (cx - 58) + '" y1="' + Y(pdh).toFixed(1) + '" x2="' + (cx + 58) + '" y2="' + Y(pdh).toFixed(1) + '" stroke="#2563eb" stroke-width="1.6" stroke-dasharray="5 3"' + o + '/>' +
-             '<line x1="' + (cx - 58) + '" y1="' + Y(pdl).toFixed(1) + '" x2="' + (cx + 58) + '" y2="' + Y(pdl).toFixed(1) + '" stroke="#d97706" stroke-width="1.6" stroke-dasharray="5 3"' + o + '/>' +
-             '<text x="' + (cx + 18) + '" y="' + (Y(pdh) - 4).toFixed(1) + '" font-size="11.5" font-weight="700" fill="#2563eb" ' + halo + '>' + usd(pdh) + '</text>' +
-             '<text x="' + (cx + 18) + '" y="' + (Y(pdl) + 13).toFixed(1) + '" font-size="11.5" font-weight="700" fill="#b45309" ' + halo + '>' + usd(pdl) + '</text>';
+    const lvl = (cx, pdh, pdl, dim, x1) => {
+      const o = dim ? ' opacity="0.8"' : '', x2 = cx + 16;
+      return '<line x1="' + x1 + '" y1="' + Y(pdh).toFixed(1) + '" x2="' + x2 + '" y2="' + Y(pdh).toFixed(1) + '" stroke="#2563eb" stroke-width="1.6" stroke-dasharray="5 3"' + o + '/>' +
+             '<line x1="' + x1 + '" y1="' + Y(pdl).toFixed(1) + '" x2="' + x2 + '" y2="' + Y(pdl).toFixed(1) + '" stroke="#d97706" stroke-width="1.6" stroke-dasharray="5 3"' + o + '/>' +
+             '<text x="' + (x2 + 4) + '" y="' + (Y(pdh) + 4).toFixed(1) + '" font-size="11.5" font-weight="700" fill="#2563eb" ' + halo + '>' + usd(pdh) + '</text>' +
+             '<text x="' + (x2 + 4) + '" y="' + (Y(pdl) + 4).toFixed(1) + '" font-size="11.5" font-weight="700" fill="#b45309" ' + halo + '>' + usd(pdl) + '</text>';
     };
+    // a day's lines start at the wick tip of the previous trading day's candle (its high / low) and run across this day's candle
+    const startX = k => (k > 0 && days[k - 1] != null) ? XL + slot * (k - 0.5) - 8 : XL + slot * (k + 0.5) - 58;
     const td = 'padding:4px 5px;border-top:1px solid #eef0f3;white-space:nowrap;text-align:left';
     days.forEach((i, k) => {
       const cx = XL + slot * (k + 0.5);
       if (i == null) {
         if (isPend && pend.k === k) {
           const dn = parseInt(pend.date.slice(8), 10);
-          s += lvl(cx, pend.pdh, pend.pdl, true) + '<text x="' + cx + '" y="' + (B + 18) + '" text-anchor="middle" font-size="12" fill="#374151">' + NAMES[k] + ' ' + dn + '</text><text x="' + cx + '" y="' + (B + 35) + '" text-anchor="middle" font-size="12" font-weight="700" fill="#6b7280">not traded yet</text>';
+          s += lvl(cx, pend.pdh, pend.pdl, true, startX(k)) + '<text x="' + cx + '" y="' + (B + 18) + '" text-anchor="middle" font-size="12" fill="#374151">' + NAMES[k] + ' ' + dn + '</text><text x="' + cx + '" y="' + (B + 35) + '" text-anchor="middle" font-size="12" font-weight="700" fill="#6b7280">not traded yet</text>';
           rows += '<tr><td style="' + td + ';font-weight:700">' + NAMES[k] + ' ' + dn + '</td><td style="' + td + ';color:#2563eb;font-weight:700">' + usd(pend.pdh) + '</td><td style="' + td + ';color:#9ca3af">&ndash;</td><td style="' + td + ';color:#b45309;font-weight:700">' + usd(pend.pdl) + '</td><td style="' + td + ';color:#9ca3af">&ndash;</td><td style="' + td + ';color:#6b7280;font-weight:700">Not traded yet &mdash; these are the levels to watch</td></tr>';
         } else {
           s += '<text x="' + cx + '" y="' + (B + 18) + '" text-anchor="middle" font-size="12" fill="#c4c8cf">' + NAMES[k] + '</text><text x="' + cx + '" y="' + (B + 35) + '" text-anchor="middle" font-size="12" fill="#c4c8cf">&ndash;</text>';
@@ -3399,7 +3401,7 @@ function spyWeeksHtml(d, liveIdx) {
       const yo = Y(o), yc = Y(c), dn = parseInt(dateOf(i).slice(8), 10);
       s += '<line x1="' + (cx - 8) + '" y1="' + Y(h).toFixed(1) + '" x2="' + (cx - 8) + '" y2="' + Y(l).toFixed(1) + '" stroke="' + col + '" stroke-width="1.5"/>' +
            '<rect x="' + (cx - 19) + '" y="' + Math.min(yo, yc).toFixed(1) + '" width="22" height="' + Math.max(Math.abs(yo - yc), 2).toFixed(1) + '" rx="2" fill="' + col + '" fill-opacity="' + (isLive ? 0.45 : 0.85) + '"/>' +
-           lvl(cx, pdh, pdl, false);
+           lvl(cx, pdh, pdl, false, startX(k));
       const lab = hitH && hitL ? 'HIT H + L' : hitH ? 'HIT H' : hitL ? 'HIT L' : 'NOT HIT';
       const lc = hitH && hitL ? '#374151' : hitH ? '#2563eb' : hitL ? '#b45309' : '#e5484d';
       s += '<text x="' + cx + '" y="' + (B + 18) + '" text-anchor="middle" font-size="12" fill="#374151">' + NAMES[k] + ' ' + dn + '</text>' +
@@ -3420,7 +3422,7 @@ function spyWeeksHtml(d, liveIdx) {
       '<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:11.5px;width:100%"><thead><tr style="text-align:left;color:#6b7280"><th style="padding:4px 5px;text-align:left">Day</th><th style="padding:4px 5px;text-align:left">PDH (line)</th><th style="padding:4px 5px;text-align:left">Day high</th><th style="padding:4px 5px;text-align:left">PDL (line)</th><th style="padding:4px 5px;text-align:left">Day low</th><th style="padding:4px 5px;text-align:left">Result</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
   });
   return '<h3 style="font-size:14px;margin:16px 0 4px">This week &mdash; did each weekday hit its own PDH or PDL?</h3>' +
-    '<div style="color:#6b7280;margin-bottom:8px">Each weekday gets its own previous-day high (blue dashes) and previous-day low (amber dashes), with the dollar price written next to each line; Monday uses the previous Friday. The table under each chart gives that day\'s actual high and low. <strong>HIT</strong> = the day traded to or through that line. <span style="color:#e5484d;font-weight:700">NOT HIT</span> = an inside day, the 5% case.</div>' +
+    '<div style="color:#6b7280;margin-bottom:8px">Each dashed line starts at the tip of the previous day\'s candle &mdash; its high (blue, the PDH) and its low (amber, the PDL) &mdash; and runs across the next day\'s candle, with the dollar price written at the end. So Tuesday\'s lines are Monday\'s high and low. Monday\'s lines come from the prior Friday, which is not drawn. The table under each chart gives that day\'s actual high and low. <strong>HIT</strong> = the day traded to or through that line. <span style="color:#e5484d;font-weight:700">NOT HIT</span> = an inside day, the 5% case.</div>' +
     '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:14px;align-items:start">' + cards.slice().reverse().join('') + '</div>';
 }
 
