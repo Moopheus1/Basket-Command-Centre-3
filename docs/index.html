@@ -158,6 +158,7 @@
   <button class="pnl-all" onclick="setAllPanels(false)" style="background:#4b5563">Expand all</button>
   <a href="#takePanel">↓ TAKE (2+ panels)</a>
   <a href="#weeklyPicksPanel">↓ Weekly Picks (top 2)</a>
+  <a href="#spyLevelsPanel">↓ SPY PDH/PDL</a>
   <a href="#chartsPanel">↓ Charts</a>
   <a href="#goldenPanel">↓ Golden cross &middot; #1</a>
   <a href="#rsDivPanel">↓ RS Leaders &middot; #2</a>
@@ -201,6 +202,12 @@
       <tbody id="weeklyPicksBody"></tbody>
     </table>
   </div>
+</div>
+
+<div class="panel" id="spyLevelsPanel">
+  <h2><span style="background:#475569;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">SPY LEVELS &middot; DISPLAY ONLY</span>Previous-day high and low (PDH / PDL)</h2>
+  <div class="desc">The high and low of SPY's last <em>completed</em> US session, drawn forward across today's candle. It reads the same <code>data.json</code> every other panel uses, so it refreshes with them (about every 10 minutes during the session). Display only: it is not part of TAKE, Weekly Picks, any ranked panel or the forward log. Before the 9:30am ET open the price shown is the last close, because the data has no pre-market price. Yahoo's close can differ from the official close by a few cents.</div>
+  <div id="spyLevelsBody" style="font-size:13px"></div>
 </div>
 
 <div class="panel" id="chartsPanel">
@@ -3327,16 +3334,84 @@ function initCollapsiblePanels() {
   }));
 }
 
+// ===== SPY PDH / PDL (display-only; reads the SPY bars already loaded from data.json; never touches TAKE, any panel rule or the forward log) =====
+function renderSpyLevels() {
+  const el = document.getElementById('spyLevelsBody');
+  if (!el) return;
+  const d = data['SPY'];
+  if (!d || d.error || !d.times || d.times.length < 3 || !d.highs || !d.lows || !d.opens) {
+    el.innerHTML = '<div class="empty" style="padding:10px">SPY is not in data.json right now.</div>'; return;
+  }
+  const n = d.times.length;
+  const et = nowET(), mins = et.getHours() * 60 + et.getMinutes();
+  // A bar dated today is "live" until 20 minutes after the close; then it counts as the completed session.
+  const liveToday = tpBarDate(d.times[n - 1]) === tpTodayET() && mins < SESSION_CLOSE_MIN + 20;
+  const pd = liveToday ? n - 2 : n - 1;
+  const bar = i => ({ t: d.times[i], o: d.opens[i], h: d.highs[i], l: d.lows[i], c: d.closes[i] });
+  const bars = [bar(pd - 1), bar(pd)];
+  if (liveToday) bars.push(bar(n - 1));
+  const PD = bars[1], PDH = PD.h, PDL = PD.l;
+  const px = liveToday ? d.closes[n - 1] : PD.c;
+  const pxLabel = liveToday ? 'Now' : 'Last close';
+  const dayTxt = t => new Date(t * 1000).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
+  const usd = v => '$' + fmtNum2(v);
+
+  let status, scol;
+  if (px > PDH) { status = 'ABOVE the PDH by ' + usd(px - PDH); scol = '#0a9e5c'; }
+  else if (px < PDL) { status = 'BELOW the PDL by ' + usd(PDL - px); scol = '#e5484d'; }
+  else { status = 'INSIDE the PDH&ndash;PDL range'; scol = '#6b7280'; }
+  const tile = (lab, val, col) => '<div style="border:1px solid #e9eaee;border-radius:10px;padding:8px 12px;min-width:125px"><div style="font-size:11px;color:#6b7280">' + lab + '</div><div style="font-size:18px;font-weight:700' + (col ? ';color:' + col : '') + '">' + val + '</div></div>';
+  let html = '<div style="color:#6b7280;margin-bottom:4px">Previous completed session: <strong>' + dayTxt(PD.t) + '</strong> &middot; its range ' + usd(PDH - PDL) + '</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:10px;margin:8px 0">' +
+      tile('PDH (previous-day high)', usd(PDH), '#2563eb') + tile('PDL (previous-day low)', usd(PDL), '#d97706') +
+      tile('Previous close', usd(PD.c)) + tile(pxLabel, usd(px)) +
+      tile('Down to PDL', px >= PDL ? usd(px - PDL) : '&mdash;') + tile('Up to PDH', px <= PDH ? usd(PDH - px) : '&mdash;') +
+    '</div><div style="margin:4px 0 8px;font-weight:700;color:' + scol + '">' + pxLabel + ' ' + usd(px) + ' is ' + status + '</div>';
+
+  const XL = 62, XR = 640, T = 18, B = 262, CX = [180, 340, 500];
+  let lo = Math.min(...bars.map(b => b.l), px), hi = Math.max(...bars.map(b => b.h), px);
+  const pad = (hi - lo) * 0.08 || 1; lo -= pad; hi += pad;
+  const Y = p => T + (hi - p) / (hi - lo) * (B - T);
+  const step = [0.5, 1, 2, 5, 10, 20, 25, 50, 100].find(s => s >= (hi - lo) / 5) || 100;
+  const halo = ' paint-order="stroke" stroke="#fff" stroke-width="4" stroke-linejoin="round"';
+  let s = '';
+  for (let k = Math.ceil(lo / step); k <= Math.floor(hi / step); k++) {
+    const v = k * step, yy = Y(v).toFixed(1);
+    s += '<line x1="' + XL + '" y1="' + yy + '" x2="' + XR + '" y2="' + yy + '" stroke="#e5e7eb" stroke-width="1"/>' +
+         '<text x="' + (XL - 8) + '" y="' + (+yy + 4) + '" text-anchor="end" font-size="11" fill="#6b7280">$' + v.toLocaleString() + '</text>';
+  }
+  bars.forEach((b, i) => {
+    const x = CX[i], col = b.c >= b.o ? '#0a9e5c' : '#e5484d';
+    const yo = Y(b.o), yc = Y(b.c), top = Math.min(yo, yc), hgt = Math.max(Math.abs(yo - yc), 2);
+    s += '<line x1="' + x + '" y1="' + Y(b.h).toFixed(1) + '" x2="' + x + '" y2="' + Y(b.l).toFixed(1) + '" stroke="' + col + '" stroke-width="1.5"/>' +
+         '<rect x="' + (x - 28) + '" y="' + top.toFixed(1) + '" width="56" height="' + hgt.toFixed(1) + '" rx="2" fill="' + col + '" fill-opacity="0.85"/>';
+  });
+  const yH = Y(PDH), yL = Y(PDL), yP = Y(px);
+  s += '<line x1="' + (CX[1] - 28) + '" y1="' + yH.toFixed(1) + '" x2="' + XR + '" y2="' + yH.toFixed(1) + '" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="6 4"/>' +
+       '<line x1="' + (CX[1] - 28) + '" y1="' + yL.toFixed(1) + '" x2="' + XR + '" y2="' + yL.toFixed(1) + '" stroke="#d97706" stroke-width="1.5" stroke-dasharray="6 4"/>' +
+       '<text x="' + XR + '" y="' + (yH - 6).toFixed(1) + '" text-anchor="end" font-size="12" font-weight="700" fill="#2563eb"' + halo + '>PDH ' + usd(PDH) + '</text>' +
+       '<text x="' + XR + '" y="' + (yL + 16).toFixed(1) + '" text-anchor="end" font-size="12" font-weight="700" fill="#d97706"' + halo + '>PDL ' + usd(PDL) + '</text>' +
+       '<circle cx="' + CX[2] + '" cy="' + yP.toFixed(1) + '" r="5" fill="#111827" stroke="#fff" stroke-width="2"/>' +
+       '<text x="' + (CX[2] - 40) + '" y="' + (yP + 4).toFixed(1) + '" text-anchor="end" font-size="12" font-weight="700" fill="#111827"' + halo + '>' + pxLabel + ' ' + usd(px) + '</text>';
+  [dayTxt(bars[0].t), dayTxt(PD.t) + ' · PD', liveToday ? 'Today · live' : 'Next session'].forEach((lab, i) => {
+    s += '<text x="' + CX[i] + '" y="284" text-anchor="middle" font-size="12" fill="#374151">' + esc(lab) + '</text>';
+  });
+  html += '<svg viewBox="0 0 680 296" width="100%" style="max-width:760px;display:block" role="img" aria-label="SPY daily candles with the previous-day high ' + usd(PDH) + ' and low ' + usd(PDL) + ' carried forward, and the current price ' + usd(px) + '">' + s + '</svg>' +
+    '<div style="color:#9ca3af;font-size:11px;margin-top:4px">Data as of ' + esc(asofStr || '') + ' (Yahoo Finance via data.json).</div>';
+  el.innerHTML = html;
+}
+
 (async function init() {
   try { syncBottomJumpbar(); } catch (e) {}      // before initCollapsiblePanels, so bottom links also open hidden panels
   try { initCollapsiblePanels(); } catch (e) {}
   loadForwardSummary();
   const ok = await loadData();
   if (!ok) return;
+  try { renderSpyLevels(); } catch (e) {}
   await loadFlow();
   try { renderTradePlans(); } catch (e) {}
   loadBB();
-  setInterval(async () => { await loadData(); renderFlowPanel(); try { renderTradePlans(); } catch (e) {} loadBB(); }, DATA_REFRESH_MS);
+  setInterval(async () => { await loadData(); try { renderSpyLevels(); } catch (e) {} renderFlowPanel(); try { renderTradePlans(); } catch (e) {} loadBB(); }, DATA_REFRESH_MS);
 })();
 </script>
 </body>
