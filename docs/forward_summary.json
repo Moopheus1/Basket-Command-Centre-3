@@ -1,6 +1,6 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-07T00:06:56.714Z",
+ "updated": "2026-11-07T01:03:08.122Z",
  "logged_rows": 322,
  "logged_days": 31,
  "scored_signals": 45,
@@ -11,14 +11,14 @@
   "hit_rate": 0.402,
   "avg_return": -0.1323,
   "median_dip": -0.1843,
-  "bad_case_dip": -0.3264
+  "bad_case_dip": -0.327
  },
  "random_baseline_2x": {
   "n": 1190,
   "hit_rate": 0.324,
   "avg_return": -0.1413,
   "median_dip": -0.2001,
-  "bad_case_dip": -0.3314
+  "bad_case_dip": -0.3318
  },
  "all_signals": {
   "n": 45,
@@ -38,7 +38,7 @@
   "1 panel": {
    "n": 44,
    "hit_rate": 0.659,
-   "avg_return": -0.0301,
+   "avg_return": -0.03,
    "median_dip": -0.0235,
    "bad_case_dip": -0.1557
   },
@@ -54,7 +54,7 @@
   "FULL": {
    "n": 40,
    "hit_rate": 0.65,
-   "avg_return": -0.0317,
+   "avg_return": -0.0316,
    "median_dip": -0.022,
    "bad_case_dip": -0.1557
   },
@@ -77,7 +77,7 @@
   "Weekly Pick": {
    "n": 14,
    "hit_rate": 0.571,
-   "avg_return": -0.0798,
+   "avg_return": -0.0796,
    "median_dip": -0.0189,
    "bad_case_dip": -0.2986
   },
@@ -91,7 +91,7 @@
   "RS Leader": {
    "n": 2,
    "hit_rate": 0.5,
-   "avg_return": -0.0365,
+   "avg_return": -0.0363,
    "median_dip": -0.0773,
    "bad_case_dip": -0.182
   },
@@ -130,7 +130,7 @@
   "breadth <= 50%": {
    "n": 3,
    "hit_rate": 0.333,
-   "avg_return": -0.1154,
+   "avg_return": -0.1145,
    "median_dip": -0.182,
    "bad_case_dip": -0.2435
   }
