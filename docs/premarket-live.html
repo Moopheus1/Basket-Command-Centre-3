@@ -378,8 +378,8 @@ document.getElementById('tbody').addEventListener('click', e => {
 ['q', 'flt', 'ncharts', 'cstyle'].forEach(id => document.getElementById(id).addEventListener('input', () => render(true)));
 
 // ---------------- live link to TradingView Desktop (your own computer) ----------------
-let LIVE = {}, liveTs = 0, ws = null, wsId = 0, pend = {}, liveOn = false, tvId = (location.hash || '').replace(/^#/, '').trim();
-const EXPR = `(async()=>{const sleep=ms=>new Promise(r=>setTimeout(r,ms));const first=document.querySelector('[data-symbol-full]');if(!first)return{err:'no watchlist rows on screen: open the watchlist panel'};let sc=first.parentElement;while(sc&&!(sc.scrollHeight>sc.clientHeight+20&&/auto|scroll/.test(getComputedStyle(sc).overflowY)))sc=sc.parentElement;const lb=document.querySelector('[data-name="watchlists-button"]');const list=lb?lb.innerText.trim():'';if(list!=='BCC3')return{err:'the open watchlist is "'+list+'": select BCC3',list};const out={};const num=s=>{if(s==null)return null;s=s.replace(/[\\u2212\\u2013]/g,'-').replace(/[,\\s%]/g,'');const v=parseFloat(s);return isNaN(v)?null:v};const grab=()=>document.querySelectorAll('[data-symbol-full]').forEach(r=>{const c=r.querySelectorAll(':scope > span[class*="cell-"]');if(c.length<3)return;const vol=c[3]&&c[3].querySelector('[data-value]');out[r.getAttribute('data-symbol-full')]={last:num(c[0].innerText),chg:num(c[1].innerText),pct:num(c[2].innerText),vol:vol?+vol.getAttribute('data-value'):null,rt:!!r.querySelector('[title="Real-time"]')}});if(sc){const st=sc.scrollTop;sc.scrollTop=0;await sleep(300);grab();let g=0;while(g++<20&&sc.scrollTop+sc.clientHeight<sc.scrollHeight-2){sc.scrollTop+=sc.clientHeight*0.5;await sleep(300);grab()}g=0;while(g++<20&&sc.scrollTop>2){sc.scrollTop-=sc.clientHeight*0.5;await sleep(250);grab()}sc.scrollTop=st}else grab();return{list,n:Object.keys(out).length,rows:out}})()`;
+let cycleMs = 0, LIVE = {}, liveTs = 0, ws = null, wsId = 0, pend = {}, liveOn = false, tvId = (location.hash || '').replace(/^#/, '').trim();
+const EXPR = `(async()=>{const T0=Date.now();const sleep=ms=>new Promise(r=>setTimeout(r,ms));const first=document.querySelector('[data-symbol-full]');if(!first)return{err:'no watchlist rows on screen: open the watchlist panel'};let sc=first.parentElement;while(sc&&!(sc.scrollHeight>sc.clientHeight+20&&/auto|scroll/.test(getComputedStyle(sc).overflowY)))sc=sc.parentElement;const lb=document.querySelector('[data-name="watchlists-button"]');const list=lb?lb.innerText.trim():'';if(list!=='BCC3')return{err:'the open watchlist is "'+list+'": select BCC3',list};const out={};const num=s=>{if(s==null)return null;s=s.replace(/[\\u2212\\u2013]/g,'-').replace(/[,\\s%]/g,'');const v=parseFloat(s);return isNaN(v)?null:v};const grab=()=>document.querySelectorAll('[data-symbol-full]').forEach(r=>{const c=r.querySelectorAll(':scope > span[class*="cell-"]');if(c.length<3)return;const vol=c[3]&&c[3].querySelector('[data-value]');out[r.getAttribute('data-symbol-full')]={last:num(c[0].innerText),chg:num(c[1].innerText),pct:num(c[2].innerText),vol:vol?+vol.getAttribute('data-value'):null,rt:!!r.querySelector('[title="Real-time"]')}});if(sc){const st=sc.scrollTop;sc.scrollTop=0;await sleep(90);grab();let g=0;while(g++<20&&sc.scrollTop+sc.clientHeight<sc.scrollHeight-2){sc.scrollTop+=sc.clientHeight*0.8;await sleep(90);grab()}sc.scrollTop=st}else grab();return{list,n:Object.keys(out).length,rows:out,ms:Date.now()-T0}})()`;
 function liveStatus(cls, html) { const el = document.getElementById('live'); el.className = 'status' + (cls ? ' ' + cls : ''); el.innerHTML = html; }
 function cdp(method, params) { return new Promise((res, rej) => { const id = ++wsId; pend[id] = { res, rej }; ws.send(JSON.stringify({ id, method, params })); setTimeout(() => { if (pend[id]) { delete pend[id]; rej(new Error('timeout')); } }, 20000); }); }
 function connect() {
@@ -399,10 +399,10 @@ async function poll() {
     const v = r && r.result && r.result.value;
     if (!v) throw new Error('no value');
     if (v.err) { liveStatus('warn', 'TradingView says: ' + esc(v.err) + '. Showing the last Yahoo snapshot.'); applyLive(false); }
-    else { LIVE = {}; for (const [k, x] of Object.entries(v.rows)) { const sym = k.includes('!') ? k.split(':').pop() : revSym(k); if (x.last != null) LIVE[sym] = x; } liveTs = Date.now(); applyLive(true); }
+    else { cycleMs = v.ms; for (const [k, x] of Object.entries(v.rows)) { const sym = k.includes('!') ? k.split(':').pop() : revSym(k); if (x.last != null) LIVE[sym] = x; } liveTs = Date.now(); applyLive(true); }
   } catch (e) { liveStatus('warn', 'Could not read TradingView: ' + esc(e.message)); }
   polling = false;
-  if (liveOn) setTimeout(poll, 1500);
+  if (liveOn) setTimeout(poll, 200);
 }
 function revSym(full) { for (const [k, v] of Object.entries(TVSYM)) if (v === full) return k; return full.split(':').pop(); }
 function applyLive(on) {
@@ -420,7 +420,7 @@ function applyLive(on) {
   document.getElementById('status').style.display = on ? 'none' : '';
   if (on) {
     const stk = Object.entries(LIVE).filter(([k]) => !k.includes('!')), n = stk.length, rt = stk.filter(([, x]) => x.rt).length;
-    liveStatus('', '<strong style="color:var(--up)">&#9679; LIVE</strong> from your TradingView &middot; <strong>' + n + '</strong> tickers (' + rt + ' real-time) &middot; updated ' + new Date().toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: false }) + ' ET &middot; refreshes every ~2&ndash;3 s');
+    liveStatus('', '<strong style="color:var(--up)">&#9679; LIVE</strong> from your TradingView &middot; <strong>' + n + '</strong> tickers (' + rt + ' real-time) &middot; updated ' + new Date().toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: false }) + ' ET &middot; full read every ' + (cycleMs / 1000).toFixed(1) + ' s');
   }
 }
 setInterval(async () => {   // Yahoo snapshot kept as the fallback and for PM high/low
