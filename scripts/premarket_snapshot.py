@@ -131,9 +131,29 @@ def write_tv_symbols(tickers):
         print(f"[premarket_snapshot] tv_symbols skipped: {e}")
 
 
+def update_ticker_order(tickers):
+    """Keep docs/ticker_order.json = tickers in the order they were added to tickers.txt (oldest first).
+    Seeded once from the git history; from then on any ticker not yet listed is appended with today's date."""
+    path = os.path.join(ROOT, "docs", "ticker_order.json")
+    try:
+        doc = json.load(open(path, encoding="utf-8")) if os.path.exists(path) else {"order": [], "added": {}}
+        order, added = doc.get("order", []), doc.get("added", {})
+        today = datetime.now(ET).strftime("%Y-%m-%d")
+        new = [t for t in tickers if t not in order]
+        if new:
+            for t in new:
+                order.append(t)
+                added[t] = today
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump({"added": added, "order": order}, f, separators=(",", ":"))
+    except Exception as e:
+        print(f"[premarket_snapshot] ticker_order skipped: {e}")
+
+
 def main():
     tickers = read_tickers()
     write_tv_symbols(tickers)
+    update_ticker_order(tickers)
     print(f"[premarket_snapshot] {len(tickers)} tickers")
     try:
         raw = yf.download(

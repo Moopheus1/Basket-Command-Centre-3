@@ -79,7 +79,7 @@
   <div class="status" id="status">Loading&hellip;</div>
 
   <div class="panel">
-    <h2>Table <span class="sub" style="font-weight:400">&mdash; click a column to sort, click a ticker to jump to its chart</span></h2>
+    <h2>Table <span class="sub" style="font-weight:400">&mdash; default order is oldest-added first (# column, hover for the date added); click a column to sort, click # to come back to it; click a ticker to jump to its chart</span></h2>
     <div class="scroll"><table id="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
     <div class="note" style="margin-top:8px">Each average cell shows the average in dollars, then how many dollars the price is above (green) or below (red) it. Gap is price minus the last regular close. The Gap column sorts by percentage so different-priced stocks compare fairly; the sort for each average is also by percentage.</div>
   </div>
@@ -104,7 +104,7 @@ const MAS = [
 ];
 const CHART_BARS = 90;
 const ET = 'America/New_York';
-let DATA = null, PM = null, TVSYM = {}, ROWS = [], sortKey = 'gapPct', sortDir = -1, lastChartSig = '', tvObserver = null;
+let DATA = null, PM = null, TVSYM = {}, TORD = null, ROWS = [], sortKey = 'order', sortDir = 1, lastChartSig = '', tvObserver = null;
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const usd = v => v == null ? '—' : '$' + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -116,7 +116,7 @@ function emaSeries(c, n) { const o = new Array(c.length).fill(null); if (c.lengt
 
 async function load() {
   const get = async u => { try { const r = await fetch(u + '?t=' + Date.now(), { cache: 'no-store' }); return r.ok ? await r.json() : null; } catch (e) { return null; } };
-  [DATA, PM, TVSYM] = await Promise.all([get('data.json'), get('premarket.json'), get('tv_symbols.json')]);
+  [DATA, PM, TVSYM, TORD] = await Promise.all([get('data.json'), get('premarket.json'), get('tv_symbols.json'), get('ticker_order.json')]);
   TVSYM = TVSYM || {};
   if (!DATA || !DATA.tickers) { document.getElementById('status').textContent = 'data.json could not be loaded.'; return; }
   build();
@@ -127,6 +127,10 @@ function build() {
   // a daily bar dated on the day being shown is partial while that day's session is not over: leave it out of the averages and charts
   const anyPost = PM && Object.values(PM.tickers).some(v => v.session === 'post');
   ROWS = [];
+  // default order = the order tickers were added to tickers.txt, oldest first (ticker_order.json); a ticker missing from it goes last
+  const ORDER = {}, ADDED = (TORD && TORD.added) || {};
+  if (TORD && TORD.order) TORD.order.forEach((k, i) => { ORDER[k] = i; });
+  else Object.keys((PM && PM.tickers) || DATA.tickers).forEach((k, i) => { ORDER[k] = i; });
   for (const [sym, t] of Object.entries(DATA.tickers)) {
     if (!t || !t.bars || t.bars.length < 30) continue;
     let bars = t.bars;
@@ -138,7 +142,7 @@ function build() {
     const p = PM && PM.tickers[sym] && !PM.tickers[sym].error && PM.tickers[sym].price != null ? PM.tickers[sym] : null;
     const prev = p && p.prev_close != null ? p.prev_close : closes[last];
     const price = p && p.price != null ? p.price : closes[last];
-    const r = { sym, name: t.name || '', bars, closes, series, p, price, prev, hasPm: !!p,
+    const r = { sym, order: ORDER[sym] != null ? ORDER[sym] : 9999, added: ADDED[sym] || '', name: t.name || '', bars, closes, series, p, price, prev, hasPm: !!p,
                 gap: price - prev, gapPct: prev ? (price - prev) / prev * 100 : null };
     MAS.forEach(m => { const v = series[m.key][last]; r[m.key] = v; r[m.key + 'Pct'] = v ? (price - v) / v * 100 : null; });
     ROWS.push(r);
@@ -158,7 +162,7 @@ function build() {
   render();
 }
 
-const COLS = [['sym', 'Ticker'], ['prev', 'Prev close'], ['price', 'Pre-mkt price'], ['gapPct', 'Gap'], ['pmHi', 'PM high'], ['pmLo', 'PM low']]
+const COLS = [['sym', 'Ticker'], ['order', '#'], ['prev', 'Prev close'], ['price', 'Pre-mkt price'], ['gapPct', 'Gap'], ['pmHi', 'PM high'], ['pmLo', 'PM low']]
   .concat(MAS.map(m => [m.key + 'Pct', m.name]));
 
 function visibleRows() {
@@ -195,7 +199,7 @@ function render(force) {
     const tag = r.p && r.p.session !== 'pre' ? '<span class="tag ' + r.p.session + '">' + (r.p.session === 'regular' ? 'live' : 'post') + '</span>' : '';
     const g = r.hasPm ? '<span class="' + (r.gap >= 0 ? 'up' : 'down') + '">' + sgn(r.gap) + '</span>' : '<span class="mut">&mdash;</span>';
     return '<tr><td><a href="#c-' + esc(r.sym) + '" data-jump="' + esc(r.sym) + '">' + esc(r.sym) + '</a>' + tag + '</td>' +
-      '<td>' + usd(r.prev) + '</td><td>' + (r.hasPm ? usd(r.price) : '<span class="mut">' + usd(r.price) + '</span>') + '</td><td title="' + (r.gapPct != null ? r.gapPct.toFixed(2) + '%' : '') + '">' + g + '</td>' +
+      '<td class="mut"' + (r.added ? ' title="added ' + r.added + '"' : '') + '>' + (r.order + 1) + '</td><td>' + usd(r.prev) + '</td><td>' + (r.hasPm ? usd(r.price) : '<span class="mut">' + usd(r.price) + '</span>') + '</td><td title="' + (r.gapPct != null ? r.gapPct.toFixed(2) + '%' : '') + '">' + g + '</td>' +
       '<td>' + (r.p && r.p.pm_high != null ? usd(r.p.pm_high) : '<span class="mut">&mdash;</span>') + '</td><td>' + (r.p && r.p.pm_low != null ? usd(r.p.pm_low) : '<span class="mut">&mdash;</span>') + '</td>' +
       MAS.map(m => maCell(r, m)).join('') + '</tr>';
   }).join('') : '<tr><td colspan="' + COLS.length + '" class="empty">No tickers match.</td></tr>';
@@ -308,7 +312,7 @@ function gapHtml(r) { return r.hasPm ? '<span class="' + (r.gap >= 0 ? 'up' : 'd
 
 document.getElementById('thead').addEventListener('click', e => {
   const th = e.target.closest('th'); if (!th) return;
-  const k = th.dataset.k; if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = k === 'sym' ? 1 : -1; }
+  const k = th.dataset.k; if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = (k === 'sym' || k === 'order') ? 1 : -1; }
   render(true);
 });
 document.getElementById('tbody').addEventListener('click', e => {
