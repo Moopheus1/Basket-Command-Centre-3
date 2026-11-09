@@ -94,12 +94,12 @@
   </div>
 
   <div class="panel">
-    <h2>Charts <span class="sub" style="font-weight:400">&mdash; last 90 daily candles, in the same order as the table</span></h2>
+    <h2>Charts <span class="sub" style="font-weight:400">&mdash; daily candles, in the same order as the table</span></h2>
     <div class="grid" id="grid"></div>
   </div>
 
   <div class="note">
-    Pre-market prices come from Yahoo Finance 1-minute bars (4:00&ndash;9:30am ET), refreshed about every 10 minutes in that window; Yahoo gives no pre-market volume, and thinly traded names can print odd prices, so treat a single pre-market tick with caution. The averages are computed from the completed daily bars in <code>data.json</code> (EMA9 is exponential; SMA20/50/100/200 are simple), so they do not move with the pre-market price. TradingView charts are TradingView's own embedded widget (their data and their pre-market tag); the widget cannot colour each average separately, so all five lines share one colour there and are told apart by the legend and the price-axis labels. Pick &ldquo;my SVG&rdquo; for colour-coded lines. Nothing on this page feeds TAKE, Weekly Picks, any panel or the forward log.
+    Pre-market prices come from Yahoo Finance 1-minute bars (4:00&ndash;9:30am ET), refreshed about every 10 minutes in that window; Yahoo gives no pre-market volume, and thinly traded names can print odd prices, so treat a single pre-market tick with caution. The averages are computed from the completed daily bars in <code>data.json</code> (EMA9 is exponential; SMA20/50/100/200 are simple), so they do not move with the pre-market price. TradingView charts are TradingView's own embedded widget on daily candles (their data and their orange Pre tag). The free widget cannot colour moving-average lines individually, so the averages are not drawn on those charts; their values are listed under each chart and in the table. Pick &ldquo;my SVG&rdquo; in the chart-type box for charts with all five averages drawn in separate colours. Nothing on this page feeds TAKE, Weekly Picks, any panel or the forward log.
   </div>
 </div>
 
@@ -293,16 +293,14 @@ function chartSvg(r) {
   return { svg: '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + esc(r.sym) + ' daily candles with moving averages">' + s + '</svg>', lo, hi };
 }
 
-const TV_LENS = [['MAExp@tv-basicstudies', 9], ['MASimple@tv-basicstudies', 20], ['MASimple@tv-basicstudies', 50], ['MASimple@tv-basicstudies', 100], ['MASimple@tv-basicstudies', 200]];
 function mountTv(box) {
   if (box.dataset.done) return; box.dataset.done = '1';
   const sym = box.dataset.tv;
   const c = document.createElement('div'); c.className = 'tradingview-widget-container';
   const w = document.createElement('div'); w.className = 'tradingview-widget-container__widget'; c.appendChild(w);
   const s = document.createElement('script'); s.async = true; s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
-  s.text = JSON.stringify({ autosize: true, symbol: sym, interval: 'D', range: '6M', timezone: 'America/New_York', theme: 'dark', style: '1', locale: 'en', backgroundColor: '#131722', gridColor: 'rgba(42,46,57,0.6)',
-    allow_symbol_change: false, hide_top_toolbar: true, hide_side_toolbar: true, hide_volume: true, withdateranges: false, save_image: false, calendar: false, support_host: 'https://www.tradingview.com',
-    studies: TV_LENS.map(x => ({ id: x[0], inputs: { length: x[1] } })) });
+  s.text = JSON.stringify({ autosize: true, symbol: sym, interval: 'D', timezone: 'America/New_York', theme: 'dark', style: '1', locale: 'en', backgroundColor: '#131722', gridColor: 'rgba(42,46,57,0.6)',
+    allow_symbol_change: false, hide_top_toolbar: true, hide_side_toolbar: true, hide_volume: true, withdateranges: false, save_image: false, calendar: false, support_host: 'https://www.tradingview.com' });
   c.appendChild(s); box.textContent = ''; box.appendChild(c);
 }
 
