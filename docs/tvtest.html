@@ -1,0 +1,24 @@
+<!doctype html><html><head><meta charset="utf-8"><title>TradingView link test</title>
+<style>body{background:#131722;color:#d1d4dc;font:15px system-ui;padding:24px;max-width:760px}code{background:#1e222d;padding:2px 6px;border-radius:4px}.ok{color:#26a69a}.bad{color:#ef5350}pre{background:#1e222d;padding:12px;border-radius:6px;white-space:pre-wrap}</style></head><body>
+<h2>TradingView link test</h2>
+<p>Test only. It tries to connect from this browser to your TradingView Desktop on this computer (port 9222). Nothing is sent anywhere else.</p>
+<p>Target id: <input id="tid" size="40" style="background:#1e222d;color:#d1d4dc;border:1px solid #2a2e39;padding:4px"> <button onclick="run()">Run test</button></p>
+<pre id="log">Waiting…</pre>
+<script>
+const L=m=>{document.getElementById('log').textContent+='\n'+m};
+const h=location.hash.replace('#','');if(h)document.getElementById('tid').value=h;
+function run(){
+  document.getElementById('log').textContent='Starting…';
+  const id=document.getElementById('tid').value.trim();
+  // step 1: can we read the list of targets over HTTP?
+  fetch('http://localhost:9222/json/version').then(r=>r.json()).then(j=>L('HTTP /json/version: OK ('+(j.Browser||'')+')')).catch(e=>L('HTTP /json/version: blocked ('+e.message+') — expected, not needed'));
+  // step 2: websocket to the page
+  let ws;try{ws=new WebSocket('ws://localhost:9222/devtools/page/'+id)}catch(e){L('WebSocket: could not start — '+e.message);return}
+  const t=setTimeout(()=>L('WebSocket: no answer after 8 s'),8000);
+  ws.onopen=()=>{L('WebSocket: CONNECTED');ws.send(JSON.stringify({id:1,method:'Runtime.evaluate',params:{expression:'document.title+" | "+document.querySelectorAll("[data-symbol-full]").length+" watchlist rows on screen",returnByValue:true}}))};
+  ws.onmessage=e=>{clearTimeout(t);const m=JSON.parse(e.data);if(m.id===1){L('Answer from TradingView: '+(m.result&&m.result.result?m.result.result.value:JSON.stringify(m)));L('\nRESULT: LINK WORKS');ws.close()}};
+  ws.onerror=()=>L('WebSocket: ERROR (refused or blocked)');
+  ws.onclose=ev=>L('WebSocket closed (code '+ev.code+')');
+}
+if(h)setTimeout(run,300);
+</script></body></html>
