@@ -5,41 +5,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BCC3 Premarket</title>
 <style>
+  :root { --bg:#131722; --panel:#1e222d; --line:#2a2e39; --txt:#d1d4dc; --mut:#787b86; --up:#26a69a; --dn:#ef5350; --link:#5b9cf6; }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f6f7f9; color: #111827; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Trebuchet MS", Roboto, Ubuntu, sans-serif; background: var(--bg); color: var(--txt); }
   .wrap { max-width: 1500px; margin: 0 auto; padding: 16px; }
-  h1 { font-size: 22px; margin: 0 0 2px; }
-  .sub { color: #6b7280; font-size: 13px; }
-  a { color: #2563eb; text-decoration: none; }
+  h1 { font-size: 22px; margin: 0 0 2px; color: #fff; }
+  .sub { color: var(--mut); font-size: 13px; }
+  a { color: var(--link); text-decoration: none; }
   .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0; }
-  .bar input[type=search], .bar select { padding: 7px 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; background: #fff; }
-  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 3px 9px; border: 1px solid #e5e7eb; border-radius: 999px; background: #fff; }
+  .bar input[type=search], .bar select { padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; background: var(--panel); color: var(--txt); }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 3px 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); }
   .sw { display: inline-block; width: 16px; height: 3px; border-radius: 2px; }
-  .status { font-size: 13px; padding: 8px 12px; border-radius: 10px; background: #fff; border: 1px solid #e5e7eb; margin-bottom: 12px; }
-  .status.warn { border-color: #fcd34d; background: #fffbeb; color: #92400e; }
-  .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; }
-  .panel h2 { font-size: 16px; margin: 0 0 6px; }
+  .status { font-size: 13px; padding: 8px 12px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); margin-bottom: 12px; }
+  .status.warn { border-color: #b7791f; background: #2a2316; color: #f6c66a; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; }
+  .panel h2 { font-size: 16px; margin: 0 0 6px; color: #fff; }
   .scroll { overflow: auto; max-height: 70vh; }
   table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 13px; }
-  th, td { padding: 6px 9px; border-bottom: 1px solid #f1f2f4; white-space: nowrap; text-align: right; }
-  th { position: sticky; top: 0; background: #fff; z-index: 2; cursor: pointer; user-select: none; color: #374151; font-weight: 600; border-bottom: 1px solid #e5e7eb; }
-  th:first-child, td:first-child { text-align: left; position: sticky; left: 0; background: #fff; z-index: 1; font-weight: 700; }
+  th, td { padding: 6px 9px; border-bottom: 1px solid var(--line); white-space: nowrap; text-align: right; }
+  th { position: sticky; top: 0; background: var(--panel); z-index: 2; cursor: pointer; user-select: none; color: var(--mut); font-weight: 600; }
+  th:first-child, td:first-child { text-align: left; position: sticky; left: 0; background: var(--panel); z-index: 1; font-weight: 700; }
   th:first-child { z-index: 3; }
-  tbody tr:hover td { background: #fafafa; }
-  .up { color: #0a9e5c; font-weight: 700; } .down { color: #e5484d; font-weight: 700; } .mut { color: #9ca3af; }
-  .tag { font-size: 10.5px; padding: 1px 6px; border-radius: 999px; background: #eef2ff; color: #3730a3; margin-left: 6px; font-weight: 600; }
-  .tag.regular { background: #ecfdf5; color: #065f46; } .tag.post { background: #f3f4f6; color: #374151; }
+  tbody tr:hover td { background: #262b38; }
+  .up { color: var(--up); font-weight: 700; } .down { color: var(--dn); font-weight: 700; } .mut { color: var(--mut); }
+  .tag { font-size: 10.5px; padding: 1px 6px; border-radius: 999px; background: #2b3252; color: #b4bcf5; margin-left: 6px; font-weight: 600; }
+  .tag.regular { background: #123b35; color: #7fdccf; } .tag.post { background: #2a2e39; color: #b2b5be; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 12px; }
-  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 8px 10px; min-width: 0; }
-  .card.flash { box-shadow: 0 0 0 3px #93c5fd; }
-  .card h3 { font-size: 15px; margin: 0 0 2px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-  .card h3 .nm { font-size: 11.5px; color: #6b7280; font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 11.5px; margin-top: 2px; color: #374151; }
+  .card { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; min-width: 0; }
+  .card.flash { box-shadow: 0 0 0 3px #2962ff; }
+  .card h3 { font-size: 15px; margin: 0 0 2px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; color: #fff; }
+  .card h3 .nm { font-size: 11.5px; color: var(--mut); font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 11.5px; margin-top: 2px; color: var(--txt); }
   .legend span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
-  .note { color: #6b7280; font-size: 12.5px; line-height: 1.5; }
-  .empty { padding: 20px; color: #6b7280; text-align: center; }
-  .tvbox { height: 360px; background: #fafafa; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 12px; }
+  .note { color: var(--mut); font-size: 12.5px; line-height: 1.5; }
+  .empty { padding: 20px; color: var(--mut); text-align: center; }
+  .tvbox { height: 360px; background: var(--bg); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--mut); font-size: 12px; }
   .tvbox .tradingview-widget-container, .tvbox .tradingview-widget-container__widget { width: 100%; height: 100%; }
+  #quotes { height: 620px; border-radius: 8px; overflow: hidden; }
+  #quotes .tradingview-widget-container, #quotes .tradingview-widget-container__widget { width: 100%; height: 100%; }
 </style>
 </head>
 <body>
@@ -79,6 +82,12 @@
   <div class="status" id="status">Loading&hellip;</div>
 
   <div class="panel">
+    <h2>Live quotes <span class="sub" style="font-weight:400">&mdash; TradingView's own table: index futures first, then every BCC3 ticker by sector</span></h2>
+    <div id="quotes">Loading TradingView&hellip;</div>
+    <div class="note" style="margin-top:8px">Streamed by TradingView, so it updates by itself. The index futures (OANDA CFDs) trade around the clock and are the live pre-market read on the market. For stocks, TradingView's free feed is delayed (the small orange <strong>D</strong>) and only moves in the 9:30am&ndash;4:00pm ET session, so before the open its stock rows still show the previous session. The pre-market price of each stock is in the table below (from Yahoo, refreshed by the snapshot job) and as the orange <strong>Pre</strong> tag on each chart.</div>
+  </div>
+
+  <div class="panel">
     <h2>Table <span class="sub" style="font-weight:400">&mdash; default order is A to Z (click the # column for oldest-added first, hover it for the date added); click a column to sort, click # to come back to it; click a ticker to jump to its chart</span></h2>
     <div class="scroll"><table id="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
     <div class="note" style="margin-top:8px">Each average cell shows the average in dollars, then how many dollars the price is above (green) or below (red) it. Gap is price minus the last regular close. The Gap column sorts by percentage so different-priced stocks compare fairly; the sort for each average is also by percentage.</div>
@@ -97,14 +106,14 @@
 <script>
 const MAS = [
   { key: 'ema9',   name: 'EMA9',   col: '#f59e0b', w: 1.6 },
-  { key: 'sma20',  name: 'SMA20',  col: '#2563eb', w: 1.6 },
-  { key: 'sma50',  name: 'SMA50',  col: '#7c3aed', w: 1.6 },
-  { key: 'sma100', name: 'SMA100', col: '#0891b2', w: 1.6 },
-  { key: 'sma200', name: 'SMA200', col: '#111827', w: 2.2 }
+  { key: 'sma20',  name: 'SMA20',  col: '#3b82f6', w: 1.6 },
+  { key: 'sma50',  name: 'SMA50',  col: '#b36bff', w: 1.6 },
+  { key: 'sma100', name: 'SMA100', col: '#22d3ee', w: 1.6 },
+  { key: 'sma200', name: 'SMA200', col: '#e5e7eb', w: 2.2 }
 ];
 const CHART_BARS = 90;
 const ET = 'America/New_York';
-let DATA = null, PM = null, TVSYM = {}, TORD = null, ROWS = [], sortKey = 'sym', sortDir = 1, lastChartSig = '', tvObserver = null;
+let quotesMounted = false, DATA = null, PM = null, TVSYM = {}, TORD = null, ROWS = [], sortKey = 'sym', sortDir = 1, lastChartSig = '', tvObserver = null;
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const usd = v => v == null ? '—' : '$' + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -122,7 +131,22 @@ async function load() {
   build();
 }
 
+function mountQuotes() {
+  if (quotesMounted || !DATA) return; quotesMounted = true;
+  const g = {};
+  Object.entries(DATA.tickers).forEach(([sym, t]) => { const k = (t && t.sector) || 'Other'; (g[k] = g[k] || []).push(sym); });
+  const groups = [{ name: 'US INDEX FUTURES', symbols: [['OANDA:US30USD', 'USA 30 (Dow)'], ['OANDA:SPX500USD', 'USA 500 (S&P)'], ['OANDA:NAS100USD', 'US Tech 100 (Nasdaq)'], ['OANDA:US2000USD', 'Small Cap 2000 (Russell)']].map(x => ({ name: x[0], displayName: x[1] })) }]
+    .concat(Object.entries(g).sort((a, b) => b[1].length - a[1].length).map(([name, ts]) => ({ name: name.toUpperCase(), symbols: ts.map(s => ({ name: TVSYM[s] || s, displayName: s })) })));
+  const box = document.getElementById('quotes');
+  const c = document.createElement('div'); c.className = 'tradingview-widget-container';
+  const w = document.createElement('div'); w.className = 'tradingview-widget-container__widget'; c.appendChild(w);
+  const s = document.createElement('script'); s.async = true; s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-market-quotes.js';
+  s.text = JSON.stringify({ width: '100%', height: '100%', symbolsGroups: groups, showSymbolLogo: true, colorTheme: 'dark', isTransparent: false, locale: 'en', backgroundColor: '#131722' });
+  c.appendChild(s); box.textContent = ''; box.appendChild(c);
+}
+
 function build() {
+  mountQuotes();
   const pmDate = PM && PM.asof_date;
   // a daily bar dated on the day being shown is partial while that day's session is not over: leave it out of the averages and charts
   const anyPost = PM && Object.values(PM.tickers).some(v => v.session === 'post');
@@ -224,11 +248,11 @@ function chartSvg(r) {
   const raw = (hi - lo) / 4, mag = Math.pow(10, Math.floor(Math.log10(raw))), stepV = [1, 2, 2.5, 5, 10].map(x => x * mag).find(x => x >= raw) || raw;
   for (let v = Math.ceil(lo / stepV) * stepV; v <= hi; v += stepV) {
     const y = Y(v).toFixed(1);
-    s += '<line x1="' + XL + '" y1="' + y + '" x2="' + (W - XR + 2) + '" y2="' + y + '" stroke="#eef0f3"/><text x="' + (W - XR + 6) + '" y="' + (+y + 3.5) + '" font-size="10" fill="#9ca3af">' + usd(v).replace('.00', '') + '</text>';
+    s += '<line x1="' + XL + '" y1="' + y + '" x2="' + (W - XR + 2) + '" y2="' + y + '" stroke="#2a2e39"/><text x="' + (W - XR + 6) + '" y="' + (+y + 3.5) + '" font-size="10" fill="#787b86">' + usd(v).replace('.00', '') + '</text>';
   }
   s += '<g clip-path="url(#' + clip + ')">';
   bars.forEach((b, i) => {
-    const up = b[4] >= b[1], c = up ? '#0a9e5c' : '#e5484d', x = X(i);
+    const up = b[4] >= b[1], c = up ? '#26a69a' : '#ef5350', x = X(i);
     const yo = Y(b[1]), yc = Y(b[4]);
     s += '<line x1="' + x.toFixed(1) + '" y1="' + Y(b[2]).toFixed(1) + '" x2="' + x.toFixed(1) + '" y2="' + Y(b[3]).toFixed(1) + '" stroke="' + c + '" stroke-width="1"/>' +
          '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + Math.min(yo, yc).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(Math.abs(yo - yc), 0.8).toFixed(1) + '" fill="' + c + '" fill-opacity="0.8"/>';
@@ -242,19 +266,19 @@ function chartSvg(r) {
   s += '</g>';
   // premarket marker
   if (r.hasPm) {
-    const col = r.gap >= 0 ? '#0a9e5c' : '#e5484d', x = X(n + 3), yP = Y(r.price);
+    const col = r.gap >= 0 ? '#26a69a' : '#ef5350', x = X(n + 3), yP = Y(r.price);
     if (p.pm_high != null && p.pm_low != null) s += '<line x1="' + x.toFixed(1) + '" y1="' + Y(p.pm_high).toFixed(1) + '" x2="' + x.toFixed(1) + '" y2="' + Y(p.pm_low).toFixed(1) + '" stroke="' + col + '" stroke-width="3" stroke-opacity="0.35" stroke-linecap="round"/>';
     s += '<line x1="' + XL + '" y1="' + yP.toFixed(1) + '" x2="' + (W - XR + 2) + '" y2="' + yP.toFixed(1) + '" stroke="' + col + '" stroke-width="1" stroke-dasharray="4 3"/>' +
-         '<circle cx="' + x.toFixed(1) + '" cy="' + yP.toFixed(1) + '" r="3.8" fill="' + col + '" stroke="#fff" stroke-width="1.5"/>' +
+         '<circle cx="' + x.toFixed(1) + '" cy="' + yP.toFixed(1) + '" r="3.8" fill="' + col + '" stroke="#131722" stroke-width="1.5"/>' +
          '<rect x="' + (W - XR + 3) + '" y="' + (yP - 8).toFixed(1) + '" width="' + (XR - 5) + '" height="16" rx="3" fill="' + col + '"/>' +
          '<text x="' + (W - XR + 6) + '" y="' + (yP + 4).toFixed(1) + '" font-size="10.5" font-weight="700" fill="#fff">' + usd(r.price) + '</text>';
   }
   // x labels: first / middle / last bar dates
   [0, Math.floor(n / 2), n - 1].forEach(i => {
     const d = new Date(etDate(bars[i][0]) + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
-    s += '<text x="' + X(i).toFixed(1) + '" y="' + (H - 6) + '" font-size="10" fill="#9ca3af" text-anchor="' + (i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle') + '">' + d + '</text>';
+    s += '<text x="' + X(i).toFixed(1) + '" y="' + (H - 6) + '" font-size="10" fill="#787b86" text-anchor="' + (i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle') + '">' + d + '</text>';
   });
-  s += '<text x="' + X(n + 3).toFixed(1) + '" y="' + (H - 6) + '" font-size="10" fill="#6b7280" text-anchor="middle">PM</text>';
+  s += '<text x="' + X(n + 3).toFixed(1) + '" y="' + (H - 6) + '" font-size="10" fill="#787b86" text-anchor="middle">PM</text>';
   return { svg: '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + esc(r.sym) + ' daily candles with moving averages">' + s + '</svg>', lo, hi };
 }
 
@@ -265,7 +289,7 @@ function mountTv(box) {
   const c = document.createElement('div'); c.className = 'tradingview-widget-container';
   const w = document.createElement('div'); w.className = 'tradingview-widget-container__widget'; c.appendChild(w);
   const s = document.createElement('script'); s.async = true; s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
-  s.text = JSON.stringify({ autosize: true, symbol: sym, interval: 'D', range: '6M', timezone: 'America/New_York', theme: 'light', style: '1', locale: 'en',
+  s.text = JSON.stringify({ autosize: true, symbol: sym, interval: 'D', range: '6M', timezone: 'America/New_York', theme: 'dark', style: '1', locale: 'en', backgroundColor: '#131722', gridColor: 'rgba(42,46,57,0.6)',
     allow_symbol_change: false, hide_top_toolbar: true, hide_side_toolbar: true, hide_volume: true, withdateranges: false, save_image: false, calendar: false, support_host: 'https://www.tradingview.com',
     studies: TV_LENS.map(x => ({ id: x[0], inputs: { length: x[1] } })) });
   c.appendChild(s); box.textContent = ''; box.appendChild(c);
