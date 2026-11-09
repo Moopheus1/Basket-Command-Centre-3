@@ -71,7 +71,7 @@
       <option value="12">Charts: first 12</option>
       <option value="24">Charts: first 24</option>
       <option value="60">Charts: first 60</option>
-      <option value="9999">Charts: all (TradingView max 60)</option>
+      <option value="9999" selected>Charts: all</option>
       <option value="0">Charts: hide</option>
     </select>
     <span id="legendTop" style="display:flex;flex-wrap:wrap;gap:6px"></span>
@@ -272,7 +272,6 @@ function renderCharts(rows, force) {
   let lim = +document.getElementById('ncharts').value;
   const grid = document.getElementById('grid');
   if (!lim) { lastChartSig = ''; grid.innerHTML = '<div class="empty" style="grid-column:1/-1">Charts hidden.</div>'; return; }
-  if (style === 'tv') lim = Math.min(lim, 60);
   const shown = rows.slice(0, lim);
   // TradingView charts are live iframes: do not rebuild them when only the numbers refreshed
   const sig = style + '|' + shown.map(r => r.sym).sort().join(',');
