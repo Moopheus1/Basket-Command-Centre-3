@@ -38,6 +38,8 @@
   .legend span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
   .note { color: #6b7280; font-size: 12.5px; line-height: 1.5; }
   .empty { padding: 20px; color: #6b7280; text-align: center; }
+  .tvbox { height: 360px; background: #fafafa; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 12px; }
+  .tvbox .tradingview-widget-container, .tvbox .tradingview-widget-container__widget { width: 100%; height: 100%; }
 </style>
 </head>
 <body>
@@ -61,10 +63,15 @@
       <option value="aboveall">Above all 5 averages</option>
       <option value="belowall">Below all 5 averages</option>
     </select>
+    <select id="cstyle" title="Chart type">
+      <option value="tv">Charts: TradingView (interactive)</option>
+      <option value="own">Charts: my SVG (colour-coded lines)</option>
+    </select>
     <select id="ncharts">
+      <option value="12">Charts: first 12</option>
       <option value="24">Charts: first 24</option>
       <option value="60">Charts: first 60</option>
-      <option value="9999">Charts: all</option>
+      <option value="9999">Charts: all (TradingView max 60)</option>
       <option value="0">Charts: hide</option>
     </select>
     <span id="legendTop" style="display:flex;flex-wrap:wrap;gap:6px"></span>
@@ -83,7 +90,7 @@
   </div>
 
   <div class="note">
-    Pre-market prices come from Yahoo Finance 1-minute bars (4:00&ndash;9:30am ET), refreshed about every 10 minutes in that window; Yahoo gives no pre-market volume, and thinly traded names can print odd prices, so treat a single pre-market tick with caution. The averages are computed from the completed daily bars in <code>data.json</code> (EMA9 is exponential; SMA20/50/100/200 are simple), so they do not move with the pre-market price. Nothing on this page feeds TAKE, Weekly Picks, any panel or the forward log.
+    Pre-market prices come from Yahoo Finance 1-minute bars (4:00&ndash;9:30am ET), refreshed about every 10 minutes in that window; Yahoo gives no pre-market volume, and thinly traded names can print odd prices, so treat a single pre-market tick with caution. The averages are computed from the completed daily bars in <code>data.json</code> (EMA9 is exponential; SMA20/50/100/200 are simple), so they do not move with the pre-market price. TradingView charts are TradingView's own embedded widget (their data and their pre-market tag); the widget cannot colour each average separately, so all five lines share one colour there and are told apart by the legend and the price-axis labels. Pick &ldquo;my SVG&rdquo; for colour-coded lines. Nothing on this page feeds TAKE, Weekly Picks, any panel or the forward log.
   </div>
 </div>
 
@@ -97,7 +104,7 @@ const MAS = [
 ];
 const CHART_BARS = 90;
 const ET = 'America/New_York';
-let DATA = null, PM = null, ROWS = [], sortKey = 'gapPct', sortDir = -1;
+let DATA = null, PM = null, TVSYM = {}, ROWS = [], sortKey = 'gapPct', sortDir = -1, lastChartSig = '', tvObserver = null;
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const usd = v => v == null ? '—' : '$' + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -109,7 +116,8 @@ function emaSeries(c, n) { const o = new Array(c.length).fill(null); if (c.lengt
 
 async function load() {
   const get = async u => { try { const r = await fetch(u + '?t=' + Date.now(), { cache: 'no-store' }); return r.ok ? await r.json() : null; } catch (e) { return null; } };
-  [DATA, PM] = await Promise.all([get('data.json'), get('premarket.json')]);
+  [DATA, PM, TVSYM] = await Promise.all([get('data.json'), get('premarket.json'), get('tv_symbols.json')]);
+  TVSYM = TVSYM || {};
   if (!DATA || !DATA.tickers) { document.getElementById('status').textContent = 'data.json could not be loaded.'; return; }
   build();
 }
@@ -180,7 +188,7 @@ function maCell(r, m) {
   return '<td><span style="border-left:3px solid ' + m.col + ';padding-left:5px">' + usd(v) + '</span> <span class="' + (d >= 0 ? 'up' : 'down') + '">' + sgn(d) + '</span></td>';
 }
 
-function render() {
+function render(force) {
   const rows = visibleRows();
   document.getElementById('thead').innerHTML = '<tr>' + COLS.map(c => '<th data-k="' + c[0] + '">' + c[1] + (sortKey === c[0] ? (sortDir > 0 ? ' &#9650;' : ' &#9660;') : '') + '</th>').join('') + '</tr>';
   document.getElementById('tbody').innerHTML = rows.length ? rows.map(r => {
@@ -191,7 +199,7 @@ function render() {
       '<td>' + (r.p && r.p.pm_high != null ? usd(r.p.pm_high) : '<span class="mut">&mdash;</span>') + '</td><td>' + (r.p && r.p.pm_low != null ? usd(r.p.pm_low) : '<span class="mut">&mdash;</span>') + '</td>' +
       MAS.map(m => maCell(r, m)).join('') + '</tr>';
   }).join('') : '<tr><td colspan="' + COLS.length + '" class="empty">No tickers match.</td></tr>';
-  renderCharts(rows);
+  renderCharts(rows, force);
 }
 
 function chartSvg(r) {
@@ -246,35 +254,72 @@ function chartSvg(r) {
   return { svg: '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + esc(r.sym) + ' daily candles with moving averages">' + s + '</svg>', lo, hi };
 }
 
-function renderCharts(rows) {
-  const lim = +document.getElementById('ncharts').value;
+const TV_LENS = [['MAExp@tv-basicstudies', 9], ['MASimple@tv-basicstudies', 20], ['MASimple@tv-basicstudies', 50], ['MASimple@tv-basicstudies', 100], ['MASimple@tv-basicstudies', 200]];
+function mountTv(box) {
+  if (box.dataset.done) return; box.dataset.done = '1';
+  const sym = box.dataset.tv;
+  const c = document.createElement('div'); c.className = 'tradingview-widget-container';
+  const w = document.createElement('div'); w.className = 'tradingview-widget-container__widget'; c.appendChild(w);
+  const s = document.createElement('script'); s.async = true; s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+  s.text = JSON.stringify({ autosize: true, symbol: sym, interval: 'D', range: '6M', timezone: 'America/New_York', theme: 'light', style: '1', locale: 'en',
+    allow_symbol_change: false, hide_top_toolbar: true, hide_side_toolbar: true, hide_volume: true, withdateranges: false, save_image: false, calendar: false, support_host: 'https://www.tradingview.com',
+    studies: TV_LENS.map(x => ({ id: x[0], inputs: { length: x[1] } })) });
+  c.appendChild(s); box.textContent = ''; box.appendChild(c);
+}
+
+function renderCharts(rows, force) {
+  const style = document.getElementById('cstyle').value;
+  let lim = +document.getElementById('ncharts').value;
   const grid = document.getElementById('grid');
-  if (!lim) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1">Charts hidden.</div>'; return; }
-  grid.innerHTML = rows.slice(0, lim).map(r => {
+  if (!lim) { lastChartSig = ''; grid.innerHTML = '<div class="empty" style="grid-column:1/-1">Charts hidden.</div>'; return; }
+  if (style === 'tv') lim = Math.min(lim, 60);
+  const shown = rows.slice(0, lim);
+  // TradingView charts are live iframes: do not rebuild them when only the numbers refreshed
+  const sig = style + '|' + shown.map(r => r.sym).sort().join(',');
+  if (!force && style === 'tv' && sig === lastChartSig) {
+    shown.forEach(r => { const el = document.querySelector('#c-' + CSS.escape(r.sym) + ' .gaptxt'); if (el) el.innerHTML = gapHtml(r); });
+    return;
+  }
+  lastChartSig = sig;
+  if (tvObserver) { tvObserver.disconnect(); tvObserver = null; }
+  grid.innerHTML = shown.map(r => {
+    if (style === 'tv') {
+      const sym = TVSYM[r.sym] || r.sym;
+      const leg = MAS.map(m => '<span>' + m.name + ' ' + (r[m.key] == null ? '&mdash;' : usd(r[m.key])) + '</span>').join('');
+      return '<div class="card" id="c-' + esc(r.sym) + '"><h3><span>' + esc(r.sym) + ' <span class="nm">' + esc(r.name) + '</span></span><span class="gaptxt" style="font-size:13px">' + gapHtml(r) + '</span></h3>' +
+        '<div class="tvbox" data-tv="' + esc(sym) + '">Loading TradingView&hellip;</div><div class="legend">' + leg + '</div></div>';
+    }
     const c = chartSvg(r);
     const leg = MAS.map(m => {
       const v = r[m.key];
       const off = v == null ? '' : (v < c.lo ? ' <span class="mut" title="below the chart">&#9660;</span>' : v > c.hi ? ' <span class="mut" title="above the chart">&#9650;</span>' : '');
       return '<span><span class="sw" style="background:' + m.col + '"></span>' + m.name + ' ' + (v == null ? '&mdash;' : usd(v)) + off + '</span>';
     }).join('');
-    const g = r.hasPm ? '<span class="' + (r.gap >= 0 ? 'up' : 'down') + '">' + usd(r.price) + ' (' + sgn(r.gap) + ')</span>' : '<span class="mut">' + usd(r.price) + ' (last close)</span>';
-    return '<div class="card" id="c-' + esc(r.sym) + '"><h3><span>' + esc(r.sym) + ' <span class="nm">' + esc(r.name) + '</span></span><span style="font-size:13px">' + g + '</span></h3>' + c.svg + '<div class="legend">' + leg + '</div></div>';
-  }).join('') + (rows.length > lim ? '<div class="empty" style="grid-column:1/-1">' + (rows.length - lim) + ' more tickers &mdash; pick &ldquo;Charts: all&rdquo; above, or use the search box.</div>' : '');
+    return '<div class="card" id="c-' + esc(r.sym) + '"><h3><span>' + esc(r.sym) + ' <span class="nm">' + esc(r.name) + '</span></span><span class="gaptxt" style="font-size:13px">' + gapHtml(r) + '</span></h3>' + c.svg + '<div class="legend">' + leg + '</div></div>';
+  }).join('') + (rows.length > lim ? '<div class="empty" style="grid-column:1/-1">' + (rows.length - lim) + ' more tickers &mdash; use the search box or a filter to pick which ones to chart.</div>' : '');
+  if (style === 'tv') {
+    const boxes = [...grid.querySelectorAll('.tvbox')];
+    if ('IntersectionObserver' in window) {
+      tvObserver = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { mountTv(e.target); tvObserver.unobserve(e.target); } }), { rootMargin: '400px' });
+      boxes.forEach(b => tvObserver.observe(b));
+    } else boxes.forEach(mountTv);
+  }
 }
+function gapHtml(r) { return r.hasPm ? '<span class="' + (r.gap >= 0 ? 'up' : 'down') + '">' + usd(r.price) + ' (' + sgn(r.gap) + ')</span>' : '<span class="mut">' + usd(r.price) + ' (last close)</span>'; }
 
 document.getElementById('thead').addEventListener('click', e => {
   const th = e.target.closest('th'); if (!th) return;
   const k = th.dataset.k; if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = k === 'sym' ? 1 : -1; }
-  render();
+  render(true);
 });
 document.getElementById('tbody').addEventListener('click', e => {
   const a = e.target.closest('a[data-jump]'); if (!a) return;
   e.preventDefault();
   let el = document.getElementById('c-' + a.dataset.jump);
-  if (!el) { document.getElementById('ncharts').value = '9999'; render(); el = document.getElementById('c-' + a.dataset.jump); }
+  if (!el) { document.getElementById('ncharts').value = '9999'; render(true); el = document.getElementById('c-' + a.dataset.jump); }
   if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1600); }
 });
-['q', 'flt', 'ncharts'].forEach(id => document.getElementById(id).addEventListener('input', render));
+['q', 'flt', 'ncharts', 'cstyle'].forEach(id => document.getElementById(id).addEventListener('input', () => render(true)));
 load();
 setInterval(async () => {   // only the small premarket file is re-read; the averages come from data.json loaded once
   try { const r = await fetch('premarket.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) { PM = await r.json(); build(); } } catch (e) {}

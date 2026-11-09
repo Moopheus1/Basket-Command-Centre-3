@@ -103,8 +103,37 @@ def summarize(df, day):
     }
 
 
+def write_tv_symbols(tickers):
+    """Best effort: map each ticker to its TradingView symbol (EXCHANGE:TICKER) via TradingView's public
+    scanner, so the page's embedded TradingView charts open the right listing. Failure keeps the old file."""
+    import urllib.request
+    path = os.path.join(ROOT, "docs", "tv_symbols.json")
+    body = {"filter": [{"left": "name", "operation": "in_range", "right": tickers}], "options": {"lang": "en"},
+            "markets": ["america"], "symbols": {"query": {"types": []}, "tickers": []},
+            "columns": ["name", "exchange"], "range": [0, 2000]}
+    try:
+        req = urllib.request.Request("https://scanner.tradingview.com/america/scan", data=json.dumps(body).encode(),
+                                     headers={"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"})
+        res = json.load(urllib.request.urlopen(req, timeout=30))
+        m = {}
+        for row in res.get("data", []):
+            sym, (name, _ex) = row["s"], row["d"]
+            m.setdefault(name, sym)
+        if len(m) < len(tickers) // 2:
+            return
+        old = {}
+        if os.path.exists(path):
+            old = json.load(open(path, encoding="utf-8"))
+        if old != m:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(m, f, separators=(",", ":"), sort_keys=True)
+    except Exception as e:
+        print(f"[premarket_snapshot] tv_symbols skipped: {e}")
+
+
 def main():
     tickers = read_tickers()
+    write_tv_symbols(tickers)
     print(f"[premarket_snapshot] {len(tickers)} tickers")
     try:
         raw = yf.download(
