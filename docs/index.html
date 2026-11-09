@@ -3355,7 +3355,7 @@ function spyWeeksHtml(d, liveIdx) {
     while (dow(nx) === 0 || dow(nx) === 6) nx = addDays(nx, 1);
     if (nx >= tpTodayET()) { pend = { date: nx, k: (dow(nx) + 6) % 7, wk: mondayOf(nx), pdh: d.highs[n - 1], pdl: d.lows[n - 1] }; if (!weeks.has(pend.wk)) weeks.set(pend.wk, []); }
   }
-  const keys = [...weeks.keys()].sort().reverse().slice(0, 2);
+  const keys = [...weeks.keys()].sort().reverse().slice(0, 1); // current week only (previous-week charts removed 9 Nov 2026)
   const NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 
   // one chart: [day before, PD, the day tested]; ti = index of the day tested (null if it has not traded yet)
