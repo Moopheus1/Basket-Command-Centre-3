@@ -41,8 +41,10 @@
   .empty { padding: 20px; color: var(--mut); text-align: center; }
   .tvbox { height: 360px; background: var(--bg); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--mut); font-size: 12px; }
   .tvbox .tradingview-widget-container, .tvbox .tradingview-widget-container__widget { width: 100%; height: 100%; }
-  #quotes { height: 620px; border-radius: 8px; overflow: hidden; }  /* height is set by script to fit every row */
-  #quotes .tradingview-widget-container, #quotes .tradingview-widget-container__widget { width: 100%; height: 100%; }
+  #quotes { border-radius: 8px; }
+  .qlabel { font-size: 13px; font-weight: 700; letter-spacing: .02em; color: #fff; background: #262b38; border: 1px solid var(--line); border-bottom: 0; border-radius: 8px 8px 0 0; padding: 9px 12px; }
+  .qgroup { border-radius: 0 0 8px 8px; overflow: hidden; margin-bottom: 12px; }
+  .qgroup .tradingview-widget-container, .qgroup .tradingview-widget-container__widget { width: 100%; height: 100%; }
 </style>
 </head>
 <body>
@@ -145,15 +147,21 @@ function mountQuotes() {
   if (etfs.length) groups.push({ name: 'ETFS', symbols: etfs.slice().sort(az).map(sym) });
   Object.entries(g).sort((a, b) => (a[0] === 'Other') - (b[0] === 'Other') || a[0].localeCompare(b[0]))
     .forEach(([name, ts]) => groups.push({ name: name.toUpperCase(), symbols: ts.slice().sort(az).map(sym) }));
-  // no inner scrolling: make the box tall enough for every row (header + one line per group + one line per ticker)
-  const rows = groups.reduce((n, grp) => n + 1 + grp.symbols.length, 0);
+  // One TradingView table per group, so the column titles (Value, Change, Chg% ...) repeat above every sub-heading.
+  // Each box is tall enough for its rows, so there is no inner scrolling.
   const box = document.getElementById('quotes');
-  box.style.height = (64 + rows * 36 + 24) + 'px';
-  const c = document.createElement('div'); c.className = 'tradingview-widget-container';
-  const w = document.createElement('div'); w.className = 'tradingview-widget-container__widget'; c.appendChild(w);
-  const s = document.createElement('script'); s.async = true; s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-market-quotes.js';
-  s.text = JSON.stringify({ width: '100%', height: '100%', symbolsGroups: groups, showSymbolLogo: true, colorTheme: 'dark', isTransparent: false, locale: 'en', backgroundColor: '#131722' });
-  c.appendChild(s); box.textContent = ''; box.appendChild(c);
+  box.textContent = ''; box.style.height = 'auto';
+  groups.forEach(grp => {
+    const lab = document.createElement('div'); lab.className = 'qlabel'; lab.textContent = grp.name; box.appendChild(lab);
+    const el = document.createElement('div'); el.className = 'qgroup';
+    el.style.height = (58 + grp.symbols.length * 36 + 4) + 'px';
+    box.appendChild(el);
+    const c = document.createElement('div'); c.className = 'tradingview-widget-container';
+    const w = document.createElement('div'); w.className = 'tradingview-widget-container__widget'; c.appendChild(w);
+    const s = document.createElement('script'); s.async = true; s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-market-quotes.js';
+    s.text = JSON.stringify({ width: '100%', height: '100%', symbolsGroups: [grp], showSymbolLogo: true, colorTheme: 'dark', isTransparent: false, locale: 'en', backgroundColor: '#131722' });
+    c.appendChild(s); el.appendChild(c);
+  });
 }
 
 function build() {
