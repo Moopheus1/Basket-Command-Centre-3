@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BCC3 Premarket</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f6f7f9; color: #111827; }
+  .wrap { max-width: 1500px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 22px; margin: 0 0 2px; }
+  .sub { color: #6b7280; font-size: 13px; }
+  a { color: #2563eb; text-decoration: none; }
+  .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0; }
+  .bar input[type=search], .bar select { padding: 7px 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; background: #fff; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 3px 9px; border: 1px solid #e5e7eb; border-radius: 999px; background: #fff; }
+  .sw { display: inline-block; width: 16px; height: 3px; border-radius: 2px; }
+  .status { font-size: 13px; padding: 8px 12px; border-radius: 10px; background: #fff; border: 1px solid #e5e7eb; margin-bottom: 12px; }
+  .status.warn { border-color: #fcd34d; background: #fffbeb; color: #92400e; }
+  .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; }
+  .panel h2 { font-size: 16px; margin: 0 0 6px; }
+  .scroll { overflow: auto; max-height: 70vh; }
+  table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 13px; }
+  th, td { padding: 6px 9px; border-bottom: 1px solid #f1f2f4; white-space: nowrap; text-align: right; }
+  th { position: sticky; top: 0; background: #fff; z-index: 2; cursor: pointer; user-select: none; color: #374151; font-weight: 600; border-bottom: 1px solid #e5e7eb; }
+  th:first-child, td:first-child { text-align: left; position: sticky; left: 0; background: #fff; z-index: 1; font-weight: 700; }
+  th:first-child { z-index: 3; }
+  tbody tr:hover td { background: #fafafa; }
+  .up { color: #0a9e5c; font-weight: 700; } .down { color: #e5484d; font-weight: 700; } .mut { color: #9ca3af; }
+  .tag { font-size: 10.5px; padding: 1px 6px; border-radius: 999px; background: #eef2ff; color: #3730a3; margin-left: 6px; font-weight: 600; }
+  .tag.regular { background: #ecfdf5; color: #065f46; } .tag.post { background: #f3f4f6; color: #374151; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 12px; }
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 8px 10px; min-width: 0; }
+  .card.flash { box-shadow: 0 0 0 3px #93c5fd; }
+  .card h3 { font-size: 15px; margin: 0 0 2px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .card h3 .nm { font-size: 11.5px; color: #6b7280; font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 11.5px; margin-top: 2px; color: #374151; }
+  .legend span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .note { color: #6b7280; font-size: 12.5px; line-height: 1.5; }
+  .empty { padding: 20px; color: #6b7280; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px">
+    <div>
+      <h1>BCC3 Premarket</h1>
+      <div class="sub">Pre-market price of every BCC3 ticker against its EMA9, SMA20, SMA50, SMA100 and SMA200. Display only. <a href="./">&larr; back to BCC3</a></div>
+    </div>
+    <div class="sub" id="asof"></div>
+  </div>
+
+  <div class="bar">
+    <input type="search" id="q" placeholder="Search ticker or name" size="22">
+    <select id="flt">
+      <option value="all">All tickers</option>
+      <option value="gapup">Gapping up</option>
+      <option value="gapdn">Gapping down</option>
+      <option value="above200">Price above SMA200</option>
+      <option value="below200">Price below SMA200</option>
+      <option value="aboveall">Above all 5 averages</option>
+      <option value="belowall">Below all 5 averages</option>
+    </select>
+    <select id="ncharts">
+      <option value="24">Charts: first 24</option>
+      <option value="60">Charts: first 60</option>
+      <option value="9999">Charts: all</option>
+      <option value="0">Charts: hide</option>
+    </select>
+    <span id="legendTop" style="display:flex;flex-wrap:wrap;gap:6px"></span>
+  </div>
+  <div class="status" id="status">Loading&hellip;</div>
+
+  <div class="panel">
+    <h2>Table <span class="sub" style="font-weight:400">&mdash; click a column to sort, click a ticker to jump to its chart</span></h2>
+    <div class="scroll"><table id="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    <div class="note" style="margin-top:8px">Each average cell shows the average in dollars, then how many dollars the price is above (green) or below (red) it. Gap is price minus the last regular close. The Gap column sorts by percentage so different-priced stocks compare fairly; the sort for each average is also by percentage.</div>
+  </div>
+
+  <div class="panel">
+    <h2>Charts <span class="sub" style="font-weight:400">&mdash; last 90 daily candles, in the same order as the table</span></h2>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="note">
+    Pre-market prices come from Yahoo Finance 1-minute bars (4:00&ndash;9:30am ET), refreshed about every 10 minutes in that window; Yahoo gives no pre-market volume, and thinly traded names can print odd prices, so treat a single pre-market tick with caution. The averages are computed from the completed daily bars in <code>data.json</code> (EMA9 is exponential; SMA20/50/100/200 are simple), so they do not move with the pre-market price. Nothing on this page feeds TAKE, Weekly Picks, any panel or the forward log.
+  </div>
+</div>
+
+<script>
+const MAS = [
+  { key: 'ema9',   name: 'EMA9',   col: '#f59e0b', w: 1.6 },
+  { key: 'sma20',  name: 'SMA20',  col: '#2563eb', w: 1.6 },
+  { key: 'sma50',  name: 'SMA50',  col: '#7c3aed', w: 1.6 },
+  { key: 'sma100', name: 'SMA100', col: '#0891b2', w: 1.6 },
+  { key: 'sma200', name: 'SMA200', col: '#111827', w: 2.2 }
+];
+const CHART_BARS = 90;
+const ET = 'America/New_York';
+let DATA = null, PM = null, ROWS = [], sortKey = 'gapPct', sortDir = -1;
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const usd = v => v == null ? '—' : '$' + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const sgn = v => (v >= 0 ? '+' : '−') + usd(Math.abs(v));
+const etDate = ts => new Date(ts * 1000).toLocaleDateString('en-CA', { timeZone: ET });
+
+function smaSeries(c, n) { const o = new Array(c.length).fill(null); let s = 0; for (let i = 0; i < c.length; i++) { s += c[i]; if (i >= n) s -= c[i - n]; if (i >= n - 1) o[i] = s / n; } return o; }
+function emaSeries(c, n) { const o = new Array(c.length).fill(null); if (c.length < n) return o; let e = c.slice(0, n).reduce((a, b) => a + b, 0) / n; o[n - 1] = e; const k = 2 / (n + 1); for (let i = n; i < c.length; i++) { e = c[i] * k + e * (1 - k); o[i] = e; } return o; }
+
+async function load() {
+  const get = async u => { try { const r = await fetch(u + '?t=' + Date.now(), { cache: 'no-store' }); return r.ok ? await r.json() : null; } catch (e) { return null; } };
+  [DATA, PM] = await Promise.all([get('data.json'), get('premarket.json')]);
+  if (!DATA || !DATA.tickers) { document.getElementById('status').textContent = 'data.json could not be loaded.'; return; }
+  build();
+}
+
+function build() {
+  const pmDate = PM && PM.asof_date;
+  // a daily bar dated on the day being shown is partial while that day's session is not over: leave it out of the averages and charts
+  const anyPost = PM && Object.values(PM.tickers).some(v => v.session === 'post');
+  ROWS = [];
+  for (const [sym, t] of Object.entries(DATA.tickers)) {
+    if (!t || !t.bars || t.bars.length < 30) continue;
+    let bars = t.bars;
+    if (pmDate && !anyPost) bars = bars.filter(b => etDate(b[0]) < pmDate);
+    if (bars.length < 30) continue;
+    const closes = bars.map(b => b[4]);
+    const series = { ema9: emaSeries(closes, 9), sma20: smaSeries(closes, 20), sma50: smaSeries(closes, 50), sma100: smaSeries(closes, 100), sma200: smaSeries(closes, 200) };
+    const last = closes.length - 1;
+    const p = PM && PM.tickers[sym] && !PM.tickers[sym].error && PM.tickers[sym].price != null ? PM.tickers[sym] : null;
+    const prev = p && p.prev_close != null ? p.prev_close : closes[last];
+    const price = p && p.price != null ? p.price : closes[last];
+    const r = { sym, name: t.name || '', bars, closes, series, p, price, prev, hasPm: !!p,
+                gap: price - prev, gapPct: prev ? (price - prev) / prev * 100 : null };
+    MAS.forEach(m => { const v = series[m.key][last]; r[m.key] = v; r[m.key + 'Pct'] = v ? (price - v) / v * 100 : null; });
+    ROWS.push(r);
+  }
+  const st = document.getElementById('status');
+  if (!PM) { st.className = 'status warn'; st.textContent = 'premarket.json has not been created yet, so prices below are the last daily close. It is written by the Premarket snapshot job (weekdays 4:00-9:50am ET).'; }
+  else {
+    const n = ROWS.filter(r => r.hasPm).length;
+    const ageMin = Math.round((Date.now() - new Date(PM.generated).getTime()) / 60000);
+    const sess = PM.tickers && Object.values(PM.tickers).find(v => v.session);
+    const label = sess ? ({ pre: 'pre-market', regular: 'regular session', post: 'after hours' }[sess.session]) : '';
+    st.className = 'status' + (ageMin > 30 ? ' warn' : '');
+    st.innerHTML = '<strong>' + n + ' of ' + ROWS.length + '</strong> tickers have a ' + label + ' price &middot; snapshot as of <strong>' + esc(PM.asof_et) + ' ET</strong> (' + (ageMin < 90 ? ageMin + ' min ago' : Math.round(ageMin / 60) + ' h ago') + ')' + (ageMin > 30 ? ' &mdash; this snapshot is not fresh; pre-market refreshes only 4:00-9:50am ET on weekdays.' : '.');
+  }
+  document.getElementById('asof').textContent = PM ? 'Prices as of ' + PM.asof_et + ' ET' : '';
+  document.getElementById('legendTop').innerHTML = MAS.map(m => '<span class="chip"><span class="sw" style="background:' + m.col + '"></span>' + m.name + '</span>').join('');
+  render();
+}
+
+const COLS = [['sym', 'Ticker'], ['prev', 'Prev close'], ['price', 'Pre-mkt price'], ['gapPct', 'Gap'], ['pmHi', 'PM high'], ['pmLo', 'PM low']]
+  .concat(MAS.map(m => [m.key + 'Pct', m.name]));
+
+function visibleRows() {
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const f = document.getElementById('flt').value;
+  let rows = ROWS.filter(r => !q || r.sym.toLowerCase().includes(q) || r.name.toLowerCase().includes(q));
+  const above = (r, k) => r[k] != null && r.price > r[k], below = (r, k) => r[k] != null && r.price < r[k];
+  if (f === 'gapup') rows = rows.filter(r => r.gap > 0);
+  else if (f === 'gapdn') rows = rows.filter(r => r.gap < 0);
+  else if (f === 'above200') rows = rows.filter(r => above(r, 'sma200'));
+  else if (f === 'below200') rows = rows.filter(r => below(r, 'sma200'));
+  else if (f === 'aboveall') rows = rows.filter(r => MAS.every(m => above(r, m.key)));
+  else if (f === 'belowall') rows = rows.filter(r => MAS.every(m => below(r, m.key)));
+  const val = r => sortKey === 'sym' ? r.sym : sortKey === 'pmHi' ? (r.p ? r.p.pm_high : null) : sortKey === 'pmLo' ? (r.p ? r.p.pm_low : null) : r[sortKey];
+  rows.sort((a, b) => {
+    const x = val(a), y = val(b);
+    if (sortKey === 'sym') return sortDir * String(x).localeCompare(String(y));
+    if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1;
+    return sortDir * (x - y);
+  });
+  return rows;
+}
+
+function maCell(r, m) {
+  const v = r[m.key]; if (v == null) return '<td class="mut">&mdash;</td>';
+  const d = r.price - v;
+  return '<td><span style="border-left:3px solid ' + m.col + ';padding-left:5px">' + usd(v) + '</span> <span class="' + (d >= 0 ? 'up' : 'down') + '">' + sgn(d) + '</span></td>';
+}
+
+function render() {
+  const rows = visibleRows();
+  document.getElementById('thead').innerHTML = '<tr>' + COLS.map(c => '<th data-k="' + c[0] + '">' + c[1] + (sortKey === c[0] ? (sortDir > 0 ? ' &#9650;' : ' &#9660;') : '') + '</th>').join('') + '</tr>';
+  document.getElementById('tbody').innerHTML = rows.length ? rows.map(r => {
+    const tag = r.p && r.p.session !== 'pre' ? '<span class="tag ' + r.p.session + '">' + (r.p.session === 'regular' ? 'live' : 'post') + '</span>' : '';
+    const g = r.hasPm ? '<span class="' + (r.gap >= 0 ? 'up' : 'down') + '">' + sgn(r.gap) + '</span>' : '<span class="mut">&mdash;</span>';
+    return '<tr><td><a href="#c-' + esc(r.sym) + '" data-jump="' + esc(r.sym) + '">' + esc(r.sym) + '</a>' + tag + '</td>' +
+      '<td>' + usd(r.prev) + '</td><td>' + (r.hasPm ? usd(r.price) : '<span class="mut">' + usd(r.price) + '</span>') + '</td><td title="' + (r.gapPct != null ? r.gapPct.toFixed(2) + '%' : '') + '">' + g + '</td>' +
+      '<td>' + (r.p && r.p.pm_high != null ? usd(r.p.pm_high) : '<span class="mut">&mdash;</span>') + '</td><td>' + (r.p && r.p.pm_low != null ? usd(r.p.pm_low) : '<span class="mut">&mdash;</span>') + '</td>' +
+      MAS.map(m => maCell(r, m)).join('') + '</tr>';
+  }).join('') : '<tr><td colspan="' + COLS.length + '" class="empty">No tickers match.</td></tr>';
+  renderCharts(rows);
+}
+
+function chartSvg(r) {
+  const W = 420, H = 250, XL = 8, XR = 64, T = 10, B = 22;
+  const n = Math.min(CHART_BARS, r.bars.length), s0 = r.bars.length - n;
+  const bars = r.bars.slice(s0);
+  const slots = n + 6;                        // spare slots on the right for the pre-market marker
+  const step = (W - XL - XR) / slots, bw = Math.max(1.5, step * 0.62);
+  const X = i => XL + step * (i + 0.5);
+  const p = r.p;
+  let lo = Math.min(...bars.map(b => b[3])), hi = Math.max(...bars.map(b => b[2]));
+  if (r.hasPm) { lo = Math.min(lo, r.price, p.pm_low != null ? p.pm_low : r.price); hi = Math.max(hi, r.price, p.pm_high != null ? p.pm_high : r.price); }
+  const pad = (hi - lo) * 0.06 || 1; lo -= pad; hi += pad;
+  const Y = v => T + (hi - v) / (hi - lo) * (H - T - B);
+  const clip = 'clip' + r.sym.replace(/[^A-Za-z0-9]/g, '_');
+  let s = '<defs><clipPath id="' + clip + '"><rect x="' + XL + '" y="' + T + '" width="' + (W - XL - XR + 2) + '" height="' + (H - T - B) + '"/></clipPath></defs>';
+  // grid + y labels
+  const raw = (hi - lo) / 4, mag = Math.pow(10, Math.floor(Math.log10(raw))), stepV = [1, 2, 2.5, 5, 10].map(x => x * mag).find(x => x >= raw) || raw;
+  for (let v = Math.ceil(lo / stepV) * stepV; v <= hi; v += stepV) {
+    const y = Y(v).toFixed(1);
+    s += '<line x1="' + XL + '" y1="' + y + '" x2="' + (W - XR + 2) + '" y2="' + y + '" stroke="#eef0f3"/><text x="' + (W - XR + 6) + '" y="' + (+y + 3.5) + '" font-size="10" fill="#9ca3af">' + usd(v).replace('.00', '') + '</text>';
+  }
+  s += '<g clip-path="url(#' + clip + ')">';
+  bars.forEach((b, i) => {
+    const up = b[4] >= b[1], c = up ? '#0a9e5c' : '#e5484d', x = X(i);
+    const yo = Y(b[1]), yc = Y(b[4]);
+    s += '<line x1="' + x.toFixed(1) + '" y1="' + Y(b[2]).toFixed(1) + '" x2="' + x.toFixed(1) + '" y2="' + Y(b[3]).toFixed(1) + '" stroke="' + c + '" stroke-width="1"/>' +
+         '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + Math.min(yo, yc).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(Math.abs(yo - yc), 0.8).toFixed(1) + '" fill="' + c + '" fill-opacity="0.8"/>';
+  });
+  MAS.forEach(m => {
+    const arr = r.series[m.key].slice(s0);
+    let d = '', started = false;
+    arr.forEach((v, i) => { if (v == null) return; d += (started ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1); started = true; });
+    if (d) s += '<path d="' + d + '" fill="none" stroke="' + m.col + '" stroke-width="' + m.w + '" stroke-linejoin="round"/>';
+  });
+  s += '</g>';
+  // premarket marker
+  if (r.hasPm) {
+    const col = r.gap >= 0 ? '#0a9e5c' : '#e5484d', x = X(n + 3), yP = Y(r.price);
+    if (p.pm_high != null && p.pm_low != null) s += '<line x1="' + x.toFixed(1) + '" y1="' + Y(p.pm_high).toFixed(1) + '" x2="' + x.toFixed(1) + '" y2="' + Y(p.pm_low).toFixed(1) + '" stroke="' + col + '" stroke-width="3" stroke-opacity="0.35" stroke-linecap="round"/>';
+    s += '<line x1="' + XL + '" y1="' + yP.toFixed(1) + '" x2="' + (W - XR + 2) + '" y2="' + yP.toFixed(1) + '" stroke="' + col + '" stroke-width="1" stroke-dasharray="4 3"/>' +
+         '<circle cx="' + x.toFixed(1) + '" cy="' + yP.toFixed(1) + '" r="3.8" fill="' + col + '" stroke="#fff" stroke-width="1.5"/>' +
+         '<rect x="' + (W - XR + 3) + '" y="' + (yP - 8).toFixed(1) + '" width="' + (XR - 5) + '" height="16" rx="3" fill="' + col + '"/>' +
+         '<text x="' + (W - XR + 6) + '" y="' + (yP + 4).toFixed(1) + '" font-size="10.5" font-weight="700" fill="#fff">' + usd(r.price) + '</text>';
+  }
+  // x labels: first / middle / last bar dates
+  [0, Math.floor(n / 2), n - 1].forEach(i => {
+    const d = new Date(etDate(bars[i][0]) + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+    s += '<text x="' + X(i).toFixed(1) + '" y="' + (H - 6) + '" font-size="10" fill="#9ca3af" text-anchor="' + (i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle') + '">' + d + '</text>';
+  });
+  s += '<text x="' + X(n + 3).toFixed(1) + '" y="' + (H - 6) + '" font-size="10" fill="#6b7280" text-anchor="middle">PM</text>';
+  return { svg: '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + esc(r.sym) + ' daily candles with moving averages">' + s + '</svg>', lo, hi };
+}
+
+function renderCharts(rows) {
+  const lim = +document.getElementById('ncharts').value;
+  const grid = document.getElementById('grid');
+  if (!lim) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1">Charts hidden.</div>'; return; }
+  grid.innerHTML = rows.slice(0, lim).map(r => {
+    const c = chartSvg(r);
+    const leg = MAS.map(m => {
+      const v = r[m.key];
+      const off = v == null ? '' : (v < c.lo ? ' <span class="mut" title="below the chart">&#9660;</span>' : v > c.hi ? ' <span class="mut" title="above the chart">&#9650;</span>' : '');
+      return '<span><span class="sw" style="background:' + m.col + '"></span>' + m.name + ' ' + (v == null ? '&mdash;' : usd(v)) + off + '</span>';
+    }).join('');
+    const g = r.hasPm ? '<span class="' + (r.gap >= 0 ? 'up' : 'down') + '">' + usd(r.price) + ' (' + sgn(r.gap) + ')</span>' : '<span class="mut">' + usd(r.price) + ' (last close)</span>';
+    return '<div class="card" id="c-' + esc(r.sym) + '"><h3><span>' + esc(r.sym) + ' <span class="nm">' + esc(r.name) + '</span></span><span style="font-size:13px">' + g + '</span></h3>' + c.svg + '<div class="legend">' + leg + '</div></div>';
+  }).join('') + (rows.length > lim ? '<div class="empty" style="grid-column:1/-1">' + (rows.length - lim) + ' more tickers &mdash; pick &ldquo;Charts: all&rdquo; above, or use the search box.</div>' : '');
+}
+
+document.getElementById('thead').addEventListener('click', e => {
+  const th = e.target.closest('th'); if (!th) return;
+  const k = th.dataset.k; if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = k === 'sym' ? 1 : -1; }
+  render();
+});
+document.getElementById('tbody').addEventListener('click', e => {
+  const a = e.target.closest('a[data-jump]'); if (!a) return;
+  e.preventDefault();
+  let el = document.getElementById('c-' + a.dataset.jump);
+  if (!el) { document.getElementById('ncharts').value = '9999'; render(); el = document.getElementById('c-' + a.dataset.jump); }
+  if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1600); }
+});
+['q', 'flt', 'ncharts'].forEach(id => document.getElementById(id).addEventListener('input', render));
+load();
+setInterval(async () => {   // only the small premarket file is re-read; the averages come from data.json loaded once
+  try { const r = await fetch('premarket.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) { PM = await r.json(); build(); } } catch (e) {}
+}, 120000);
+</script>
+</body>
+</html>
