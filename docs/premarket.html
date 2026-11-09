@@ -90,18 +90,18 @@
   </div>
 
   <div class="panel">
-    <h2>Table <span class="sub" style="font-weight:400">&mdash; default order is A to Z; click a column to sort, click a ticker to jump to its chart</span></h2>
-    <div class="scroll"><table id="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
-    <div class="note" style="margin-top:8px">Each average cell shows the average in dollars, then how many dollars the price is above (green) or below (red) it. Gap is price minus the last regular close. The Gap column sorts by percentage so different-priced stocks compare fairly; the sort for each average is also by percentage.</div>
-  </div>
-
-  <div class="panel">
     <h2>Charts <span class="sub" style="font-weight:400">&mdash; daily candles, in the same order as the table</span></h2>
     <div class="grid" id="grid"></div>
   </div>
 
+  <div class="panel">
+    <h2>Table <span class="sub" style="font-weight:400">&mdash; default order is A to Z; click a column to sort, click a ticker to jump to its chart above</span></h2>
+    <div class="scroll"><table id="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    <div class="note" style="margin-top:8px">Each average cell shows the average in dollars, then how many dollars the price is above (green) or below (red) it. Gap is price minus the last regular close. The Gap column sorts by percentage so different-priced stocks compare fairly; the sort for each average is also by percentage.</div>
+  </div>
+
   <div class="note">
-    Pre-market prices come from Yahoo Finance 1-minute bars (4:00&ndash;9:30am ET), refreshed about every 5 minutes in that window (GitHub scheduling can run late); Yahoo gives no pre-market volume, and thinly traded names can print odd prices, so treat a single pre-market tick with caution. The averages are computed from the completed daily bars in <code>data.json</code> (EMA9 is exponential; SMA20/50/100/200 are simple), so they do not move with the pre-market price. TradingView charts are TradingView's own embedded widget on daily candles (their data and their orange Pre tag). The free widget cannot colour moving-average lines individually, so the averages are not drawn on those charts; their values are listed under each chart and in the table. Pick &ldquo;my SVG&rdquo; in the chart-type box for charts with all five averages drawn in separate colours. Nothing on this page feeds TAKE, Weekly Picks, any panel or the forward log.
+    Pre-market prices come from Yahoo Finance 1-minute bars (4:00&ndash;9:30am ET), refreshed about every 5 minutes in that window (GitHub scheduling can run late); Yahoo gives no pre-market volume, and thinly traded names can print odd prices, so treat a single pre-market tick with caution. The averages are computed from the completed daily bars in <code>data.json</code> (EMA9 is exponential; SMA20/50/100/200 are simple), so they do not move with the pre-market price. TradingView charts are TradingView's own embedded widget on daily candles (their data and their orange Pre tag). The free widget cannot hide or recolour lines, so only the SMA 200 is added to those charts (its value shows in the chart legend); all five averages are listed under each chart and in the table. Pick &ldquo;my SVG&rdquo; in the chart-type box for charts with all five averages drawn in separate colours. Nothing on this page feeds TAKE, Weekly Picks, any panel or the forward log.
   </div>
 </div>
 
@@ -308,7 +308,7 @@ function mountTv(box) {
   const w = document.createElement('div'); w.className = 'tradingview-widget-container__widget'; c.appendChild(w);
   const s = document.createElement('script'); s.async = true; s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
   s.text = JSON.stringify({ autosize: true, symbol: sym, interval: 'D', timezone: 'America/New_York', theme: 'dark', style: '1', locale: 'en', backgroundColor: '#131722', gridColor: 'rgba(42,46,57,0.6)',
-    allow_symbol_change: false, hide_top_toolbar: true, hide_side_toolbar: true, hide_volume: true, withdateranges: false, save_image: false, calendar: false, support_host: 'https://www.tradingview.com' });
+    allow_symbol_change: false, hide_top_toolbar: true, hide_side_toolbar: true, hide_volume: true, withdateranges: false, save_image: false, calendar: false, studies: [{ id: 'MASimple@tv-basicstudies', inputs: { length: 200 } }], support_host: 'https://www.tradingview.com' });
   c.appendChild(s); box.textContent = ''; box.appendChild(c);
 }
 
