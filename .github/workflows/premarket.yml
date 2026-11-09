@@ -9,7 +9,7 @@ name: Premarket snapshot
 # other workflows, add this one (workflow_dispatch) to it for reliable timing.
 on:
   schedule:
-    - cron: "*/5 4-9 * * 1-5"
+    - cron: "*/5 4-16 * * 1-5"
       timezone: "America/New_York"
   workflow_dispatch:
 
