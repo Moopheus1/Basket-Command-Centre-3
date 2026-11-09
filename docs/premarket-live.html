@@ -41,7 +41,20 @@
   .empty { padding: 20px; color: var(--mut); text-align: center; }
   .tvbox { height: 360px; background: var(--bg); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--mut); font-size: 12px; }
   .tvbox .tradingview-widget-container, .tvbox .tradingview-widget-container__widget { width: 100%; height: 100%; }
-  #quotes { border-radius: 8px; }
+  .lqg { margin-bottom: 14px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #0d141a; }
+  .lqg table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .lqg .gh td { background: #1a2229; color: #fff; font-weight: 700; font-size: 12.5px; letter-spacing: .02em; padding: 9px 12px; }
+  .lqg .ch th { color: var(--mut); font-weight: 400; font-size: 12.5px; text-align: right; padding: 12px 10px; border-bottom: 1px solid #2a3540; background: #0d141a; }
+  .lqg .ch th:first-child { text-align: left; padding-left: 12px; }
+  .lqg td { padding: 9px 10px; border-bottom: 1px solid #1d272f; text-align: right; color: #d1d4dc; }
+  .lqg td:first-child { text-align: left; padding-left: 12px; font-weight: 500; }
+  .lqg tr:last-child td { border-bottom: 0; }
+  .lqg table { table-layout: fixed; }
+  .lqg th:first-child, .lqg td:first-child { width: 26%; background: transparent !important; position: static !important; }
+  .lqg td.up { color: var(--up); font-weight: 400; }
+  .lqg td.down { color: var(--dn); font-weight: 400; }
+  .lqg .gh td:first-child { width: auto; }
+  .lqg .nm2 { color: var(--mut); font-weight: 400; font-size: 12px; margin-left: 6px; }
   .qlabel { font-size: 13px; font-weight: 700; letter-spacing: .02em; color: #fff; background: #262b38; border: 1px solid var(--line); border-bottom: 0; border-radius: 8px 8px 0 0; padding: 9px 12px; }
   .qgroup { border-radius: 0 0 8px 8px; overflow: hidden; margin-bottom: 12px; }
   .qgroup .tradingview-widget-container, .qgroup .tradingview-widget-container__widget { width: 100%; height: 100%; }
@@ -83,6 +96,12 @@
   </div>
   <div class="status warn" id="live">Not connected to TradingView yet.</div>
   <div class="status" id="status">Loading&hellip;</div>
+
+  <div class="panel">
+    <h2>Live quotes <span class="sub" style="font-weight:400">&mdash; from your TradingView: index futures, then ETFs, then every BCC3 stock by sector, A to Z</span></h2>
+    <div id="lq"><div class="empty">Waiting for the TradingView link&hellip;</div></div>
+    <div class="note" style="margin-top:8px">Value, Change and Chg% are your real-time TradingView prices (index futures are the CME contracts ES, NQ, YM and RTY). Prev is the previous close implied by the change. Open, High and Low are today&rsquo;s regular-session figures from the Yahoo snapshot, widened by the live price, so High and Low never lag behind the Value. Open and range appear after 9:30am ET; before that they show a dash.</div>
+  </div>
 
   <div class="panel">
     <h2>Charts <span class="sub" style="font-weight:400">&mdash; daily candles, in the same order as the table</span></h2>
@@ -129,34 +148,33 @@ async function load() {
   build();
 }
 
-function mountQuotes() {
-  if (quotesMounted || !DATA) return; quotesMounted = true;
+const FUT = [['YM1!', 'USA 30 (Dow)'], ['ES1!', 'USA 500 (S&P)'], ['NQ1!', 'US Tech 100 (Nasdaq)'], ['RTY1!', 'Small Cap 2000 (Russell)']];
+function renderQuotes() {
+  const box = document.getElementById('lq');
+  if (!box || !DATA) return;
   const etfSet = new Set(ETFS), g = {}, etfs = [];
   Object.entries(DATA.tickers).forEach(([sym, t]) => {
     if (etfSet.has(sym)) { etfs.push(sym); return; }
     const k = (t && t.sector) || 'Other'; (g[k] = g[k] || []).push(sym);
   });
-  const sym = s => ({ name: TVSYM[s] || s, displayName: s });
   const az = (x, y) => x.localeCompare(y);
-  const groups = [{ name: 'US INDEX FUTURES', symbols: [['OANDA:US30USD', 'USA 30 (Dow)'], ['OANDA:SPX500USD', 'USA 500 (S&P)'], ['OANDA:NAS100USD', 'US Tech 100 (Nasdaq)'], ['OANDA:US2000USD', 'Small Cap 2000 (Russell)']].map(x => ({ name: x[0], displayName: x[1] })) }];
-  if (etfs.length) groups.push({ name: 'ETFS', symbols: etfs.slice().sort(az).map(sym) });
+  const num = (v, d) => v == null ? '<span class="mut">&mdash;</span>' : v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const rowFor = (label, sub, L, D, d) => {
+    if (!L) return '<tr><td>' + label + sub + '</td><td colspan="7" class="mut" style="text-align:right">no live price</td></tr>';
+    const prev = L.chg != null ? L.last - L.chg : (D && D.prev_close);
+    const hi = D && D.day_high != null ? Math.max(D.day_high, L.last) : null, lo = D && D.day_low != null ? Math.min(D.day_low, L.last) : null;
+    const cls = L.chg > 0 ? 'up' : L.chg < 0 ? 'down' : '';
+    const sg = v => v == null ? '<span class="mut">&mdash;</span>' : (v > 0 ? '+' : v < 0 ? '&minus;' : '') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+    return '<tr><td>' + label + sub + '</td><td>' + num(L.last, d) + '</td><td class="' + cls + '">' + sg(L.chg) + '</td><td class="' + cls + '">' + (L.pct == null ? '&mdash;' : (L.pct > 0 ? '+' : L.pct < 0 ? '&minus;' : '') + Math.abs(L.pct).toFixed(2) + '%') + '</td><td>' + num(D && D.day_open, d) + '</td><td>' + num(hi, d) + '</td><td>' + num(lo, d) + '</td><td>' + num(prev, d) + '</td></tr>';
+  };
+  const stockRow = sym => rowFor(esc(sym), '', LIVE[sym], PM && PM.tickers[sym], LIVE[sym] && LIVE[sym].last < 1 ? 4 : 2);
+  const grp = (name, rows) => '<div class="lqg"><table><thead><tr class="gh"><td colspan="8">' + esc(name) + '</td></tr><tr class="ch"><th>Name</th><th>Value</th><th>Change</th><th>Chg%</th><th>Open</th><th>High</th><th>Low</th><th>Prev</th></tr></thead><tbody>' + rows.join('') + '</tbody></table></div>';
+  const out = [];
+  out.push(grp('US INDEX FUTURES', FUT.map(([k, nm]) => rowFor(nm, '<span class="nm2">' + k + '</span>', LIVE[k], PM && PM.futures && PM.futures[k], 2))));
+  if (etfs.length) out.push(grp('ETFS', etfs.slice().sort(az).map(stockRow)));
   Object.entries(g).sort((a, b) => (a[0] === 'Other') - (b[0] === 'Other') || a[0].localeCompare(b[0]))
-    .forEach(([name, ts]) => groups.push({ name: name.toUpperCase(), symbols: ts.slice().sort(az).map(sym) }));
-  // One TradingView table per group, so the column titles (Value, Change, Chg% ...) repeat above every sub-heading.
-  // Each box is tall enough for its rows, so there is no inner scrolling.
-  const box = document.getElementById('quotes');
-  box.textContent = ''; box.style.height = 'auto';
-  groups.forEach(grp => {
-    const lab = document.createElement('div'); lab.className = 'qlabel'; lab.textContent = grp.name; box.appendChild(lab);
-    const el = document.createElement('div'); el.className = 'qgroup';
-    el.style.height = (58 + grp.symbols.length * 36 + 4) + 'px';
-    box.appendChild(el);
-    const c = document.createElement('div'); c.className = 'tradingview-widget-container';
-    const w = document.createElement('div'); w.className = 'tradingview-widget-container__widget'; c.appendChild(w);
-    const s = document.createElement('script'); s.async = true; s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-market-quotes.js';
-    s.text = JSON.stringify({ width: '100%', height: '100%', symbolsGroups: [grp], showSymbolLogo: true, colorTheme: 'dark', isTransparent: false, locale: 'en', backgroundColor: '#131722' });
-    c.appendChild(s); el.appendChild(c);
-  });
+    .forEach(([name, ts]) => out.push(grp(name.toUpperCase(), ts.slice().sort(az).map(stockRow))));
+  box.innerHTML = out.join('');
 }
 
 function build() {
@@ -381,7 +399,7 @@ async function poll() {
     const v = r && r.result && r.result.value;
     if (!v) throw new Error('no value');
     if (v.err) { liveStatus('warn', 'TradingView says: ' + esc(v.err) + '. Showing the last Yahoo snapshot.'); applyLive(false); }
-    else { LIVE = {}; for (const [k, x] of Object.entries(v.rows)) { const sym = revSym(k); if (x.last != null) LIVE[sym] = x; } liveTs = Date.now(); applyLive(true); }
+    else { LIVE = {}; for (const [k, x] of Object.entries(v.rows)) { const sym = k.includes('!') ? k.split(':').pop() : revSym(k); if (x.last != null) LIVE[sym] = x; } liveTs = Date.now(); applyLive(true); }
   } catch (e) { liveStatus('warn', 'Could not read TradingView: ' + esc(e.message)); }
   polling = false;
   if (liveOn) setTimeout(poll, 1500);
@@ -392,14 +410,16 @@ function applyLive(on) {
   if (on && PM) {
     const clock = new Date().toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: false });
     for (const [sym, x] of Object.entries(LIVE)) {
+      if (sym.includes('!')) continue;
       const o = PM.tickers[sym] || {};
       PM.tickers[sym] = Object.assign({}, o, { price: x.last, prev_close: (x.chg != null ? x.last - x.chg : o.prev_close), session: x.rt ? 'regular' : (o.session || 'pre'), live: true, last_et: clock });
     }
   }
   build();
+  renderQuotes();
   document.getElementById('status').style.display = on ? 'none' : '';
   if (on) {
-    const n = Object.keys(LIVE).length, rt = Object.values(LIVE).filter(x => x.rt).length;
+    const stk = Object.entries(LIVE).filter(([k]) => !k.includes('!')), n = stk.length, rt = stk.filter(([, x]) => x.rt).length;
     liveStatus('', '<strong style="color:var(--up)">&#9679; LIVE</strong> from your TradingView &middot; <strong>' + n + '</strong> tickers (' + rt + ' real-time) &middot; updated ' + new Date().toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: false }) + ' ET &middot; refreshes every ~2&ndash;3 s');
   }
 }

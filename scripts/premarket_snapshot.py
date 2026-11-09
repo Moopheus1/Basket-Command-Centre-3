@@ -30,6 +30,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "docs", "premarket.json")
 
 
+FUTURES = {"ES=F": "ES1!", "NQ=F": "NQ1!", "YM=F": "YM1!", "RTY=F": "RTY1!"}
+
+
 def read_tickers():
     out = []
     with open(os.path.join(ROOT, "tickers.txt"), encoding="utf-8") as f:
@@ -92,8 +95,13 @@ def summarize(df, day):
         return {"price": None, "session": None, "last_et": None, "prev_close": prev_close,
                 "pm_high": None, "pm_low": None}
     last_ts = today.index[-1]
-    pm = today[(today.index.hour * 60 + today.index.minute) < 9 * 60 + 30]
+    tm = today.index.hour * 60 + today.index.minute
+    pm = today[tm < 9 * 60 + 30]
+    reg = today[(tm >= 9 * 60 + 30) & (tm < 16 * 60)]
     return {
+        "day_open": num(reg["Open"].iloc[0]) if not reg.empty else None,
+        "day_high": num(reg["High"].max()) if not reg.empty else None,
+        "day_low": num(reg["Low"].min()) if not reg.empty else None,
         "price": num(today["Close"].iloc[-1]),
         "session": session_of(last_ts),
         "last_et": last_ts.strftime("%Y-%m-%d %H:%M"),
@@ -204,7 +212,24 @@ def main():
 
     newest = max(v["last_et"] for v in good)
     nopm = [t for t, v in out.items() if "error" not in v and v.get("price") is None]
+    # index futures for the live page (Yahoo symbol -> TradingView continuous contract name)
+    fut = {}
+    try:
+        fr = yf.download(list(FUTURES), period="5d", interval="1m", prepost=True, group_by="ticker",
+                         auto_adjust=False, progress=False, threads=True)
+        for ysym, name in FUTURES.items():
+            try:
+                f = prep(fr[ysym])
+                today = f[f.index.date == f.index[-1].date()]
+                fut[name] = {"day_open": num(today["Open"].iloc[0]), "day_high": num(today["High"].max()),
+                             "day_low": num(today["Low"].min()), "price": num(today["Close"].iloc[-1]),
+                             "last_et": today.index[-1].strftime("%Y-%m-%d %H:%M")}
+            except Exception as e:
+                print(f"[premarket_snapshot] future {ysym}: {e}")
+    except Exception as e:
+        print(f"[premarket_snapshot] futures download failed: {e}")
     doc = {
+        "futures": fut,
         "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "asof_et": newest,
         "asof_date": newest[:10],
