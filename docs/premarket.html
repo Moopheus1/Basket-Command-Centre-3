@@ -82,13 +82,13 @@
   <div class="status" id="status">Loading&hellip;</div>
 
   <div class="panel">
-    <h2>Live quotes <span class="sub" style="font-weight:400">&mdash; TradingView's own table: index futures first, then every BCC3 ticker by sector</span></h2>
+    <h2>Live quotes <span class="sub" style="font-weight:400">&mdash; TradingView's own table: index futures first, then every BCC3 ticker by sector, A to Z</span></h2>
     <div id="quotes">Loading TradingView&hellip;</div>
     <div class="note" style="margin-top:8px">Streamed by TradingView, so it updates by itself. The index futures (OANDA CFDs) trade around the clock and are the live pre-market read on the market. For stocks, TradingView's free feed is delayed (the small orange <strong>D</strong>) and only moves in the 9:30am&ndash;4:00pm ET session, so before the open its stock rows still show the previous session. The pre-market price of each stock is in the table below (from Yahoo, refreshed by the snapshot job) and as the orange <strong>Pre</strong> tag on each chart.</div>
   </div>
 
   <div class="panel">
-    <h2>Table <span class="sub" style="font-weight:400">&mdash; default order is A to Z (click the # column for oldest-added first, hover it for the date added); click a column to sort, click # to come back to it; click a ticker to jump to its chart</span></h2>
+    <h2>Table <span class="sub" style="font-weight:400">&mdash; default order is A to Z; click a column to sort, click a ticker to jump to its chart</span></h2>
     <div class="scroll"><table id="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
     <div class="note" style="margin-top:8px">Each average cell shows the average in dollars, then how many dollars the price is above (green) or below (red) it. Gap is price minus the last regular close. The Gap column sorts by percentage so different-priced stocks compare fairly; the sort for each average is also by percentage.</div>
   </div>
@@ -136,7 +136,7 @@ function mountQuotes() {
   const g = {};
   Object.entries(DATA.tickers).forEach(([sym, t]) => { const k = (t && t.sector) || 'Other'; (g[k] = g[k] || []).push(sym); });
   const groups = [{ name: 'US INDEX FUTURES', symbols: [['OANDA:US30USD', 'USA 30 (Dow)'], ['OANDA:SPX500USD', 'USA 500 (S&P)'], ['OANDA:NAS100USD', 'US Tech 100 (Nasdaq)'], ['OANDA:US2000USD', 'Small Cap 2000 (Russell)']].map(x => ({ name: x[0], displayName: x[1] })) }]
-    .concat(Object.entries(g).sort((a, b) => b[1].length - a[1].length).map(([name, ts]) => ({ name: name.toUpperCase(), symbols: ts.map(s => ({ name: TVSYM[s] || s, displayName: s })) })));
+    .concat(Object.entries(g).sort((a, b) => (a[0] === 'Other') - (b[0] === 'Other') || a[0].localeCompare(b[0])).map(([name, ts]) => ({ name: name.toUpperCase(), symbols: ts.slice().sort((x, y) => x.localeCompare(y)).map(s => ({ name: TVSYM[s] || s, displayName: s })) })));
   const box = document.getElementById('quotes');
   const c = document.createElement('div'); c.className = 'tradingview-widget-container';
   const w = document.createElement('div'); w.className = 'tradingview-widget-container__widget'; c.appendChild(w);
@@ -186,7 +186,7 @@ function build() {
   render();
 }
 
-const COLS = [['sym', 'Ticker'], ['order', '#'], ['prev', 'Prev close'], ['price', 'Pre-mkt price'], ['gapPct', 'Gap'], ['pmHi', 'PM high'], ['pmLo', 'PM low']]
+const COLS = [['sym', 'Ticker'], ['prev', 'Prev close'], ['price', 'Pre-mkt price'], ['gapPct', 'Gap'], ['pmLo', 'PM low'], ['pmHi', 'PM high']]
   .concat(MAS.map(m => [m.key + 'Pct', m.name]));
 
 function visibleRows() {
@@ -223,8 +223,8 @@ function render(force) {
     const tag = r.p && r.p.session !== 'pre' ? '<span class="tag ' + r.p.session + '">' + (r.p.session === 'regular' ? 'live' : 'post') + '</span>' : '';
     const g = r.hasPm ? '<span class="' + (r.gap >= 0 ? 'up' : 'down') + '">' + sgn(r.gap) + '</span>' : '<span class="mut">&mdash;</span>';
     return '<tr><td><a href="#c-' + esc(r.sym) + '" data-jump="' + esc(r.sym) + '">' + esc(r.sym) + '</a>' + tag + '</td>' +
-      '<td class="mut"' + (r.added ? ' title="added ' + r.added + '"' : '') + '>' + (r.order + 1) + '</td><td>' + usd(r.prev) + '</td><td>' + (r.hasPm ? usd(r.price) : '<span class="mut">' + usd(r.price) + '</span>') + '</td><td title="' + (r.gapPct != null ? r.gapPct.toFixed(2) + '%' : '') + '">' + g + '</td>' +
-      '<td>' + (r.p && r.p.pm_high != null ? usd(r.p.pm_high) : '<span class="mut">&mdash;</span>') + '</td><td>' + (r.p && r.p.pm_low != null ? usd(r.p.pm_low) : '<span class="mut">&mdash;</span>') + '</td>' +
+      '<td>' + usd(r.prev) + '</td><td>' + (r.hasPm ? usd(r.price) : '<span class="mut">' + usd(r.price) + '</span>') + '</td><td title="' + (r.gapPct != null ? r.gapPct.toFixed(2) + '%' : '') + '">' + g + '</td>' +
+      '<td>' + (r.p && r.p.pm_low != null ? usd(r.p.pm_low) : '<span class="mut">&mdash;</span>') + '</td><td>' + (r.p && r.p.pm_high != null ? usd(r.p.pm_high) : '<span class="mut">&mdash;</span>') + '</td>' +
       MAS.map(m => maCell(r, m)).join('') + '</tr>';
   }).join('') : '<tr><td colspan="' + COLS.length + '" class="empty">No tickers match.</td></tr>';
   renderCharts(rows, force);
@@ -336,7 +336,7 @@ function gapHtml(r) { return r.hasPm ? '<span class="' + (r.gap >= 0 ? 'up' : 'd
 
 document.getElementById('thead').addEventListener('click', e => {
   const th = e.target.closest('th'); if (!th) return;
-  const k = th.dataset.k; if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = (k === 'sym' || k === 'order') ? 1 : -1; }
+  const k = th.dataset.k; if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = k === 'sym' ? 1 : -1; }
   render(true);
 });
 document.getElementById('tbody').addEventListener('click', e => {
