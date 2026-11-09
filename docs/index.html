@@ -3355,7 +3355,7 @@ function spyWeeksHtml(d, liveIdx) {
     while (dow(nx) === 0 || dow(nx) === 6) nx = addDays(nx, 1);
     if (nx >= tpTodayET()) { pend = { date: nx, k: (dow(nx) + 6) % 7, wk: mondayOf(nx), pdh: d.highs[n - 1], pdl: d.lows[n - 1] }; if (!weeks.has(pend.wk)) weeks.set(pend.wk, []); }
   }
-  const keys = [...weeks.keys()].sort().reverse().slice(0, 1); // current week only (previous-week charts removed 9 Nov 2026)
+  const keys = [...weeks.keys()].sort().reverse().slice(0, 2);
   const NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 
   // one chart: [day before, PD, the day tested]; ti = index of the day tested (null if it has not traded yet)
@@ -3438,9 +3438,9 @@ function spyWeeksHtml(d, liveIdx) {
   // previous week on the left, current week on the right; one row per weekday so Mon sits beside Mon
   const order = [1, 0].filter(x => x < keys.length);
   let grid = order.map(x => heads[x]).join('');
-  for (let k = 0; k < 5; k++) grid += order.map(x => minis[x][k]).join('');
+  // daily mini charts removed 9 Nov 2026 (summary tables only); the minis are still built above but not shown
   return '<h3 style="font-size:14px;margin:16px 0 4px">This week &mdash; did each weekday hit its own PDH or PDL?</h3>' +
-    '<div style="color:#6b7280;margin-bottom:8px">Each chart is the same view as the one above: the day before, the previous day (<strong>PD</strong>), and the weekday being tested. The PD candle\'s high (blue, the PDH) and low (amber, the PDL) are carried across to the tested day\'s candle. <strong>HIT</strong> = that day traded to or through the line. <span style="color:#e5484d;font-weight:700">NOT HIT</span> = an inside day, the 5% case.</div>' +
+    '<div style="color:#6b7280;margin-bottom:8px">Each weekday is tested against the previous day (<strong>PD</strong>)\'s high (PDH) and low (PDL). <strong>HIT</strong> = that day traded to or through the line. <span style="color:#e5484d;font-weight:700">NOT HIT</span> = an inside day, the 5% case.</div>' +
     '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:14px;align-items:start">' + grid + '</div>';
 }
 
