@@ -20,7 +20,7 @@
   .status.warn { border-color: #b7791f; background: #2a2316; color: #f6c66a; }
   .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; }
   .panel h2 { font-size: 16px; margin: 0 0 6px; color: #fff; }
-  .scroll { overflow: auto; max-height: 70vh; }
+  .scroll { overflow-x: auto; }
   table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 13px; }
   th, td { padding: 6px 9px; border-bottom: 1px solid var(--line); white-space: nowrap; text-align: right; }
   th { position: sticky; top: 0; background: var(--panel); z-index: 2; cursor: pointer; user-select: none; color: var(--mut); font-weight: 600; }
@@ -41,7 +41,7 @@
   .empty { padding: 20px; color: var(--mut); text-align: center; }
   .tvbox { height: 360px; background: var(--bg); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--mut); font-size: 12px; }
   .tvbox .tradingview-widget-container, .tvbox .tradingview-widget-container__widget { width: 100%; height: 100%; }
-  #quotes { height: 620px; border-radius: 8px; overflow: hidden; }
+  #quotes { height: 620px; border-radius: 8px; overflow: hidden; }  /* height is set by script to fit every row */
   #quotes .tradingview-widget-container, #quotes .tradingview-widget-container__widget { width: 100%; height: 100%; }
 </style>
 </head>
@@ -82,7 +82,7 @@
   <div class="status" id="status">Loading&hellip;</div>
 
   <div class="panel">
-    <h2>Live quotes <span class="sub" style="font-weight:400">&mdash; TradingView's own table: index futures first, then every BCC3 ticker by sector, A to Z</span></h2>
+    <h2>Live quotes <span class="sub" style="font-weight:400">&mdash; TradingView's own table: index futures, then ETFs, then every BCC3 stock by sector, A to Z</span></h2>
     <div id="quotes">Loading TradingView&hellip;</div>
     <div class="note" style="margin-top:8px">Streamed by TradingView, so it updates by itself. The index futures (OANDA CFDs) trade around the clock and are the live pre-market read on the market. For stocks, TradingView's free feed is delayed (the small orange <strong>D</strong>) and only moves in the 9:30am&ndash;4:00pm ET session, so before the open its stock rows still show the previous session. The pre-market price of each stock is in the table below (from Yahoo, refreshed by the snapshot job) and as the orange <strong>Pre</strong> tag on each chart.</div>
   </div>
@@ -113,7 +113,7 @@ const MAS = [
 ];
 const CHART_BARS = 90;
 const ET = 'America/New_York';
-let quotesMounted = false, DATA = null, PM = null, TVSYM = {}, TORD = null, ROWS = [], sortKey = 'sym', sortDir = 1, lastChartSig = '', tvObserver = null;
+let ETFS = [], quotesMounted = false, DATA = null, PM = null, TVSYM = {}, TORD = null, ROWS = [], sortKey = 'sym', sortDir = 1, lastChartSig = '', tvObserver = null;
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const usd = v => v == null ? '—' : '$' + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -125,7 +125,8 @@ function emaSeries(c, n) { const o = new Array(c.length).fill(null); if (c.lengt
 
 async function load() {
   const get = async u => { try { const r = await fetch(u + '?t=' + Date.now(), { cache: 'no-store' }); return r.ok ? await r.json() : null; } catch (e) { return null; } };
-  [DATA, PM, TVSYM, TORD] = await Promise.all([get('data.json'), get('premarket.json'), get('tv_symbols.json'), get('ticker_order.json')]);
+  [DATA, PM, TVSYM, TORD, ETFS] = await Promise.all([get('data.json'), get('premarket.json'), get('tv_symbols.json'), get('ticker_order.json'), get('etfs.json')]);
+  ETFS = ETFS || [];
   TVSYM = TVSYM || {};
   if (!DATA || !DATA.tickers) { document.getElementById('status').textContent = 'data.json could not be loaded.'; return; }
   build();
@@ -133,11 +134,21 @@ async function load() {
 
 function mountQuotes() {
   if (quotesMounted || !DATA) return; quotesMounted = true;
-  const g = {};
-  Object.entries(DATA.tickers).forEach(([sym, t]) => { const k = (t && t.sector) || 'Other'; (g[k] = g[k] || []).push(sym); });
-  const groups = [{ name: 'US INDEX FUTURES', symbols: [['OANDA:US30USD', 'USA 30 (Dow)'], ['OANDA:SPX500USD', 'USA 500 (S&P)'], ['OANDA:NAS100USD', 'US Tech 100 (Nasdaq)'], ['OANDA:US2000USD', 'Small Cap 2000 (Russell)']].map(x => ({ name: x[0], displayName: x[1] })) }]
-    .concat(Object.entries(g).sort((a, b) => (a[0] === 'Other') - (b[0] === 'Other') || a[0].localeCompare(b[0])).map(([name, ts]) => ({ name: name.toUpperCase(), symbols: ts.slice().sort((x, y) => x.localeCompare(y)).map(s => ({ name: TVSYM[s] || s, displayName: s })) })));
+  const etfSet = new Set(ETFS), g = {}, etfs = [];
+  Object.entries(DATA.tickers).forEach(([sym, t]) => {
+    if (etfSet.has(sym)) { etfs.push(sym); return; }
+    const k = (t && t.sector) || 'Other'; (g[k] = g[k] || []).push(sym);
+  });
+  const sym = s => ({ name: TVSYM[s] || s, displayName: s });
+  const az = (x, y) => x.localeCompare(y);
+  const groups = [{ name: 'US INDEX FUTURES', symbols: [['OANDA:US30USD', 'USA 30 (Dow)'], ['OANDA:SPX500USD', 'USA 500 (S&P)'], ['OANDA:NAS100USD', 'US Tech 100 (Nasdaq)'], ['OANDA:US2000USD', 'Small Cap 2000 (Russell)']].map(x => ({ name: x[0], displayName: x[1] })) }];
+  if (etfs.length) groups.push({ name: 'ETFS', symbols: etfs.slice().sort(az).map(sym) });
+  Object.entries(g).sort((a, b) => (a[0] === 'Other') - (b[0] === 'Other') || a[0].localeCompare(b[0]))
+    .forEach(([name, ts]) => groups.push({ name: name.toUpperCase(), symbols: ts.slice().sort(az).map(sym) }));
+  // no inner scrolling: make the box tall enough for every row (header + one line per group + one line per ticker)
+  const rows = groups.reduce((n, grp) => n + 1 + grp.symbols.length, 0);
   const box = document.getElementById('quotes');
+  box.style.height = (64 + rows * 36 + 24) + 'px';
   const c = document.createElement('div'); c.className = 'tradingview-widget-container';
   const w = document.createElement('div'); w.className = 'tradingview-widget-container__widget'; c.appendChild(w);
   const s = document.createElement('script'); s.async = true; s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-market-quotes.js';

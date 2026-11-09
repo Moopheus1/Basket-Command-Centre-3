@@ -110,17 +110,25 @@ def write_tv_symbols(tickers):
     path = os.path.join(ROOT, "docs", "tv_symbols.json")
     body = {"filter": [{"left": "name", "operation": "in_range", "right": tickers}], "options": {"lang": "en"},
             "markets": ["america"], "symbols": {"query": {"types": []}, "tickers": []},
-            "columns": ["name", "exchange"], "range": [0, 2000]}
+            "columns": ["name", "exchange", "type", "subtype"], "range": [0, 2000]}
     try:
         req = urllib.request.Request("https://scanner.tradingview.com/america/scan", data=json.dumps(body).encode(),
                                      headers={"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"})
         res = json.load(urllib.request.urlopen(req, timeout=30))
-        m = {}
+        m, etfs = {}, []
         for row in res.get("data", []):
-            sym, (name, _ex) = row["s"], row["d"]
-            m.setdefault(name, sym)
+            sym, (name, _ex, ty, sub) = row["s"], row["d"]
+            if name not in m:
+                m[name] = sym
+                if ty == "fund" or sub in ("etf", "etn"):
+                    etfs.append(name)
         if len(m) < len(tickers) // 2:
             return
+        epath = os.path.join(ROOT, "docs", "etfs.json")
+        etfs = sorted(set(etfs))
+        if not os.path.exists(epath) or json.load(open(epath, encoding="utf-8")) != etfs:
+            with open(epath, "w", encoding="utf-8") as f:
+                json.dump(etfs, f, separators=(",", ":"))
         old = {}
         if os.path.exists(path):
             old = json.load(open(path, encoding="utf-8"))
