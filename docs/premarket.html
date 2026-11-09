@@ -101,7 +101,7 @@
   </div>
 
   <div class="note">
-    Pre-market prices come from Yahoo Finance 1-minute bars (4:00&ndash;9:30am ET), refreshed about every 10 minutes in that window; Yahoo gives no pre-market volume, and thinly traded names can print odd prices, so treat a single pre-market tick with caution. The averages are computed from the completed daily bars in <code>data.json</code> (EMA9 is exponential; SMA20/50/100/200 are simple), so they do not move with the pre-market price. TradingView charts are TradingView's own embedded widget on daily candles (their data and their orange Pre tag). The free widget cannot colour moving-average lines individually, so the averages are not drawn on those charts; their values are listed under each chart and in the table. Pick &ldquo;my SVG&rdquo; in the chart-type box for charts with all five averages drawn in separate colours. Nothing on this page feeds TAKE, Weekly Picks, any panel or the forward log.
+    Pre-market prices come from Yahoo Finance 1-minute bars (4:00&ndash;9:30am ET), refreshed about every 5 minutes in that window (GitHub scheduling can run late); Yahoo gives no pre-market volume, and thinly traded names can print odd prices, so treat a single pre-market tick with caution. The averages are computed from the completed daily bars in <code>data.json</code> (EMA9 is exponential; SMA20/50/100/200 are simple), so they do not move with the pre-market price. TradingView charts are TradingView's own embedded widget on daily candles (their data and their orange Pre tag). The free widget cannot colour moving-average lines individually, so the averages are not drawn on those charts; their values are listed under each chart and in the table. Pick &ldquo;my SVG&rdquo; in the chart-type box for charts with all five averages drawn in separate colours. Nothing on this page feeds TAKE, Weekly Picks, any panel or the forward log.
   </div>
 </div>
 
@@ -367,7 +367,7 @@ document.getElementById('tbody').addEventListener('click', e => {
 load();
 setInterval(async () => {   // only the small premarket file is re-read; the averages come from data.json loaded once
   try { const r = await fetch('premarket.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) { PM = await r.json(); build(); } } catch (e) {}
-}, 120000);
+}, 60000);
 </script>
 </body>
 </html>
