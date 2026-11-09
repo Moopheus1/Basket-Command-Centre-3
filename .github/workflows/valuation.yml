@@ -8,9 +8,11 @@ name: Valuation vs own history
 #
 # Needs a repository secret named SEC_CONTACT_EMAIL (the SEC requires automated users to give a
 # contact address). Without it the run exits cleanly and changes nothing.
+# SWITCHED OFF 9 Nov 2026 (the My Fair Value column was replaced by SMA 200). The weekly schedule is
+# removed; the job can still be started by hand from the Actions tab. To restore, put back:
+#   schedule:
+#     - cron: "37 9 * * 6"    # Saturdays 09:37 UTC
 on:
-  schedule:
-    - cron: "37 9 * * 6"    # Saturdays 09:37 UTC, after the US week has closed
   workflow_dispatch:
 
 permissions:

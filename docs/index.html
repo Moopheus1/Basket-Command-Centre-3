@@ -1464,10 +1464,10 @@ function renderDetailed(spy, tickers) {
   }).join('');
 }
 const COLS = [
-  ['sym', 'Ticker'], ['price', 'Price'], ['daily', 'Daily'], ['wtd', 'WTD'], ['mtd', 'MTD'],
-  ['ytd', 'YTD'], ['y1', '1Y'], ['vsSpy', 'vs SPY'], ['mapos', 'vs EMA9/SMA20'], ['mom', 'Momentum'], ['per', 'Persist'], ['sig', 'Signal'],
+  ['sym', 'Ticker'], ['price', 'Price'], ['daily', 'Daily'], ['mapos', 'vs EMA9/SMA20'], ['mom', 'Momentum'], ['per', 'Persist'], ['sig', 'Signal'],
   ['target', 'Analyst Target'], ['sma200', 'SMA 200'], ['earnings', 'Next Earnings'], ['mcap', 'Market cap'], ['vol', 'Volume'],
-  ['health', 'Health Score'], ['rsi', 'RSI (14D)'], ['wrsi', 'Weekly RSI']
+  ['health', 'Health Score'], ['rsi', 'RSI (14D)'], ['wrsi', 'Weekly RSI'],
+  ['wtd', 'WTD'], ['mtd', 'MTD'], ['ytd', 'YTD'], ['y1', '1Y'], ['vsSpy', 'vs SPY']   // moved to the far right 9 Nov 2026
 ];
 
 // Mirror the Performance table's horizontal scrollbar above the table. The proxy is an empty
@@ -1535,11 +1535,6 @@ function renderTable(spy, tickers) {
     '<tr><td><a class="tklink" href="' + rallyLink(r.sym) + '" target="_blank" rel="noopener noreferrer">' + r.sym + '</a>' + (BENCHMARKS.has(r.sym) ? '<span class="bench-badge">Benchmark</span>' : (ETF_TICKERS.has(r.sym) ? '<span class="bench-badge">ETF</span>' : '')) + '</td>' +
     '<td>' + fmtPrice(r.price) + '</td>' +
     '<td>' + pctHtml(r.daily, {dp:2}) + '</td>' +
-    '<td>' + pctHtml(r.wtd) + '</td>' +
-    '<td>' + pctHtml(r.mtd) + '</td>' +
-    '<td>' + pctHtml(r.ytd) + '</td>' +
-    '<td>' + pctHtml(r.y1) + '</td>' +
-    '<td>' + pctHtml(r.vsSpy, {sign:true, arrow:false, dp:2}) + '</td>' +
     '<td>' + maPosBadgeCompact(r.sym) + '</td>' +
     '<td>' + scoreBadge(r.mom) + '</td>' +
     '<td>' + scoreBadge(r.per) + '</td>' +
@@ -1551,7 +1546,13 @@ function renderTable(spy, tickers) {
     '<td>' + fmtVol(r.vol) + '</td>' +
     '<td>' + scoreBadge(r.health) + (r.f.healthGrade ? ' <span style="color:#9ca3af;font-size:11px">' + r.f.healthGrade + '</span>' : '') + '</td>' +
     '<td>' + rsiBadge(r.rsi) + '</td>' +
-    '<td>' + rsiBadge(r.wrsi) + '</td></tr>'
+    '<td>' + rsiBadge(r.wrsi) + '</td>' +
+    '<td>' + pctHtml(r.wtd) + '</td>' +
+    '<td>' + pctHtml(r.mtd) + '</td>' +
+    '<td>' + pctHtml(r.ytd) + '</td>' +
+    '<td>' + pctHtml(r.y1) + '</td>' +
+    '<td>' + pctHtml(r.vsSpy, {sign:true, arrow:false, dp:2}) + '</td>' +
+    '</tr>'
   ).join('') + extraRows;
   syncPerfScrollbars();
   if (typeof requestAnimationFrame === 'function') requestAnimationFrame(syncPerfScrollbars);  // re-measure once layout settles
