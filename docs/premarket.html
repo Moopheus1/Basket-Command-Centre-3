@@ -79,7 +79,7 @@
   <div class="status" id="status">Loading&hellip;</div>
 
   <div class="panel">
-    <h2>Table <span class="sub" style="font-weight:400">&mdash; default order is oldest-added first (# column, hover for the date added); click a column to sort, click # to come back to it; click a ticker to jump to its chart</span></h2>
+    <h2>Table <span class="sub" style="font-weight:400">&mdash; default order is A to Z (click the # column for oldest-added first, hover it for the date added); click a column to sort, click # to come back to it; click a ticker to jump to its chart</span></h2>
     <div class="scroll"><table id="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
     <div class="note" style="margin-top:8px">Each average cell shows the average in dollars, then how many dollars the price is above (green) or below (red) it. Gap is price minus the last regular close. The Gap column sorts by percentage so different-priced stocks compare fairly; the sort for each average is also by percentage.</div>
   </div>
@@ -104,7 +104,7 @@ const MAS = [
 ];
 const CHART_BARS = 90;
 const ET = 'America/New_York';
-let DATA = null, PM = null, TVSYM = {}, TORD = null, ROWS = [], sortKey = 'order', sortDir = 1, lastChartSig = '', tvObserver = null;
+let DATA = null, PM = null, TVSYM = {}, TORD = null, ROWS = [], sortKey = 'sym', sortDir = 1, lastChartSig = '', tvObserver = null;
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const usd = v => v == null ? '—' : '$' + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
