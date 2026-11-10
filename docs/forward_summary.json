@@ -1,6 +1,6 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-10T08:23:24.809Z",
+ "updated": "2026-11-10T08:37:37.697Z",
  "logged_rows": 327,
  "logged_days": 32,
  "scored_signals": 50,
@@ -16,14 +16,14 @@
  "random_baseline_2x": {
   "n": 1309,
   "hit_rate": 0.316,
-  "avg_return": -0.1401,
+  "avg_return": -0.14,
   "median_dip": -0.2042,
   "bad_case_dip": -0.3354
  },
  "all_signals": {
   "n": 50,
   "hit_rate": 0.64,
-  "avg_return": -0.0384,
+  "avg_return": -0.0385,
   "median_dip": -0.0517,
   "bad_case_dip": -0.2003
  },
@@ -77,14 +77,14 @@
   "Weekly Pick": {
    "n": 17,
    "hit_rate": 0.529,
-   "avg_return": -0.0982,
+   "avg_return": -0.0983,
    "median_dip": -0.0927,
    "bad_case_dip": -0.3153
   },
   "Golden Cross": {
    "n": 24,
    "hit_rate": 0.833,
-   "avg_return": 0.0289,
+   "avg_return": 0.0288,
    "median_dip": -0.0168,
    "bad_case_dip": -0.0603
   },
@@ -98,7 +98,7 @@
   "Bull Flag": {
    "n": 3,
    "hit_rate": 0,
-   "avg_return": -0.1985,
+   "avg_return": -0.1986,
    "median_dip": -0.3088,
    "bad_case_dip": -0.3298
   },
@@ -114,7 +114,7 @@
   "QQQ above 50d": {
    "n": 50,
    "hit_rate": 0.64,
-   "avg_return": -0.0384,
+   "avg_return": -0.0385,
    "median_dip": -0.0517,
    "bad_case_dip": -0.2003
   }
@@ -130,7 +130,7 @@
   "breadth <= 50%": {
    "n": 8,
    "hit_rate": 0.375,
-   "avg_return": -0.1284,
+   "avg_return": -0.1285,
    "median_dip": -0.182,
    "bad_case_dip": -0.3088
   }
