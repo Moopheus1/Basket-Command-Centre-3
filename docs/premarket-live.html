@@ -120,7 +120,7 @@
   <div class="panel">
     <h2>Live quotes <span class="sub" style="font-weight:400">&mdash; from your TradingView: index futures, then ETFs, then every BCC3 stock by sector, A to Z; click a column header to sort inside each group, click again to reverse</span></h2>
     <div id="lq"><div class="empty">Waiting for the TradingView link&hellip;</div></div>
-    <div class="note" style="margin-top:8px">Value, Change and Chg% are your real-time TradingView prices (index futures are the CME contracts ES, NQ, YM and RTY). Prev is the previous close implied by the change. Open, High and Low are today&rsquo;s regular-session figures from the Yahoo snapshot, widened by the live price, so High and Low never lag behind the Value. Open and range appear after 9:30am ET; before that they show a dash.</div>
+    <div class="note" style="margin-top:8px">Value, Change and Chg% are your real-time TradingView prices (index futures are the CME contracts ES, NQ, YM and RTY). While this page is connected, TradingView&rsquo;s window is drawn taller than your screen so the whole watchlist is on screen at once (that is what makes every price update instantly); it goes back to normal as soon as you close this page. Prev is the previous close implied by the change. Open, High and Low are today&rsquo;s regular-session figures from the Yahoo snapshot, widened by the live price, so High and Low never lag behind the Value. Open and range appear after 9:30am ET; before that they show a dash.</div>
   </div>
 
   <div class="panel">
@@ -927,15 +927,39 @@ document.getElementById('tbody').addEventListener('click', e => {
 // ---------------- live link to TradingView Desktop (your own computer) ----------------
 let lqKey = -1, lqDir = 1;
 let cycleMs = 0, LIVE = {}, liveTs = 0, ws = null, wsId = 0, pend = {}, liveOn = false, tvId = (location.hash || '').replace(/^#/, '').trim();
-const EXPR = `(async()=>{const T0=Date.now();const sleep=ms=>new Promise(r=>setTimeout(r,ms));const first=document.querySelector('[data-symbol-full]');if(!first)return{err:'no watchlist rows on screen: open the watchlist panel'};let sc=first.parentElement;while(sc&&!(sc.scrollHeight>sc.clientHeight+20&&/auto|scroll/.test(getComputedStyle(sc).overflowY)))sc=sc.parentElement;const lb=document.querySelector('[data-name="watchlists-button"]');const list=lb?lb.innerText.trim():'';if(list!=='BCC3')return{err:'the open watchlist is "'+list+'": select BCC3',list};const out={};const num=s=>{if(s==null)return null;s=s.replace(/[\\u2212\\u2013]/g,'-').replace(/[,\\s%]/g,'');const v=parseFloat(s);return isNaN(v)?null:v};const grab=()=>document.querySelectorAll('[data-symbol-full]').forEach(r=>{const c=r.querySelectorAll(':scope > span[class*="cell-"]');if(c.length<3)return;const vol=c[3]&&c[3].querySelector('[data-value]');out[r.getAttribute('data-symbol-full')]={last:num(c[0].textContent),chg:num(c[1].textContent),pct:num(c[2].textContent),vol:vol?+vol.getAttribute('data-value'):null,rt:!!r.querySelector('[title="Real-time"]')}});if(sc){const st=sc.scrollTop;sc.scrollTop=0;await sleep(20);grab();let g=0;while(g++<20&&sc.scrollTop+sc.clientHeight<sc.scrollHeight-2){sc.scrollTop+=sc.clientHeight*0.95;await sleep(20);grab()}sc.scrollTop=st}else grab();return{list,n:Object.keys(out).length,rows:out,ms:Date.now()-T0}})()`;
+const EXPR = `(async()=>{const T0=Date.now();const sleep=ms=>new Promise(r=>setTimeout(r,ms));const first=document.querySelector('[data-symbol-full]');if(!first)return{err:'no watchlist rows on screen: open the watchlist panel'};let sc=first.parentElement;while(sc&&!(sc.scrollHeight>sc.clientHeight+20&&/auto|scroll/.test(getComputedStyle(sc).overflowY)))sc=sc.parentElement;const lb=document.querySelector('[data-name="watchlists-button"]');const list=lb?lb.innerText.trim():'';if(list!=='BCC3')return{err:'the open watchlist is "'+list+'": select BCC3',list};const out={};const num=s=>{if(s==null)return null;s=s.replace(/[\\u2212\\u2013]/g,'-').replace(/[,\\s%]/g,'');const v=parseFloat(s);return isNaN(v)?null:v};const grab=()=>document.querySelectorAll('[data-symbol-full]').forEach(r=>{const c=r.querySelectorAll(':scope > span[class*="cell-"]');if(c.length<3)return;const vol=c[3]&&c[3].querySelector('[data-value]');const k=r.getAttribute('data-symbol-full'),v={last:num(c[0].textContent),chg:num(c[1].textContent),pct:num(c[2].textContent),vol:vol?+vol.getAttribute('data-value'):null,rt:!!r.querySelector('[title="Real-time"]')};if(v.last!=null||!out[k])out[k]=v});if(sc){const st=sc.scrollTop;sc.scrollTop=0;if(sc.scrollHeight>sc.clientHeight+20)await sleep(450);grab();let g=0;while(g++<40&&sc.scrollTop+sc.clientHeight<sc.scrollHeight-2){sc.scrollTop+=sc.clientHeight*0.95;await sleep(800);grab()}sc.scrollTop=st}else grab();return{list,n:Object.keys(out).length,rows:out,ms:Date.now()-T0}})()`;
+const MEASURE = `(()=>{const f=document.querySelector('[data-symbol-full]');if(!f)return null;let sc=f.parentElement;while(sc&&!(sc.scrollHeight>sc.clientHeight+20&&/auto|scroll/.test(getComputedStyle(sc).overflowY)))sc=sc.parentElement;const ws=[innerWidth,innerHeight];return sc?{over:sc.scrollHeight-sc.clientHeight,w:ws[0],h:ws[1]}:{over:0,w:ws[0],h:ws[1]}})()`;
 const OBS = `(()=>{try{if(window.__bccObs){window.__bccObs.disconnect()}const num=s=>{if(s==null)return null;s=s.replace(/[\\u2212\\u2013]/g,'-').replace(/[,\\s%]/g,'');const v=parseFloat(s);return isNaN(v)?null:v};const snap={};const rows=()=>{const out={};document.querySelectorAll('[data-symbol-full]').forEach(r=>{const c=r.querySelectorAll(':scope > span[class*="cell-"]');if(c.length<3)return;const vol=c[3]&&c[3].querySelector('[data-value]');out[r.getAttribute('data-symbol-full')]={last:num(c[0].textContent),chg:num(c[1].textContent),pct:num(c[2].textContent),vol:vol?+vol.getAttribute('data-value'):null,rt:!!r.querySelector('[title="Real-time"]')}});return out};let t=null;const flush=()=>{t=null;const cur=rows();const ch={};for(const k in cur){const a=cur[k],b=snap[k];if(!b||a.last!==b.last||a.chg!==b.chg||a.pct!==b.pct||a.vol!==b.vol){ch[k]=a;snap[k]=a}}if(Object.keys(ch).length&&window.bccPush)window.bccPush(JSON.stringify(ch))};const first=document.querySelector('[data-symbol-full]');if(!first)return 'no rows';let sc=first.parentElement;while(sc&&!(sc.scrollHeight>sc.clientHeight+20&&/auto|scroll/.test(getComputedStyle(sc).overflowY)))sc=sc.parentElement;const mo=new MutationObserver(()=>{if(!t)t=setTimeout(flush,60)});mo.observe(sc||document.body,{subtree:true,childList:true,characterData:true});window.__bccObs=mo;return 'observing'}catch(e){return 'err '+e}})()`;
 function liveStatus(cls, html) { const el = document.getElementById('live'); el.className = 'status' + (cls ? ' ' + cls : ''); el.innerHTML = html; }
-function cdp(method, params) { return new Promise((res, rej) => { const id = ++wsId; pend[id] = { res, rej }; ws.send(JSON.stringify({ id, method, params })); setTimeout(() => { if (pend[id]) { delete pend[id]; rej(new Error('timeout')); } }, 20000); }); }
+function cdp(method, params, tmo) { return new Promise((res, rej) => { const id = ++wsId; pend[id] = { res, rej }; ws.send(JSON.stringify({ id, method, params })); setTimeout(() => { if (pend[id]) { delete pend[id]; rej(new Error('timeout')); } }, tmo || 20000); }); }
+// TradingView only draws (and prices) the watchlist rows that fit on screen. Asking its window to be taller
+// (a DevTools display override, which this page undoes when you close or reload it) makes it draw all rows at once,
+// so every price can be read instantly and stays real-time, with no scrolling.
+let origDim = null;
+function restoreTV() { try { if (ws && ws.readyState === 1 && origDim) { ws.send(JSON.stringify({ id: ++wsId, method: 'Emulation.setDeviceMetricsOverride', params: { width: origDim.w, height: origDim.h, deviceScaleFactor: 0, mobile: false } })); ws.send(JSON.stringify({ id: ++wsId, method: 'Emulation.clearDeviceMetricsOverride', params: {} })); } } catch (e) {} }
+addEventListener('pagehide', restoreTV); addEventListener('beforeunload', restoreTV);
+async function ensureTall() {
+  try {
+    await cdp('Emulation.clearDeviceMetricsOverride', {}); await new Promise(r => setTimeout(r, 400));
+    let m = await cdp('Runtime.evaluate', { expression: MEASURE, returnByValue: true });
+    let v = m && m.result && m.result.value; if (!v) return;
+    origDim = { w: v.w, h: v.h };
+    let H = Math.min(16000, v.h + Math.max(0, v.over) + 120);
+    for (let i = 0; i < 3 && v && v.over > 20; i++) {
+      await cdp('Emulation.setDeviceMetricsOverride', { width: v.w, height: H, deviceScaleFactor: 0, mobile: false });
+      await new Promise(r => setTimeout(r, 1300));
+      m = await cdp('Runtime.evaluate', { expression: MEASURE, returnByValue: true });
+      v = m && m.result && m.result.value;
+      if (!v || v.over <= 20) break;
+      H = Math.min(16000, H + v.over + 120);
+    }
+  } catch (e) {}
+}
 function connect() {
   if (!tvId) { liveStatus('warn', 'No TradingView window id. Start TradingView with <code>Start TradingView Live.bat</code> (it opens this page with the id filled in).'); return; }
   liveStatus('warn', 'Connecting to TradingView on this computer&hellip;');
   try { ws = new WebSocket('ws://localhost:9222/devtools/page/' + tvId); } catch (e) { liveStatus('warn', 'Could not start the connection: ' + esc(e.message)); return; }
-  ws.onopen = async () => { liveOn = true; try { await cdp('Runtime.addBinding', { name: 'bccPush' }); await cdp('Runtime.evaluate', { expression: OBS, returnByValue: true }); } catch (e) {} poll(); };
+  ws.onopen = async () => { liveOn = true; try { await cdp('Runtime.addBinding', { name: 'bccPush' }); await ensureTall(); await cdp('Runtime.evaluate', { expression: OBS, returnByValue: true }); } catch (e) {} poll(); };
   ws.onmessage = e => { const m = JSON.parse(e.data); if (m.method === 'Runtime.bindingCalled' && m.params && m.params.name === 'bccPush') { onPush(m.params.payload); return; } const p = pend[m.id]; if (p) { delete pend[m.id]; m.error ? p.rej(new Error(m.error.message)) : p.res(m.result); } };
   ws.onclose = () => { liveOn = false; liveStatus('warn', 'Connection to TradingView closed. Start TradingView with <code>Start TradingView Live.bat</code> again, or <a href="#" id="retry">retry</a>. Showing the last Yahoo snapshot.'); const rt = document.getElementById('retry'); if (rt) rt.onclick = ev => { ev.preventDefault(); connect(); }; applyLive(false); };
   ws.onerror = () => {};
@@ -951,7 +975,7 @@ let polling = false;
 async function poll() {
   if (polling || !liveOn) return; polling = true;
   try {
-    const r = await cdp('Runtime.evaluate', { expression: EXPR, awaitPromise: true, returnByValue: true });
+    const r = await cdp('Runtime.evaluate', { expression: EXPR, awaitPromise: true, returnByValue: true }, 90000);
     const v = r && r.result && r.result.value;
     if (!v) throw new Error('no value');
     if (v.err) { liveStatus('warn', 'TradingView says: ' + esc(v.err) + '. Showing the last Yahoo snapshot.'); applyLive(false); }
