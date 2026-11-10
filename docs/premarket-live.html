@@ -85,7 +85,7 @@
   </div>
 
   <div class="panel" id="wmlPanel">
-    <h2>Wicked Market Leaders &mdash; levels vs live price <span class="sub" style="font-weight:400">&mdash; Hardware Expansion sheet + Cheat Sheet v8, week of 9 Nov 2026</span> <span id="wmlLive" class="tag post">checking&hellip;</span></h2>
+    <h2>Wicked Market Leaders &mdash; levels vs live price <span class="sub" style="font-weight:400">&mdash; both cheat sheets combined, A to Z, week of 9 Nov 2026</span> <span id="wmlLive" class="tag post">checking&hellip;</span></h2>
     <div class="scroll"><table id="wml"><thead><tr><th>Ticker</th><th>Sheet stance</th><th>Sheet price</th><th>Live price</th><th>Signal</th><th>Support / bottom targets</th><th>Pivot / validation</th><th>Price vs pivot</th><th>Upside objectives</th></tr></thead><tbody id="wmlBody"><tr><td colspan="9" class="empty">Loading&hellip;</td></tr></tbody></table></div>
     <div class="note" style="margin-top:8px"><strong>How the signal is decided</strong> (live TradingView price; if you are not connected the cell says so and falls back to the Yahoo snapshot or last close): <span class="sig sell">SELL</span> price is below the support floor (or below the deeper floor); <span class="sig sup">AT SUPPORT</span> price is inside a support range; <span class="sig wait">WAIT</span> above support but under the pivot; <span class="sig buy">BUY</span> price is at or above the pivot; <span class="sig tp">TARGET 1 / 2 HIT</span> price has reached an upside objective that sits above the pivot. &ldquo;Price vs pivot&rdquo; is in dollars (green = above, red = below). For a single support level there is no range, so price at or below it reads SELL only once it is under the level. On bearish names the sheet&rsquo;s &ldquo;support&rdquo; is really its bearish target. Each level shows the sheet&rsquo;s own remark beside it. Where a sheet gives two pivots (AMZN 255.36 / 257.86) or a range (AVGO 391.66 &ndash; 409.81), the BUY signal uses the higher number. Upside objectives that sit at or below the pivot are shown but not used for the signal. The sheet says a spike does not count: confirm with a daily or weekly close beyond the level, as its condition says, before acting. These are the sheets&rsquo; levels, not advice.</div>
   </div>
@@ -692,8 +692,10 @@ function renderWml() {
   const body = document.getElementById('wmlBody'); if (!body) return;
   const st = document.getElementById('live'), lv = document.getElementById('wmlLive');
   if (lv) { const on = !!(st && /LIVE from your TradingView/.test(st.textContent || '')); lv.textContent = on ? 'live from TradingView' : 'not connected: prices below are not live'; lv.className = 'tag ' + (on ? 'regular' : 'post'); }
-  body.innerHTML = WML.map(w => {
-    if (w.g) return '<tr class="wgh"><td colspan="9">' + esc(w.g) + '</td></tr>';
+  let grp = ''; const list = [];
+  WML.forEach(w => { if (w.g) { grp = w.g; return; } list.push(Object.assign({ grp }, w)); });
+  list.sort((a, b) => a.s.localeCompare(b.s));
+  body.innerHTML = list.map(w => {
     const { p, src } = wmlPrice(w.s);
     const tag = src === 'live' ? '<span class="tag regular">live</span>' : src === 'lastlive' ? '<span class="tag post">last live tick, disconnected</span>' : src === 'snap' ? '<span class="tag post">Yahoo snapshot</span>' : src === 'close' ? '<span class="tag post">last close</span>' : '';
     const supLo = w.sup[0], supHi = w.sup[w.sup.length - 1];
@@ -711,7 +713,8 @@ function renderWml() {
     const dv = p == null ? '<span class="mut">&mdash;</span>' : '<span class="' + (p >= w.piv ? 'up' : 'down') + '">' + sgn(p - w.piv) + '</span>';
     const R = WMLR[w.s] || { S: [], P: [], U: [] };
     const lv = list => list.map(x => '<div class="lvl">' + (x[0] ? '<b>' + esc(x[0]) + '</b>' : '') + (x[1] ? '<span class="rm">' + esc(x[1]) + '</span>' : '') + '</div>').join('');
-    return '<tr><td>' + esc(w.s) + '</td><td class="mut">' + esc(w.stance) + '</td><td class="mut">' + usd(w.px) + '</td><td>' + (p == null ? '<span class="mut">&mdash;</span>' : usd(p)) + tag + '</td><td><span class="sig ' + cls + '">' + sig + '</span></td>' +
+    const srcTag = /^Hardware/.test(w.grp) ? '<span class="tag post" title="Hardware Expansion sheet">Hardware</span>' : '<span class="tag post" title="Cheat Sheet v8">v8</span>';
+    return '<tr><td>' + esc(w.s) + srcTag + '</td><td class="mut">' + esc(w.stance) + '</td><td class="mut">' + usd(w.px) + '</td><td>' + (p == null ? '<span class="mut">&mdash;</span>' : usd(p)) + tag + '</td><td><span class="sig ' + cls + '">' + sig + '</span></td>' +
       '<td class="lvc">' + lv(R.S) + '</td><td class="lvc">' + lv(R.P) + '</td><td>' + dv + '</td><td class="lvc">' + lv(R.U) + '</td></tr>';
   }).join('');
 }
