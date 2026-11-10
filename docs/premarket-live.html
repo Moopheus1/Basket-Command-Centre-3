@@ -47,8 +47,14 @@
   .sig.sell { background: #4a1f21; color: #ff8a87; } .sig.buy { background: #123b35; color: #7fdccf; } .sig.sup { background: #3a2e12; color: #f6c66a; }
   .sig.wait { background: #2a2e39; color: #b2b5be; } .sig.tp { background: #14304a; color: #8ec5ff; }
   #wml td, #wml th { text-align: right; } #wml td:first-child, #wml th:first-child { text-align: left; }
+  #wml td { vertical-align: top; }
+  #wml td.lvc { white-space: normal; min-width: 220px; max-width: 320px; text-align: left; }
+  #wml th:nth-child(6), #wml th:nth-child(7), #wml th:nth-child(9) { text-align: left; }
+  #wml .lvl { margin-bottom: 5px; line-height: 1.3; }
+  #wml .lvl:last-child { margin-bottom: 0; }
+  #wml .lvl b { color: #e6e9f0; font-weight: 600; margin-right: 6px; }
+  #wml .lvl .rm { color: var(--mut); font-size: 12px; }
   #wml td.cond { white-space: normal; min-width: 300px; text-align: left; color: var(--mut); font-size: 12.5px; }
-  #wml th:last-child { text-align: left; }
   #wml tr.wgh td { background: #1a2229; color: #fff; font-weight: 700; font-size: 12.5px; text-align: left; padding: 8px 10px; position: static; }
   #wml td.lv { color: #aab1bd; font-size: 13px; }
   .lqg .gh td { background: #1a2229; color: #fff; font-weight: 700; font-size: 12.5px; letter-spacing: .02em; padding: 9px 12px; }
@@ -80,8 +86,8 @@
 
   <div class="panel" id="wmlPanel">
     <h2>Wicked Market Leaders &mdash; levels vs live price <span class="sub" style="font-weight:400">&mdash; Hardware Expansion sheet + Cheat Sheet v8, week of 9 Nov 2026</span> <span id="wmlLive" class="tag post">checking&hellip;</span></h2>
-    <div class="scroll"><table id="wml"><thead><tr><th>Ticker</th><th>Sheet stance</th><th>Sheet price</th><th>Live price</th><th>Signal</th><th>Support floor</th><th>Deeper floor</th><th>Pivot</th><th>Price vs pivot</th><th>Upside objectives</th><th>Sheet condition</th></tr></thead><tbody id="wmlBody"><tr><td colspan="11" class="empty">Loading&hellip;</td></tr></tbody></table></div>
-    <div class="note" style="margin-top:8px"><strong>How the signal is decided</strong> (live TradingView price; if you are not connected the cell says so and falls back to the Yahoo snapshot or last close): <span class="sig sell">SELL</span> price is below the support floor (or below the deeper floor); <span class="sig sup">AT SUPPORT</span> price is inside a support range; <span class="sig wait">WAIT</span> above support but under the pivot; <span class="sig buy">BUY</span> price is at or above the pivot; <span class="sig tp">TARGET 1 / 2 HIT</span> price has reached an upside objective that sits above the pivot. &ldquo;Price vs pivot&rdquo; is in dollars (green = above, red = below). For a single support level there is no range, so price at or below it reads SELL only once it is under the level. On bearish names the sheet&rsquo;s &ldquo;support&rdquo; is really its bearish target. Upside objectives that sit at or below the pivot are shown but not used for the signal. The sheet says a spike does not count: confirm with a daily or weekly close beyond the level, as its condition says, before acting. These are the sheets&rsquo; levels, not advice. MU&rsquo;s 106.97&ndash;112.94 band on v8 is far below its price and looks like a typo, so it is ignored.</div>
+    <div class="scroll"><table id="wml"><thead><tr><th>Ticker</th><th>Sheet stance</th><th>Sheet price</th><th>Live price</th><th>Signal</th><th>Support / bottom targets</th><th>Pivot / validation</th><th>Price vs pivot</th><th>Upside objectives</th></tr></thead><tbody id="wmlBody"><tr><td colspan="9" class="empty">Loading&hellip;</td></tr></tbody></table></div>
+    <div class="note" style="margin-top:8px"><strong>How the signal is decided</strong> (live TradingView price; if you are not connected the cell says so and falls back to the Yahoo snapshot or last close): <span class="sig sell">SELL</span> price is below the support floor (or below the deeper floor); <span class="sig sup">AT SUPPORT</span> price is inside a support range; <span class="sig wait">WAIT</span> above support but under the pivot; <span class="sig buy">BUY</span> price is at or above the pivot; <span class="sig tp">TARGET 1 / 2 HIT</span> price has reached an upside objective that sits above the pivot. &ldquo;Price vs pivot&rdquo; is in dollars (green = above, red = below). For a single support level there is no range, so price at or below it reads SELL only once it is under the level. On bearish names the sheet&rsquo;s &ldquo;support&rdquo; is really its bearish target. Each level shows the sheet&rsquo;s own remark beside it. Where a sheet gives two pivots (AMZN 255.36 / 257.86) or a range (AVGO 391.66 &ndash; 409.81), the BUY signal uses the higher number. Upside objectives that sit at or below the pivot are shown but not used for the signal. The sheet says a spike does not count: confirm with a daily or weekly close beyond the level, as its condition says, before acting. These are the sheets&rsquo; levels, not advice.</div>
   </div>
 
   <div class="bar">
@@ -205,26 +211,476 @@ function renderQuotes() {
 }
 const WML = [
   { g: 'Hardware Expansion sheet' },
-  { s: 'AAPL', stance: 'Resilient',     px: 342.37, sup: [325.81, 331.90], deep: null,   piv: 347.74, ups: [[354.51], [380.00, 400.00]], cond: 'Needs a daily close above 347.74 to exit the base' },
-  { s: 'NVDA', stance: 'Bearish Break', px: 186.64, sup: [176.00, 181.60], deep: [155.00], piv: 202.06, ups: [[224.50], [239.00]], cond: 'Must reclaim 202.06 to neutralize the correction trap' },
-  { s: 'TSLA', stance: 'Testing Floor', px: 358.22, sup: [341.42, 343.69], deep: [312.00], piv: 358.50, ups: [[388.00], [415.00]], cond: 'Above 358.50 signals bear exhaustion' },
-  { s: 'SOXL', stance: 'Violent Flush', px: 45.97,  sup: [40.59, 43.40],   deep: [28.12],  piv: 57.84,  ups: [[70.23, 77.05], [102.39]], cond: 'Must break above 57.84 to invalidate the post-election decay' },
-  { s: 'STX',  stance: 'Active Sell',   px: 460.99, sup: [380.00, 395.00], deep: null,   piv: 450.00, ups: [[505.00], [538.00]], cond: '450.00 is the line in the sand; it must clear to void shorts (sheet price is already above it)' },
-  { s: 'WDC',  stance: 'Active Sell',   px: 263.78, sup: [215.00, 228.00], deep: null,   piv: 265.00, ups: [[287.00], [322.00]], cond: '265.00 is heavily defended by trend bears' },
+  { s: 'AAPL', stance: 'Resilient',     px: 342.37, sup: [325.81, 331.90], deep: null, piv: 347.74, ups: [[354.51], [380.00, 400.00]] },
+  { s: 'NVDA', stance: 'Bearish Break', px: 186.64, sup: [176.00, 181.60], deep: [155.00], piv: 202.06, ups: [[224.50], [239.00]] },
+  { s: 'TSLA', stance: 'Testing Floor', px: 358.22, sup: [341.42, 343.69], deep: [312.00], piv: 358.50, ups: [[388.00], [415.00]] },
+  { s: 'SOXL', stance: 'Violent Flush', px: 45.97,  sup: [40.59, 43.40],   deep: [28.12],  piv: 57.84,  ups: [[70.23, 77.05], [102.39]] },
+  { s: 'STX',  stance: 'Active Sell',   px: 460.99, sup: [380.00, 395.00], deep: null, piv: 450.00, ups: [[505.00], [538.00]] },
+  { s: 'WDC',  stance: 'Active Sell',   px: 263.78, sup: [215.00, 228.00], deep: null, piv: 265.00, ups: [[287.00], [322.00]] },
 
   { g: 'Cheat Sheet v8' },
-  { s: 'MSFT', stance: 'Bullish',          px: 530.61, sup: [520.32], deep: null, piv: 535.07, ups: [[603.52]], cond: 'Weekly close below 520.32 flips bearish; 535.07 is the weekly high settlement' },
-  { s: 'META', stance: 'Bearish',          px: 610.15, sup: [510.91, 535.07], deep: null, piv: 698.57, ups: [[840.26], [944.56]], cond: 'Settlement back above 698.57 invalidates bears; 510.91 - 535.07 is a long-term buy zone' },
-  { s: 'MU',   stance: 'Bearish',          px: 690.00, sup: [580.38], deep: [311.49], piv: 737.88, ups: [[881.11]], cond: 'Daily close above 737.88 signals a low; close above 881.11 triggers a buy; 580.38 is the cover-shorts / buy floor' },
-  { s: 'SPCX', stance: 'Bearish',          px: 134.27, sup: [104.38], deep: null, piv: 145.91, ups: [[145.91], [182.39]], cond: 'Weekly settlement above 145.91 forces a full reversal; 104.38 is a 4-5 month floor, in play over the next 3-5 weeks' },
-  { s: 'GOOGL', stance: 'Neutral Floor',   px: 284.78, sup: [279.80], deep: [250.59], piv: 305.17, ups: [[305.17], [348.55]], cond: 'Close above 305.17 shifts to macro buy; weekly close below 279.80 opens the path to 250.59' },
-  { s: 'AMZN', stance: 'Constructive',     px: 259.30, sup: [236.13], deep: null, piv: 257.86, pivTxt: '$255.36 / $257.86', ups: [[290.65], [304.97]], cond: 'Opening Monday above 257.86 confirms strength; 255.36 and 257.86 are the immediate break levels' },
-  { s: 'TSM',  stance: 'Active Sell',      px: 375.44, sup: [288.19], deep: null, piv: 381.80, ups: [[381.88], [463.98, 479.98]], cond: 'Weekly settlement above 381.80 voids the short play; 288.19 is the year-end bear objective' },
-  { s: 'PLTR', stance: 'Testing Floor',    px: 160.38, sup: [152.12], deep: [108.58], piv: 184.45, ups: [[187.55], [253.29]], cond: 'Close above 184.45 locks in the November low; settlement above 209.58 triggers a macro run' },
-  { s: 'INTC', stance: 'Bearish',          px: 56.28,  sup: [42.03], deep: null, piv: 65.72, ups: [[51.28], [63.15], [111.32]], cond: 'Weekly settlement above 65.72 forms an aggressive up-pivot; 51.28 / 63.15 are descending breakdown zones; 42.03 is the late-November target' },
-  { s: 'AVGO', stance: 'Bearish Trend',    px: 293.69, sup: [277.47], deep: [231.34, 251.88], piv: 409.81, pivTxt: '$391.66 - $409.81', ups: [[391.66], [409.81]], cond: 'Reclaiming 391.66 - 409.81 clears the bear thesis; 409.81 is the Q1 long-entry trigger' },
-  { s: 'AMD',  stance: 'Violent Break',    px: 449.04, sup: [361.52], deep: null, piv: 493.21, ups: [[484.73], [650.69]], cond: 'Weekly close above 493.21 triggers a short-squeeze buy; 361.52 is the primary buying window, targeted for late November' }
+  { s: 'MSFT', stance: 'Bullish',          px: 530.61, sup: [520.32], deep: null, piv: 535.07, ups: [[603.52]] },
+  { s: 'META', stance: 'Bearish',          px: 610.15, sup: [510.91, 535.07], deep: null, piv: 698.57, ups: [[840.26], [944.56]] },
+  { s: 'MU',   stance: 'Bearish',          px: 690.00, sup: [580.38], deep: [311.49], piv: 737.88, ups: [[881.11]] },
+  { s: 'SPCX', stance: 'Bearish',          px: 134.27, sup: [104.38], deep: null, piv: 145.91, ups: [[145.91], [182.39]] },
+  { s: 'GOOGL', stance: 'Neutral Floor',   px: 284.78, sup: [279.80], deep: [250.59], piv: 305.17, ups: [[305.17], [348.55]] },
+  { s: 'AMZN', stance: 'Constructive',     px: 259.30, sup: [236.13], deep: null, piv: 257.86, ups: [[290.65], [304.97]] },
+  { s: 'TSM',  stance: 'Active Sell',      px: 375.44, sup: [288.19], deep: null, piv: 381.80, ups: [[381.88], [463.98, 479.98]] },
+  { s: 'PLTR', stance: 'Testing Floor',    px: 160.38, sup: [152.12], deep: [108.58], piv: 184.45, ups: [[187.55], [253.29]] },
+  { s: 'INTC', stance: 'Bearish',          px: 56.28,  sup: [42.03], deep: null, piv: 65.72, ups: [[51.28], [63.15], [111.32]] },
+  { s: 'AVGO', stance: 'Bearish Trend',    px: 293.69, sup: [277.47], deep: [231.34, 251.88], piv: 409.81, ups: [[391.66], [409.81]] },
+  { s: 'AMD',  stance: 'Violent Break',    px: 449.04, sup: [361.52], deep: null, piv: 493.21, ups: [[484.73], [650.69]] }
 ];
+const WMLR = {
+ "AAPL": {
+  "S": [
+   [
+    "$325.81 – $331.90",
+    "Real-world defensives"
+   ],
+   [
+    "",
+    "Retesting the key 1-month horizontal base floor"
+   ]
+  ],
+  "P": [
+   [
+    "$347.74",
+    "Needs daily close footprint above to exit base"
+   ]
+  ],
+  "U": [
+   [
+    "$354.51",
+    "Consolidation ceiling"
+   ],
+   [
+    "$380.00 – $400.00",
+    "Long-term targets"
+   ]
+  ]
+ },
+ "NVDA": {
+  "S": [
+   [
+    "$176.00 – $181.60",
+    "Testing massive capitulation limits"
+   ],
+   [
+    "$155.00",
+    "Next deep macro trap door opens down to here"
+   ]
+  ],
+  "P": [
+   [
+    "$202.06",
+    "Must reclaim to neutralize the core correction trap"
+   ]
+  ],
+  "U": [
+   [
+    "$224.50",
+    "Near-term relief wave"
+   ],
+   [
+    "$239.00",
+    "Prior record highs block"
+   ]
+  ]
+ },
+ "TSLA": {
+  "S": [
+   [
+    "$341.42 – $343.69",
+    "Immediate cushion"
+   ],
+   [
+    "$312.00",
+    "Failure exposes the deeper long-term backstop"
+   ]
+  ],
+  "P": [
+   [
+    "$358.50",
+    "Overhead validation barrier to signal bear exhaustion"
+   ]
+  ],
+  "U": [
+   [
+    "$388.00",
+    "Near-term recovery line"
+   ],
+   [
+    "$415.00",
+    "Structural target range"
+   ]
+  ]
+ },
+ "SOXL": {
+  "S": [
+   [
+    "$40.59 – $43.40",
+    "3x Leverage Index support"
+   ],
+   [
+    "$28.12",
+    "Below this, risk opens down to the macro base"
+   ]
+  ],
+  "P": [
+   [
+    "$57.84",
+    "Must break above to invalidate the sharp post-election decay"
+   ]
+  ],
+  "U": [
+   [
+    "$70.23 – $77.05",
+    "Gap fill target zone"
+   ],
+   [
+    "$102.39",
+    "Structural short squeeze target"
+   ]
+  ]
+ },
+ "STX": {
+  "S": [
+   [
+    "$380.00 – $395.00",
+    "Multi-month channel support floor breached"
+   ]
+  ],
+  "P": [
+   [
+    "$450.00",
+    "Crucial line in the sand; ceiling must clear to void shorts"
+   ]
+  ],
+  "U": [
+   [
+    "$505.00",
+    "Immediate recovery limit"
+   ],
+   [
+    "$538.00",
+    "Heavy resistance band"
+   ]
+  ]
+ },
+ "WDC": {
+  "S": [
+   [
+    "$215.00 – $228.00",
+    "Core enterprise memory correction floor"
+   ]
+  ],
+  "P": [
+   [
+    "$265.00",
+    "Macro barrier level being heavily defended by trend bears"
+   ]
+  ],
+  "U": [
+   [
+    "$287.00",
+    "Near-term short cover run"
+   ],
+   [
+    "$322.00",
+    "Structural Q1 2027 objective"
+   ]
+  ]
+ },
+ "MSFT": {
+  "S": [
+   [
+    "$520.32",
+    "Channel Bottom holds above this; weekly close below flips bearish"
+   ]
+  ],
+  "P": [
+   [
+    "$535.07",
+    "Weekly High Settlement"
+   ]
+  ],
+  "U": [
+   [
+    "$603.52",
+    "Year-end channel target"
+   ]
+  ]
+ },
+ "META": {
+  "S": [
+   [
+    "$510.91 – $535.07",
+    "Long-term support (Solid buy zone)"
+   ]
+  ],
+  "P": [
+   [
+    "$698.57",
+    "Settlement back above invalidates bears"
+   ]
+  ],
+  "U": [
+   [
+    "$840.26",
+    "Channel top / New ATH"
+   ],
+   [
+    "$944.56",
+    "1-3 month secondary target"
+   ]
+  ]
+ },
+ "MU": {
+  "S": [
+   [
+    "$580.38",
+    "Core target (Cover shorts / buy floor)"
+   ],
+   [
+    "$311.49",
+    "Macro capitulation"
+   ]
+  ],
+  "P": [
+   [
+    "$737.88",
+    "Needs daily close above to signal low"
+   ],
+   [
+    "$881.11",
+    "Close above triggers buy"
+   ]
+  ],
+  "U": [
+   [
+    "$881.11",
+    "38% Upside Fibonacci"
+   ],
+   [
+    "$106.97 – $112.94",
+    "Significant resistance band (as printed on the sheet; far below the price, likely a typo)"
+   ]
+  ]
+ },
+ "SPCX": {
+  "S": [
+   [
+    "$104.38",
+    "4-5 month structural floor (In play next 3-5 weeks)"
+   ]
+  ],
+  "P": [
+   [
+    "$145.91",
+    "Weekly settlement above forces a full reversal"
+   ]
+  ],
+  "U": [
+   [
+    "$145.91",
+    "Active cap resistance"
+   ],
+   [
+    "$182.39",
+    "Target through Dec if pivot breaks"
+   ]
+  ]
+ },
+ "GOOGL": {
+  "S": [
+   [
+    "$279.80",
+    "Active channel floor; weekly close below opens path to $250.59"
+   ],
+   [
+    "$250.59",
+    "Macro 3-year rising channel top"
+   ]
+  ],
+  "P": [
+   [
+    "$305.17",
+    "Close above shifts to macro buy"
+   ]
+  ],
+  "U": [
+   [
+    "$305.17",
+    "Short-term swing pivot"
+   ],
+   [
+    "$348.55",
+    "Descending channel top target"
+   ]
+  ]
+ },
+ "AMZN": {
+  "S": [
+   [
+    "$236.13",
+    "Strong support floor (Defines structural bull trend)"
+   ]
+  ],
+  "P": [
+   [
+    "$255.36 / $257.86",
+    "Immediate break levels; opening Monday above $257.86 confirms structural strength"
+   ]
+  ],
+  "U": [
+   [
+    "$290.65",
+    "Near-term"
+   ],
+   [
+    "$304.97",
+    "Macro 3-year top"
+   ]
+  ]
+ },
+ "TSM": {
+  "S": [
+   [
+    "$288.19",
+    "Year-end bear objective (Violated channel structures)"
+   ]
+  ],
+  "P": [
+   [
+    "$381.80",
+    "Requires weekly settlement above to void short play"
+   ]
+  ],
+  "U": [
+   [
+    "$381.88",
+    "Immediate recovery ceiling"
+   ],
+   [
+    "$463.98",
+    "Rising floor"
+   ],
+   [
+    "$479.98",
+    "Target zone"
+   ]
+  ]
+ },
+ "PLTR": {
+  "S": [
+   [
+    "$152.12",
+    "Active support floor"
+   ],
+   [
+    "$108.58",
+    "Long-term structural backstop"
+   ]
+  ],
+  "P": [
+   [
+    "$184.45",
+    "Close above locks November low"
+   ],
+   [
+    "$209.58",
+    "Settlement above triggers macro run"
+   ]
+  ],
+  "U": [
+   [
+    "$187.55",
+    "Immediate test high"
+   ],
+   [
+    "$253.29",
+    "1-2 month upper target"
+   ]
+  ]
+ },
+ "INTC": {
+  "S": [
+   [
+    "$42.03",
+    "Long-term monthly channel target (Late Nov expectation)"
+   ]
+  ],
+  "P": [
+   [
+    "$65.72",
+    "Weekly settlement above forms an aggressive up-pivot"
+   ]
+  ],
+  "U": [
+   [
+    "$51.28 / $63.15",
+    "Descending breakdown zones"
+   ],
+   [
+    "$111.32",
+    "Macro flag break - potential double"
+   ]
+  ]
+ },
+ "AVGO": {
+  "S": [
+   [
+    "$277.47",
+    "2-3 week swing floor"
+   ],
+   [
+    "$231.34 – $251.88",
+    "Core multi-month target"
+   ]
+  ],
+  "P": [
+   [
+    "$391.66 – $409.81",
+    "Structural reclaim area to clear bear thesis"
+   ]
+  ],
+  "U": [
+   [
+    "$391.66",
+    "Long-term broken channel bottom"
+   ],
+   [
+    "$409.81",
+    "Q1 long entry confirmation trigger"
+   ]
+  ]
+ },
+ "AMD": {
+  "S": [
+   [
+    "$361.52",
+    "Primary buying window (Targeted by late November)"
+   ]
+  ],
+  "P": [
+   [
+    "$493.21",
+    "Weekly close above triggers a short-squeeze buy"
+   ]
+  ],
+  "U": [
+   [
+    "$484.73",
+    "Prior peak objective"
+   ],
+   [
+    "$650.69",
+    "Macro range boundaries / peak targets"
+   ]
+  ]
+ }
+};
 function wmlPrice(sym) {
   const L = LIVE[sym]; if (L && L.last != null) return { p: L.last, src: liveOn ? 'live' : 'lastlive' };
   const P = PM && PM.tickers && PM.tickers[sym]; if (P && !P.error && P.price != null) return { p: P.price, src: 'snap' };
@@ -237,7 +693,7 @@ function renderWml() {
   const st = document.getElementById('live'), lv = document.getElementById('wmlLive');
   if (lv) { const on = !!(st && /LIVE from your TradingView/.test(st.textContent || '')); lv.textContent = on ? 'live from TradingView' : 'not connected: prices below are not live'; lv.className = 'tag ' + (on ? 'regular' : 'post'); }
   body.innerHTML = WML.map(w => {
-    if (w.g) return '<tr class="wgh"><td colspan="11">' + esc(w.g) + '</td></tr>';
+    if (w.g) return '<tr class="wgh"><td colspan="9">' + esc(w.g) + '</td></tr>';
     const { p, src } = wmlPrice(w.s);
     const tag = src === 'live' ? '<span class="tag regular">live</span>' : src === 'lastlive' ? '<span class="tag post">last live tick, disconnected</span>' : src === 'snap' ? '<span class="tag post">Yahoo snapshot</span>' : src === 'close' ? '<span class="tag post">last close</span>' : '';
     const supLo = w.sup[0], supHi = w.sup[w.sup.length - 1];
@@ -253,9 +709,10 @@ function renderWml() {
     else if (ups.length < 2 || p < ups[1][0]) { sig = 'TARGET 1 HIT'; cls = 'tp'; }
     else { sig = 'TARGET 2 HIT'; cls = 'tp'; }
     const dv = p == null ? '<span class="mut">&mdash;</span>' : '<span class="' + (p >= w.piv ? 'up' : 'down') + '">' + sgn(p - w.piv) + '</span>';
+    const R = WMLR[w.s] || { S: [], P: [], U: [] };
+    const lv = list => list.map(x => '<div class="lvl">' + (x[0] ? '<b>' + esc(x[0]) + '</b>' : '') + (x[1] ? '<span class="rm">' + esc(x[1]) + '</span>' : '') + '</div>').join('');
     return '<tr><td>' + esc(w.s) + '</td><td class="mut">' + esc(w.stance) + '</td><td class="mut">' + usd(w.px) + '</td><td>' + (p == null ? '<span class="mut">&mdash;</span>' : usd(p)) + tag + '</td><td><span class="sig ' + cls + '">' + sig + '</span></td>' +
-      '<td class="lv">' + wmlRange(w.sup) + '</td><td class="lv">' + (w.deep ? wmlRange(w.deep) : '<span class="mut">&mdash;</span>') + '</td><td class="lv">' + (w.pivTxt ? w.pivTxt.replace(/ - /g, ' &ndash; ') : usd(w.piv)) + '</td><td>' + dv + '</td>' +
-      '<td class="lv">' + w.ups.map(wmlRange).join(' &middot; ') + '</td><td class="cond">' + esc(w.cond) + '</td></tr>';
+      '<td class="lvc">' + lv(R.S) + '</td><td class="lvc">' + lv(R.P) + '</td><td>' + dv + '</td><td class="lvc">' + lv(R.U) + '</td></tr>';
   }).join('');
 }
 document.addEventListener('click', e => {
