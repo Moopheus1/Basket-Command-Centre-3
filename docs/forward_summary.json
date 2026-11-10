@@ -1,30 +1,30 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-10T21:13:19.252Z",
- "logged_rows": 327,
- "logged_days": 32,
- "scored_signals": 50,
+ "updated": "2026-11-10T21:23:22.091Z",
+ "logged_rows": 329,
+ "logged_days": 33,
+ "scored_signals": 53,
  "success_test": "TAKE hit rate >= random + 10 points AND TAKE average return > random (random scored with the same 2.0x target), on >= 20 scored TAKEs",
  "verdict": "NOT ENOUGH DATA YET — need 20+ scored TAKE signals",
  "random_baseline": {
-  "n": 1309,
-  "hit_rate": 0.393,
-  "avg_return": -0.131,
-  "median_dip": -0.1923,
-  "bad_case_dip": -0.331
+  "n": 1428,
+  "hit_rate": 0.387,
+  "avg_return": -0.1307,
+  "median_dip": -0.1959,
+  "bad_case_dip": -0.3341
  },
  "random_baseline_2x": {
-  "n": 1309,
-  "hit_rate": 0.316,
-  "avg_return": -0.1401,
-  "median_dip": -0.2042,
-  "bad_case_dip": -0.3354
+  "n": 1428,
+  "hit_rate": 0.31,
+  "avg_return": -0.1394,
+  "median_dip": -0.2073,
+  "bad_case_dip": -0.3382
  },
  "all_signals": {
-  "n": 50,
-  "hit_rate": 0.64,
-  "avg_return": -0.0384,
-  "median_dip": -0.0517,
+  "n": 53,
+  "hit_rate": 0.623,
+  "avg_return": -0.042,
+  "median_dip": -0.0576,
   "bad_case_dip": -0.2003
  },
  "take": {
@@ -36,9 +36,9 @@
  },
  "by_n_panels": {
   "1 panel": {
-   "n": 49,
-   "hit_rate": 0.633,
-   "avg_return": -0.0409,
+   "n": 52,
+   "hit_rate": 0.615,
+   "avg_return": -0.0444,
    "median_dip": -0.0517,
    "bad_case_dip": -0.2003
   },
@@ -52,9 +52,9 @@
  },
  "by_size": {
   "FULL": {
-   "n": 45,
-   "hit_rate": 0.622,
-   "avg_return": -0.0433,
+   "n": 48,
+   "hit_rate": 0.604,
+   "avg_return": -0.0469,
    "median_dip": -0.0517,
    "bad_case_dip": -0.2003
   },
@@ -75,9 +75,9 @@
  },
  "by_panel": {
   "Weekly Pick": {
-   "n": 17,
-   "hit_rate": 0.529,
-   "avg_return": -0.0982,
+   "n": 20,
+   "hit_rate": 0.5,
+   "avg_return": -0.0986,
    "median_dip": -0.0927,
    "bad_case_dip": -0.3153
   },
@@ -112,10 +112,10 @@
  },
  "by_qqq_above_50d": {
   "QQQ above 50d": {
-   "n": 50,
-   "hit_rate": 0.64,
-   "avg_return": -0.0384,
-   "median_dip": -0.0517,
+   "n": 53,
+   "hit_rate": 0.623,
+   "avg_return": -0.042,
+   "median_dip": -0.0576,
    "bad_case_dip": -0.2003
   }
  },
@@ -128,11 +128,11 @@
    "bad_case_dip": -0.1538
   },
   "breadth <= 50%": {
-   "n": 8,
-   "hit_rate": 0.375,
-   "avg_return": -0.1284,
-   "median_dip": -0.182,
-   "bad_case_dip": -0.3088
+   "n": 11,
+   "hit_rate": 0.364,
+   "avg_return": -0.1209,
+   "median_dip": -0.1919,
+   "bad_case_dip": -0.4013
   }
  }
 }
