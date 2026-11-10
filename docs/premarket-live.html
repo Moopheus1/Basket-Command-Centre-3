@@ -166,6 +166,7 @@ async function load() {
   TVSYM = TVSYM || {};
   if (!DATA || !DATA.tickers) { document.getElementById('status').textContent = 'data.json could not be loaded.'; return; }
   build();
+  try { renderWml(); } catch (e) {}
 }
 
 const FUT = [['YM1!', 'USA 30 (Dow)'], ['ES1!', 'USA 500 (S&P)'], ['NQ1!', 'US Tech 100 (Nasdaq)'], ['RTY1!', 'Small Cap 2000 (Russell)']];
