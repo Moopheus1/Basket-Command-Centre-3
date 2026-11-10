@@ -47,6 +47,9 @@
   .sig.sell { background: #4a1f21; color: #ff8a87; } .sig.buy { background: #123b35; color: #7fdccf; } .sig.sup { background: #3a2e12; color: #f6c66a; }
   .sig.wait { background: #2a2e39; color: #b2b5be; } .sig.tp { background: #14304a; color: #8ec5ff; }
   #wml td, #wml th { text-align: right; } #wml td:first-child, #wml th:first-child { text-align: left; }
+  #wml td.cond { white-space: normal; min-width: 300px; text-align: left; color: var(--mut); font-size: 12.5px; }
+  #wml th:last-child { text-align: left; }
+  #wml tr.wgh td { background: #1a2229; color: #fff; font-weight: 700; font-size: 12.5px; text-align: left; padding: 8px 10px; position: static; }
   #wml td.lv { color: #aab1bd; font-size: 13px; }
   .lqg .gh td { background: #1a2229; color: #fff; font-weight: 700; font-size: 12.5px; letter-spacing: .02em; padding: 9px 12px; }
   .lqg .ch th { cursor: pointer; user-select: none; color: var(--mut); font-weight: 400; font-size: 12.5px; text-align: right; padding: 12px 10px; border-bottom: 1px solid #2a3540; background: #0d141a; }
@@ -73,6 +76,12 @@
       <div class="sub">Live price of every BCC3 ticker, read from your own TradingView Desktop (real-time, your subscription) against EMA9, SMA20, SMA50, SMA100 and SMA200. Private: the prices go from TradingView to this browser tab and are not stored or sent anywhere. <a href="./">&larr; back to BCC3</a> &middot; <a href="premarket.html">public Yahoo version</a></div>
     </div>
     <div class="sub" id="asof"></div>
+  </div>
+
+  <div class="panel" id="wmlPanel">
+    <h2>Wicked Market Leaders &mdash; levels vs live price <span class="sub" style="font-weight:400">&mdash; Hardware Expansion sheet + Cheat Sheet v8, week of 9 Nov 2026</span> <span id="wmlLive" class="tag post">checking&hellip;</span></h2>
+    <div class="scroll"><table id="wml"><thead><tr><th>Ticker</th><th>Sheet stance</th><th>Sheet price</th><th>Live price</th><th>Signal</th><th>Support floor</th><th>Deeper floor</th><th>Pivot</th><th>Price vs pivot</th><th>Upside objectives</th><th>Sheet condition</th></tr></thead><tbody id="wmlBody"><tr><td colspan="11" class="empty">Loading&hellip;</td></tr></tbody></table></div>
+    <div class="note" style="margin-top:8px"><strong>How the signal is decided</strong> (live TradingView price; if you are not connected the cell says so and falls back to the Yahoo snapshot or last close): <span class="sig sell">SELL</span> price is below the support floor (or below the deeper floor); <span class="sig sup">AT SUPPORT</span> price is inside a support range; <span class="sig wait">WAIT</span> above support but under the pivot; <span class="sig buy">BUY</span> price is at or above the pivot; <span class="sig tp">TARGET 1 / 2 HIT</span> price has reached an upside objective that sits above the pivot. &ldquo;Price vs pivot&rdquo; is in dollars (green = above, red = below). For a single support level there is no range, so price at or below it reads SELL only once it is under the level. On bearish names the sheet&rsquo;s &ldquo;support&rdquo; is really its bearish target. Upside objectives that sit at or below the pivot are shown but not used for the signal. The sheet says a spike does not count: confirm with a daily or weekly close beyond the level, as its condition says, before acting. These are the sheets&rsquo; levels, not advice. MU&rsquo;s 106.97&ndash;112.94 band on v8 is far below its price and looks like a typo, so it is ignored.</div>
   </div>
 
   <div class="bar">
@@ -106,12 +115,6 @@
     <h2>Live quotes <span class="sub" style="font-weight:400">&mdash; from your TradingView: index futures, then ETFs, then every BCC3 stock by sector, A to Z; click a column header to sort inside each group, click again to reverse</span></h2>
     <div id="lq"><div class="empty">Waiting for the TradingView link&hellip;</div></div>
     <div class="note" style="margin-top:8px">Value, Change and Chg% are your real-time TradingView prices (index futures are the CME contracts ES, NQ, YM and RTY). Prev is the previous close implied by the change. Open, High and Low are today&rsquo;s regular-session figures from the Yahoo snapshot, widened by the live price, so High and Low never lag behind the Value. Open and range appear after 9:30am ET; before that they show a dash.</div>
-  </div>
-
-  <div class="panel">
-    <h2>Wicked Market Leaders &mdash; levels vs live price <span class="sub" style="font-weight:400">&mdash; from the Hardware Expansion cheat sheet, week of 9 Nov 2026</span></h2>
-    <div class="scroll"><table id="wml"><thead><tr><th>Ticker</th><th>Sheet stance</th><th>Live price</th><th>Signal</th><th>Support floor</th><th>Deeper floor</th><th>Pivot</th><th>Price vs pivot</th><th>Target 1</th><th>Target 2</th></tr></thead><tbody id="wmlBody"><tr><td colspan="10" class="empty">Loading&hellip;</td></tr></tbody></table></div>
-    <div class="note" style="margin-top:8px"><strong>How the signal is decided</strong> (price is the live TradingView price, or the last Yahoo snapshot / last close if you are not connected, shown in the Live price cell): <span class="sig sell">SELL</span> price is below the support floor (or below the deeper floor); <span class="sig sup">AT SUPPORT</span> price is inside the support zone; <span class="sig wait">WAIT</span> above support but still under the pivot; <span class="sig buy">BUY</span> price is at or above the pivot; <span class="sig tp">TARGET 1 / 2 HIT</span> price has reached that upside objective. &ldquo;Price vs pivot&rdquo; is in dollars (green = above, red = below). The sheet says an intraday spike does not count: confirm with a daily close beyond the level before acting. These are the sheet&rsquo;s levels, not advice.</div>
   </div>
 
   <div class="panel">
@@ -201,15 +204,29 @@ function renderQuotes() {
   renderWml();
 }
 const WML = [
-  { s: 'AAPL', stance: 'Resilient',      sup: [325.81, 331.90], deep: null,   piv: 347.74, t1: [354.51], t2: [380.00, 400.00] },
-  { s: 'NVDA', stance: 'Bearish Break',  sup: [176.00, 181.60], deep: 155.00, piv: 202.06, t1: [224.50], t2: [239.00] },
-  { s: 'TSLA', stance: 'Testing Floor',  sup: [341.42, 343.69], deep: 312.00, piv: 358.50, t1: [388.00], t2: [415.00] },
-  { s: 'SOXL', stance: 'Violent Flush',  sup: [40.59, 43.40],   deep: 28.12,  piv: 57.84,  t1: [70.23, 77.05], t2: [102.39] },
-  { s: 'STX',  stance: 'Active Sell',    sup: [380.00, 395.00], deep: null,   piv: 450.00, t1: [505.00], t2: [538.00] },
-  { s: 'WDC',  stance: 'Active Sell',    sup: [215.00, 228.00], deep: null,   piv: 265.00, t1: [287.00], t2: [322.00] }
+  { g: 'Hardware Expansion sheet' },
+  { s: 'AAPL', stance: 'Resilient',     px: 342.37, sup: [325.81, 331.90], deep: null,   piv: 347.74, ups: [[354.51], [380.00, 400.00]], cond: 'Needs a daily close above 347.74 to exit the base' },
+  { s: 'NVDA', stance: 'Bearish Break', px: 186.64, sup: [176.00, 181.60], deep: [155.00], piv: 202.06, ups: [[224.50], [239.00]], cond: 'Must reclaim 202.06 to neutralize the correction trap' },
+  { s: 'TSLA', stance: 'Testing Floor', px: 358.22, sup: [341.42, 343.69], deep: [312.00], piv: 358.50, ups: [[388.00], [415.00]], cond: 'Above 358.50 signals bear exhaustion' },
+  { s: 'SOXL', stance: 'Violent Flush', px: 45.97,  sup: [40.59, 43.40],   deep: [28.12],  piv: 57.84,  ups: [[70.23, 77.05], [102.39]], cond: 'Must break above 57.84 to invalidate the post-election decay' },
+  { s: 'STX',  stance: 'Active Sell',   px: 460.99, sup: [380.00, 395.00], deep: null,   piv: 450.00, ups: [[505.00], [538.00]], cond: '450.00 is the line in the sand; it must clear to void shorts (sheet price is already above it)' },
+  { s: 'WDC',  stance: 'Active Sell',   px: 263.78, sup: [215.00, 228.00], deep: null,   piv: 265.00, ups: [[287.00], [322.00]], cond: '265.00 is heavily defended by trend bears' },
+
+  { g: 'Cheat Sheet v8' },
+  { s: 'MSFT', stance: 'Bullish',          px: 530.61, sup: [520.32], deep: null, piv: 535.07, ups: [[603.52]], cond: 'Weekly close below 520.32 flips bearish; 535.07 is the weekly high settlement' },
+  { s: 'META', stance: 'Bearish',          px: 610.15, sup: [510.91, 535.07], deep: null, piv: 698.57, ups: [[840.26], [944.56]], cond: 'Settlement back above 698.57 invalidates bears; 510.91 - 535.07 is a long-term buy zone' },
+  { s: 'MU',   stance: 'Bearish',          px: 690.00, sup: [580.38], deep: [311.49], piv: 737.88, ups: [[881.11]], cond: 'Daily close above 737.88 signals a low; close above 881.11 triggers a buy; 580.38 is the cover-shorts / buy floor' },
+  { s: 'SPCX', stance: 'Bearish',          px: 134.27, sup: [104.38], deep: null, piv: 145.91, ups: [[145.91], [182.39]], cond: 'Weekly settlement above 145.91 forces a full reversal; 104.38 is a 4-5 month floor, in play over the next 3-5 weeks' },
+  { s: 'GOOGL', stance: 'Neutral Floor',   px: 284.78, sup: [279.80], deep: [250.59], piv: 305.17, ups: [[305.17], [348.55]], cond: 'Close above 305.17 shifts to macro buy; weekly close below 279.80 opens the path to 250.59' },
+  { s: 'AMZN', stance: 'Constructive',     px: 259.30, sup: [236.13], deep: null, piv: 257.86, pivTxt: '$255.36 / $257.86', ups: [[290.65], [304.97]], cond: 'Opening Monday above 257.86 confirms strength; 255.36 and 257.86 are the immediate break levels' },
+  { s: 'TSM',  stance: 'Active Sell',      px: 375.44, sup: [288.19], deep: null, piv: 381.80, ups: [[381.88], [463.98, 479.98]], cond: 'Weekly settlement above 381.80 voids the short play; 288.19 is the year-end bear objective' },
+  { s: 'PLTR', stance: 'Testing Floor',    px: 160.38, sup: [152.12], deep: [108.58], piv: 184.45, ups: [[187.55], [253.29]], cond: 'Close above 184.45 locks in the November low; settlement above 209.58 triggers a macro run' },
+  { s: 'INTC', stance: 'Bearish',          px: 56.28,  sup: [42.03], deep: null, piv: 65.72, ups: [[51.28], [63.15], [111.32]], cond: 'Weekly settlement above 65.72 forms an aggressive up-pivot; 51.28 / 63.15 are descending breakdown zones; 42.03 is the late-November target' },
+  { s: 'AVGO', stance: 'Bearish Trend',    px: 293.69, sup: [277.47], deep: [231.34, 251.88], piv: 409.81, pivTxt: '$391.66 - $409.81', ups: [[391.66], [409.81]], cond: 'Reclaiming 391.66 - 409.81 clears the bear thesis; 409.81 is the Q1 long-entry trigger' },
+  { s: 'AMD',  stance: 'Violent Break',    px: 449.04, sup: [361.52], deep: null, piv: 493.21, ups: [[484.73], [650.69]], cond: 'Weekly close above 493.21 triggers a short-squeeze buy; 361.52 is the primary buying window, targeted for late November' }
 ];
 function wmlPrice(sym) {
-  const L = LIVE[sym]; if (L && L.last != null) return { p: L.last, src: 'live' };
+  const L = LIVE[sym]; if (L && L.last != null) return { p: L.last, src: liveOn ? 'live' : 'lastlive' };
   const P = PM && PM.tickers && PM.tickers[sym]; if (P && !P.error && P.price != null) return { p: P.price, src: 'snap' };
   const t = DATA && DATA.tickers && DATA.tickers[sym]; if (t && t.bars && t.bars.length) return { p: t.bars[t.bars.length - 1][4], src: 'close' };
   return { p: null, src: '' };
@@ -217,22 +234,28 @@ function wmlPrice(sym) {
 function wmlRange(a) { return a.length > 1 ? usd(a[0]) + ' &ndash; ' + usd(a[1]) : usd(a[0]); }
 function renderWml() {
   const body = document.getElementById('wmlBody'); if (!body) return;
+  const st = document.getElementById('live'), lv = document.getElementById('wmlLive');
+  if (lv) { const on = !!(st && /LIVE from your TradingView/.test(st.textContent || '')); lv.textContent = on ? 'live from TradingView' : 'not connected: prices below are not live'; lv.className = 'tag ' + (on ? 'regular' : 'post'); }
   body.innerHTML = WML.map(w => {
+    if (w.g) return '<tr class="wgh"><td colspan="11">' + esc(w.g) + '</td></tr>';
     const { p, src } = wmlPrice(w.s);
-    const tag = src === 'live' ? '<span class="tag regular">live</span>' : src === 'snap' ? '<span class="tag post">Yahoo snapshot</span>' : src === 'close' ? '<span class="tag post">last close</span>' : '';
+    const tag = src === 'live' ? '<span class="tag regular">live</span>' : src === 'lastlive' ? '<span class="tag post">last live tick, disconnected</span>' : src === 'snap' ? '<span class="tag post">Yahoo snapshot</span>' : src === 'close' ? '<span class="tag post">last close</span>' : '';
+    const supLo = w.sup[0], supHi = w.sup[w.sup.length - 1];
+    const deepHi = w.deep ? w.deep[w.deep.length - 1] : null;
+    const ups = w.ups.filter(u => u[0] > w.piv);
     let sig, cls;
     if (p == null) { sig = 'NO PRICE'; cls = 'wait'; }
-    else if (w.deep != null && p < w.deep) { sig = 'SELL &ndash; below deeper floor'; cls = 'sell'; }
-    else if (p < w.sup[0]) { sig = 'SELL &ndash; floor broken'; cls = 'sell'; }
-    else if (p <= w.sup[1]) { sig = 'AT SUPPORT'; cls = 'sup'; }
+    else if (deepHi != null && p < deepHi) { sig = 'SELL &ndash; in deeper target zone'; cls = 'sell'; }
+    else if (p < supLo) { sig = 'SELL &ndash; floor broken'; cls = 'sell'; }
+    else if (w.sup.length > 1 && p <= supHi) { sig = 'AT SUPPORT'; cls = 'sup'; }
     else if (p < w.piv) { sig = 'WAIT &ndash; under pivot'; cls = 'wait'; }
-    else if (p < w.t1[0]) { sig = 'BUY &ndash; above pivot'; cls = 'buy'; }
-    else if (p < w.t2[0]) { sig = 'TARGET 1 HIT'; cls = 'tp'; }
+    else if (!ups.length || p < ups[0][0]) { sig = 'BUY &ndash; above pivot'; cls = 'buy'; }
+    else if (ups.length < 2 || p < ups[1][0]) { sig = 'TARGET 1 HIT'; cls = 'tp'; }
     else { sig = 'TARGET 2 HIT'; cls = 'tp'; }
     const dv = p == null ? '<span class="mut">&mdash;</span>' : '<span class="' + (p >= w.piv ? 'up' : 'down') + '">' + sgn(p - w.piv) + '</span>';
-    return '<tr><td>' + esc(w.s) + '</td><td class="mut">' + esc(w.stance) + '</td><td>' + (p == null ? '<span class="mut">&mdash;</span>' : usd(p)) + tag + '</td><td><span class="sig ' + cls + '">' + sig + '</span></td>' +
-      '<td class="lv">' + wmlRange(w.sup) + '</td><td class="lv">' + (w.deep != null ? usd(w.deep) : '<span class="mut">&mdash;</span>') + '</td><td class="lv">' + usd(w.piv) + '</td><td>' + dv + '</td>' +
-      '<td class="lv">' + wmlRange(w.t1) + '</td><td class="lv">' + wmlRange(w.t2) + '</td></tr>';
+    return '<tr><td>' + esc(w.s) + '</td><td class="mut">' + esc(w.stance) + '</td><td class="mut">' + usd(w.px) + '</td><td>' + (p == null ? '<span class="mut">&mdash;</span>' : usd(p)) + tag + '</td><td><span class="sig ' + cls + '">' + sig + '</span></td>' +
+      '<td class="lv">' + wmlRange(w.sup) + '</td><td class="lv">' + (w.deep ? wmlRange(w.deep) : '<span class="mut">&mdash;</span>') + '</td><td class="lv">' + (w.pivTxt ? w.pivTxt.replace(/ - /g, ' &ndash; ') : usd(w.piv)) + '</td><td>' + dv + '</td>' +
+      '<td class="lv">' + w.ups.map(wmlRange).join(' &middot; ') + '</td><td class="cond">' + esc(w.cond) + '</td></tr>';
   }).join('');
 }
 document.addEventListener('click', e => {
