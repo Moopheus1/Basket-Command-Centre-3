@@ -1,7 +1,7 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-10T22:33:29.541Z",
- "logged_rows": 329,
+ "updated": "2026-11-10T22:43:24.353Z",
+ "logged_rows": 332,
  "logged_days": 33,
  "scored_signals": 53,
  "success_test": "TAKE hit rate >= random + 10 points AND TAKE average return > random (random scored with the same 2.0x target), on >= 20 scored TAKEs",
