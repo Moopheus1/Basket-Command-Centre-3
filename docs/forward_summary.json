@@ -1,6 +1,6 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-10T08:40:36.146Z",
+ "updated": "2026-11-10T08:43:25.241Z",
  "logged_rows": 327,
  "logged_days": 32,
  "scored_signals": 50,
@@ -84,7 +84,7 @@
   "Golden Cross": {
    "n": 24,
    "hit_rate": 0.833,
-   "avg_return": 0.0289,
+   "avg_return": 0.0288,
    "median_dip": -0.0168,
    "bad_case_dip": -0.0603
   },
