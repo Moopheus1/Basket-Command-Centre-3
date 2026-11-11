@@ -1,6 +1,6 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-11T08:37:24.016Z",
+ "updated": "2026-11-11T08:40:06.486Z",
  "logged_rows": 332,
  "logged_days": 33,
  "scored_signals": 53,
@@ -77,7 +77,7 @@
   "Weekly Pick": {
    "n": 20,
    "hit_rate": 0.5,
-   "avg_return": -0.0987,
+   "avg_return": -0.0986,
    "median_dip": -0.0927,
    "bad_case_dip": -0.3153
   },
@@ -98,7 +98,7 @@
   "Bull Flag": {
    "n": 3,
    "hit_rate": 0,
-   "avg_return": -0.1986,
+   "avg_return": -0.1985,
    "median_dip": -0.3088,
    "bad_case_dip": -0.3298
   },
@@ -130,7 +130,7 @@
   "breadth <= 50%": {
    "n": 11,
    "hit_rate": 0.364,
-   "avg_return": -0.121,
+   "avg_return": -0.1209,
    "median_dip": -0.1919,
    "bad_case_dip": -0.4013
   }
