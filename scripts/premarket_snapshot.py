@@ -32,6 +32,15 @@ OUT = os.path.join(ROOT, "docs", "premarket.json")
 
 FUTURES = {"ES=F": "ES1!", "NQ=F": "NQ1!", "YM=F": "YM1!", "RTY=F": "RTY1!"}
 
+# Premarket-only extras: tickers listed in premarket_extra.txt appear on the Premarket pages ONLY.
+# They are NOT in tickers.txt, so they never reach data.json, the panels, TAKE, Weekly Picks or the
+# forward log. Their daily bars (for the EMA/SMA lines) are written to docs/premarket_extra.json.
+EXTRA_NAMES = {
+    "SOXL": "Direxion Daily Semiconductor Bull 3X Shares",
+    "SOXS": "Direxion Daily Semiconductor Bear 3X Shares",
+}
+EXTRA_OUT = os.path.join(ROOT, "docs", "premarket_extra.json")
+
 
 def read_tickers():
     out = []
@@ -46,6 +55,52 @@ def read_tickers():
             seen.add(t)
             uniq.append(t)
     return uniq
+
+
+def read_extras(base):
+    """Symbols in premarket_extra.txt that are not already in tickers.txt."""
+    path = os.path.join(ROOT, "premarket_extra.txt")
+    out = []
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                t = line.strip().upper()
+                if t and not t.startswith("#") and t not in base and t not in out:
+                    out.append(t)
+    return out
+
+
+def write_extra_daily(extras):
+    """Daily bars (same layout as data.json: [epoch, o, h, l, c, v]) for the premarket-only extras.
+    Best effort: a failed ticker keeps whatever the previous file had for it."""
+    old = {}
+    if os.path.exists(EXTRA_OUT):
+        try:
+            old = json.load(open(EXTRA_OUT, encoding="utf-8"))
+        except Exception:
+            old = {}
+    doc = {}
+    for sym in extras:
+        try:
+            hist = yf.Ticker(sym).history(period="430d", interval="1d", auto_adjust=False)
+            bars = []
+            for ts, row in hist.iterrows():
+                try:
+                    bars.append([int(ts.timestamp()), round(float(row["Open"]), 4), round(float(row["High"]), 4),
+                                 round(float(row["Low"]), 4), round(float(row["Close"]), 4),
+                                 int(row["Volume"]) if row["Volume"] == row["Volume"] else 0])
+                except (ValueError, TypeError):
+                    continue
+            if len(bars) < 30:
+                raise ValueError("not enough daily bars")
+            doc[sym] = {"name": EXTRA_NAMES.get(sym, sym), "sector": "ETFs", "etf": True, "bars": bars}
+        except Exception as e:
+            print(f"[premarket_snapshot] extra {sym} daily bars failed: {e}")
+            if sym in old:
+                doc[sym] = old[sym]
+    if doc != old:
+        with open(EXTRA_OUT, "w", encoding="utf-8") as f:
+            json.dump(doc, f, separators=(",", ":"))
 
 
 def session_of(ts):
@@ -168,6 +223,9 @@ def update_ticker_order(tickers):
 
 def main():
     tickers = read_tickers()
+    extras = read_extras(set(tickers))
+    tickers = tickers + extras
+    write_extra_daily(extras)
     write_tv_symbols(tickers)
     update_ticker_order(tickers)
     print(f"[premarket_snapshot] {len(tickers)} tickers")

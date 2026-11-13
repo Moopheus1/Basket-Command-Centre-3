@@ -1,0 +1,4 @@
+# Premarket-only tickers: shown on the BCC3 Premarket pages, NOT in the dashboard panels, TAKE or the forward log.
+# One ticker per line. Lines starting with # are ignored.
+SOXL
+SOXS

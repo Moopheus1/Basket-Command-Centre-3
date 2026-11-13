@@ -115,7 +115,7 @@ const MAS = [
 ];
 const CHART_BARS = 90;
 const ET = 'America/New_York';
-let ETFS = [], quotesMounted = false, DATA = null, PM = null, TVSYM = {}, TORD = null, ROWS = [], sortKey = 'sym', sortDir = 1, lastChartSig = '', tvObserver = null;
+let EXTRA = null, ETFS = [], quotesMounted = false, DATA = null, PM = null, TVSYM = {}, TORD = null, ROWS = [], sortKey = 'sym', sortDir = 1, lastChartSig = '', tvObserver = null;
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const usd = v => v == null ? '—' : '$' + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -127,10 +127,12 @@ function emaSeries(c, n) { const o = new Array(c.length).fill(null); if (c.lengt
 
 async function load() {
   const get = async u => { try { const r = await fetch(u + '?t=' + Date.now(), { cache: 'no-store' }); return r.ok ? await r.json() : null; } catch (e) { return null; } };
-  [DATA, PM, TVSYM, TORD, ETFS] = await Promise.all([get('data.json'), get('premarket.json'), get('tv_symbols.json'), get('ticker_order.json'), get('etfs.json')]);
+  [DATA, PM, TVSYM, TORD, ETFS, EXTRA] = await Promise.all([get('data.json'), get('premarket.json'), get('tv_symbols.json'), get('ticker_order.json'), get('etfs.json'), get('premarket_extra.json')]);
   ETFS = ETFS || [];
   TVSYM = TVSYM || {};
   if (!DATA || !DATA.tickers) { document.getElementById('status').textContent = 'data.json could not be loaded.'; return; }
+  // premarket-only extras (premarket_extra.txt): shown here, never part of data.json or the dashboard panels
+  if (EXTRA) Object.entries(EXTRA).forEach(([k, v]) => { if (!DATA.tickers[k]) DATA.tickers[k] = v; if (v.etf && !ETFS.includes(k)) ETFS.push(k); });
   build();
 }
 
