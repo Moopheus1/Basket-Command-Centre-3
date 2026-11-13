@@ -1,24 +1,24 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-13T08:23:29.854Z",
+ "updated": "2026-11-13T08:38:18.218Z",
  "logged_rows": 340,
  "logged_days": 35,
  "scored_signals": 61,
  "success_test": "TAKE hit rate >= random + 10 points AND TAKE average return > random (random scored with the same 2.0x target), on >= 20 scored TAKEs",
  "verdict": "NOT ENOUGH DATA YET — need 20+ scored TAKE signals",
  "random_baseline": {
-  "n": 1666,
+  "n": 1680,
   "hit_rate": 0.402,
-  "avg_return": -0.1179,
-  "median_dip": -0.1929,
-  "bad_case_dip": -0.3298
+  "avg_return": -0.1169,
+  "median_dip": -0.1901,
+  "bad_case_dip": -0.3278
  },
  "random_baseline_2x": {
-  "n": 1666,
-  "hit_rate": 0.321,
-  "avg_return": -0.1262,
-  "median_dip": -0.2064,
-  "bad_case_dip": -0.3345
+  "n": 1680,
+  "hit_rate": 0.323,
+  "avg_return": -0.1252,
+  "median_dip": -0.2047,
+  "bad_case_dip": -0.3331
  },
  "all_signals": {
   "n": 61,
@@ -38,7 +38,7 @@
   "1 panel": {
    "n": 60,
    "hit_rate": 0.617,
-   "avg_return": -0.0431,
+   "avg_return": -0.0432,
    "median_dip": -0.0532,
    "bad_case_dip": -0.2112
   },
