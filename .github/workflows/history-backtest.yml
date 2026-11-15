@@ -1,0 +1,58 @@
+name: History backtest
+
+# Manual, one-off research run. Downloads ~7 years of daily bars (yfinance, same as the daily data job), replays the page's
+# own panel code on every past session, simulates a $100k account, and pushes the results to the separate branch
+# "backtest-results" (never to main). Does not touch docs/, any panel, or any forward log.
+on:
+  workflow_dispatch:
+    inputs:
+      period:
+        description: "yfinance history period (e.g. 7y, 10y)"
+        default: "7y"
+      positions:
+        description: "Max open positions"
+        default: "5"
+      cost:
+        description: "Cost per side as a fraction (0.001 = 0.10%)"
+        default: "0.001"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: history-backtest
+  cancel-in-progress: false
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install
+        run: pip install yfinance pandas requests
+      - name: Download history
+        env:
+          HISTORY_PERIOD: ${{ inputs.period }}
+        run: python scripts/history_fetch.py
+      - name: Replay panels over history
+        run: node scripts/history_replay.js
+      - name: Portfolio simulation
+        run: python scripts/history_portfolio.py --positions "${{ inputs.positions }}" --cost "${{ inputs.cost }}" | tail -5
+      - name: Push results to branch
+        run: |
+          gzip -kf backtest/history.json
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B backtest-results
+          git add -f backtest/results.json backtest/signals.jsonl backtest/history.json.gz
+          git commit -q -m "History backtest results [skip ci]"
+          git push -f origin backtest-results
