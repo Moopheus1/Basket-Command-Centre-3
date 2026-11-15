@@ -191,11 +191,30 @@ def main():
             res['policies'][key] = summarize(curve, trades, a.start)
             res['policies'][key]['signal_days'] = sum(1 for d in dates if c.get(d))
 
+    # market filter (one pre-set rule, not tuned): take new signals only when SPY closed above its own 200-day average that day
+    spy_b = bars['SPY']
+    def regime_ok(d):
+        i = didx['SPY'].get(d)
+        if i is None or i < 200:
+            return False
+        return spy_b[i][4] > sum(x[4] for x in spy_b[i - 199:i + 1]) / 200
+    ok_days = {d for d in dates if regime_ok(d)}
+    res['config']['regime_days_on'] = len(ok_days)
+    res['config']['regime_days_off'] = len(dates) - len(ok_days)
+    for name, c in policies.items():
+        cf = defaultdict(list, {d: v for d, v in c.items() if d in ok_days})
+        key = name + ' | no stop | SPY>200d filter'
+        curve, trades = simulate(cf, bars, didx, dates, a.start, a.positions, a.cost, None)
+        res['policies'][key] = summarize(curve, trades, a.start)
+        res['policies'][key]['signal_days'] = sum(1 for d in dates if cf.get(d))
+
     # random entries: same account, same rules, same number of new entries per day cap (2), same stops
-    def random_run(seed, stop):
+    def random_run(seed, stop, filt=False):
         rng = random.Random(seed)
         c = defaultdict(list)
         for d in dates:
+            if filt and d not in ok_days:
+                continue
             names = [s for s in pool if d in didx[s] and didx[s][d] >= 60]
             rng.shuffle(names)
             for s in names[:2]:
@@ -211,6 +230,13 @@ def main():
             seeds=a.seeds, final_median=fin[len(fin) // 2], final_p10=fin[int(len(fin) * 0.1)], final_p90=fin[int(len(fin) * 0.9)],
             profit_median=round(fin[len(fin) // 2] - a.start, 0), max_drawdown_median=st.median(r['max_drawdown'] for r in runs),
             win_rate_median=st.median(r['win_rate'] for r in runs), years=runs[0]['years'])
+
+    runs = [random_run(sd, None, True) for sd in range(a.seeds)]
+    fin = sorted(r['final'] for r in runs)
+    res['policies']['RANDOM entries | no stop | SPY>200d filter'] = dict(
+        seeds=a.seeds, final_median=fin[len(fin) // 2], final_p10=fin[int(len(fin) * 0.1)], final_p90=fin[int(len(fin) * 0.9)],
+        profit_median=round(fin[len(fin) // 2] - a.start, 0), max_drawdown_median=st.median(r['max_drawdown'] for r in runs),
+        win_rate_median=st.median(r['win_rate'] for r in runs), years=runs[0]['years'])
 
     # benchmarks over the same window
     i0 = didx['SPY'][dates[0]]
