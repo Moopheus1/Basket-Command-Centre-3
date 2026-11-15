@@ -1,0 +1,1 @@
+{"rules_version":"rsi-v1-2026-11-15","signals":null,"random_same_dates":null,"verdict":"WAITING (need 30 scored signals)","criteria":">=30 scored signals; hit rate >=10 points above same-date random entries; higher average $ per $1,000"}

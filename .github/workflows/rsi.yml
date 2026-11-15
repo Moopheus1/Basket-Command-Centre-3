@@ -1,0 +1,59 @@
+name: RSI oversold
+
+# Display-only test panel (#6). Daily-bar RSI(14) crossing below 30, StockKit "Ram Jet" copy.
+# Runs after every "Update market data" run but only writes/commits when the daily-bar result actually
+# changed (rsi.json ignores the data timestamp), so it commits at most once per completed session.
+# Pure Python, no installs. Never touches panel/TAKE files or the v2 forward log.
+on:
+  workflow_run:
+    workflows: ["Update market data"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write   # to dispatch pages.yml after a commit
+
+concurrency:
+  group: rsi-oversold
+  cancel-in-progress: false
+
+jobs:
+  rsi:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Find RSI crosses
+        run: python scripts/rsi_oversold.py
+      - name: Commit
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          mkdir -p /tmp/rsi
+          cp docs/rsi.json docs/rsi_log.csv docs/rsi_summary.json /tmp/rsi/ 2>/dev/null || true
+          pushed=false
+          for i in 1 2 3 4 5; do
+            git fetch origin main -q
+            git reset --hard origin/main -q
+            cp /tmp/rsi/* docs/ 2>/dev/null || true
+            # stage only files that exist: one missing path makes git add refuse ALL of them
+            for f in docs/rsi.json docs/rsi_log.csv docs/rsi_summary.json; do [ -f "$f" ] && git add "$f"; done || true
+            if git diff --staged --quiet; then echo "changed=false" >> "$GITHUB_OUTPUT"; pushed=true; break; fi
+            git commit -q -m "RSI oversold update [skip ci]"
+            if git push -q; then pushed=true; echo "changed=true" >> "$GITHUB_OUTPUT"; break; fi
+            echo "Push attempt $i failed, retrying..."; sleep 3
+          done
+          [ "$pushed" = true ] || { echo "::error::Failed to push RSI files"; exit 1; }
+      - name: Trigger Pages deploy
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run pages.yml

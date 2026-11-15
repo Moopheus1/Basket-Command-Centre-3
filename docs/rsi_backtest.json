@@ -1,0 +1,346 @@
+{
+ "data_window": {
+  "first": "2025-03-03",
+  "last": "2026-11-13",
+  "sessions": 430,
+  "tickers": 124
+ },
+ "rules": {
+  "rsi": "Wilder 14",
+  "cross_below": 30.0,
+  "entry": "next open",
+  "target_pct": 3.0,
+  "max_hold": 10,
+  "stop": null,
+  "size_per_trade": 1000.0
+ },
+ "signals_raw": 418,
+ "signals_split_skipped": 0,
+ "primary": {
+  "n": 354,
+  "hit_rate": 0.7712,
+  "avg_pnl": 5.42,
+  "median_pnl": 30.0,
+  "avg_win": 32.14,
+  "avg_loss": -99.2,
+  "profit_factor": 1.27,
+  "worst": -378.35,
+  "p5": -144.41,
+  "avg_days": 4.25,
+  "expired": 81,
+  "avg_expired_pnl": -86.86,
+  "mae_median": -26.02,
+  "mae_p10": -134.47,
+  "mae_worst": -392.42,
+  "underwater_100": 0.1808
+ },
+ "all_days_baseline": {
+  "n": 45944,
+  "hit_rate": 0.7389,
+  "avg_pnl": 6.12,
+  "median_pnl": 30.0,
+  "avg_win": 32.43,
+  "avg_loss": -85.41,
+  "profit_factor": 1.32,
+  "worst": -507.59,
+  "p5": -132.7,
+  "avg_days": 4.82,
+  "expired": 11997,
+  "avg_expired_pnl": -71.44,
+  "mae_median": -30.05,
+  "mae_p10": -140.7,
+  "mae_worst": -546.1,
+  "underwater_100": 0.1648
+ },
+ "vs_same_day_random": {
+  "n": 354,
+  "signal_avg": 5.42,
+  "random_avg": 8.88,
+  "random_hit_rate": 0.7963,
+  "avg_edge": -3.46,
+  "t_stat": -1.15
+ },
+ "with_10pct_stop": {
+  "n": 354,
+  "hit_rate": 0.709,
+  "avg_pnl": 1.65,
+  "median_pnl": 30.0,
+  "avg_win": 31.43,
+  "avg_loss": -80.73,
+  "profit_factor": 1.08,
+  "worst": -182.21,
+  "p5": -100.0,
+  "avg_days": 3.32,
+  "expired": 39,
+  "avg_expired_pnl": -23.99,
+  "mae_median": -26.02,
+  "mae_p10": -115.56,
+  "mae_worst": -209.95,
+  "underwater_100": 0.1808
+ },
+ "first_half": {
+  "n": 177,
+  "hit_rate": 0.7627,
+  "avg_pnl": 5.3,
+  "median_pnl": 30.0,
+  "avg_win": 31.63,
+  "avg_loss": -97.82,
+  "profit_factor": 1.27,
+  "worst": -289.93,
+  "p5": -144.87,
+  "avg_days": 4.34,
+  "expired": 42,
+  "avg_expired_pnl": -81.6,
+  "mae_median": -29.38,
+  "mae_p10": -129.66,
+  "mae_worst": -298.64,
+  "underwater_100": 0.1921
+ },
+ "second_half": {
+  "n": 177,
+  "hit_rate": 0.7797,
+  "avg_pnl": 5.55,
+  "median_pnl": 30.0,
+  "avg_win": 32.64,
+  "avg_loss": -100.58,
+  "profit_factor": 1.27,
+  "worst": -378.35,
+  "p5": -144.15,
+  "avg_days": 4.17,
+  "expired": 39,
+  "avg_expired_pnl": -92.53,
+  "mae_median": -23.61,
+  "mae_p10": -137.74,
+  "mae_worst": -392.42,
+  "underwater_100": 0.1695
+ },
+ "by_month": {
+  "2025-03": {
+   "n": 6,
+   "hit": 0.667,
+   "avg": -18.8
+  },
+  "2025-04": {
+   "n": 65,
+   "hit": 0.969,
+   "avg": 30.0
+  },
+  "2025-05": {
+   "n": 2,
+   "hit": 1.0,
+   "avg": 30.0
+  },
+  "2025-06": {
+   "n": 2,
+   "hit": 0.5,
+   "avg": 17.5
+  },
+  "2025-07": {
+   "n": 4,
+   "hit": 0.0,
+   "avg": -52.4
+  },
+  "2025-08": {
+   "n": 12,
+   "hit": 0.667,
+   "avg": 19.2
+  },
+  "2025-09": {
+   "n": 1,
+   "hit": 1.0,
+   "avg": 57.0
+  },
+  "2025-10": {
+   "n": 4,
+   "hit": 0.75,
+   "avg": 4.8
+  },
+  "2025-11": {
+   "n": 28,
+   "hit": 0.75,
+   "avg": 4.6
+  },
+  "2025-12": {
+   "n": 7,
+   "hit": 0.571,
+   "avg": -4.0
+  },
+  "2026-01": {
+   "n": 34,
+   "hit": 0.529,
+   "avg": -34.1
+  },
+  "2026-02": {
+   "n": 36,
+   "hit": 0.861,
+   "avg": 15.5
+  },
+  "2026-03": {
+   "n": 23,
+   "hit": 0.783,
+   "avg": 19.7
+  },
+  "2026-04": {
+   "n": 9,
+   "hit": 0.889,
+   "avg": 20.0
+  },
+  "2026-05": {
+   "n": 3,
+   "hit": 1.0,
+   "avg": 35.0
+  },
+  "2026-06": {
+   "n": 12,
+   "hit": 0.583,
+   "avg": -13.6
+  },
+  "2026-07": {
+   "n": 33,
+   "hit": 0.97,
+   "avg": 35.6
+  },
+  "2026-08": {
+   "n": 3,
+   "hit": 0.667,
+   "avg": 10.9
+  },
+  "2026-09": {
+   "n": 9,
+   "hit": 0.444,
+   "avg": -16.9
+  },
+  "2026-10": {
+   "n": 61,
+   "hit": 0.705,
+   "avg": -20.2
+  }
+ },
+ "market_wide_washout_days": {
+  "n": 133,
+  "hit_rate": 0.9173,
+  "avg_pnl": 22.59,
+  "median_pnl": 30.0,
+  "avg_win": 33.91,
+  "avg_loss": -102.95,
+  "profit_factor": 3.65,
+  "worst": -166.43,
+  "p5": -87.06,
+  "avg_days": 2.66,
+  "expired": 11,
+  "avg_expired_pnl": -102.95,
+  "mae_median": -19.85,
+  "mae_p10": -118.26,
+  "mae_worst": -221.57,
+  "underwater_100": 0.1353
+ },
+ "idiosyncratic_days": {
+  "n": 221,
+  "hit_rate": 0.6833,
+  "avg_pnl": -4.91,
+  "median_pnl": 30.0,
+  "avg_win": 30.78,
+  "avg_loss": -98.52,
+  "profit_factor": 0.82,
+  "worst": -378.35,
+  "p5": -192.54,
+  "avg_days": 5.21,
+  "expired": 70,
+  "avg_expired_pnl": -84.34,
+  "mae_median": -31.6,
+  "mae_p10": -157.94,
+  "mae_worst": -392.42,
+  "underwater_100": 0.2081
+ },
+ "washout_dates": [
+  "2025-04-03",
+  "2025-04-04",
+  "2025-04-08",
+  "2025-11-20",
+  "2026-02-03",
+  "2026-02-05",
+  "2026-07-29",
+  "2026-10-14",
+  "2026-10-16",
+  "2026-10-22"
+ ],
+ "top_tickers_by_signals": [
+  [
+   "TEAM",
+   10
+  ],
+  [
+   "NOW",
+   9
+  ],
+  [
+   "NVO",
+   9
+  ],
+  [
+   "ADBE",
+   8
+  ],
+  [
+   "UNH",
+   8
+  ],
+  [
+   "ZS",
+   8
+  ],
+  [
+   "BUG",
+   7
+  ],
+  [
+   "ORCL",
+   7
+  ]
+ ],
+ "avg_pnl_without_best5": 3.91,
+ "avg_pnl_without_worst5": 9.89,
+ "equity": {
+  "total_pnl": 1920.24,
+  "max_drawdown": -2001.06
+ },
+ "peak_concurrent_trades": 47,
+ "worst_trades": [
+  {
+   "pnl": -378.3,
+   "sym": "SHAZ",
+   "signal": "2026-10-09"
+  },
+  {
+   "pnl": -356.3,
+   "sym": "INDI",
+   "signal": "2026-10-08"
+  },
+  {
+   "pnl": -289.9,
+   "sym": "COIN",
+   "signal": "2026-01-29"
+  },
+  {
+   "pnl": -254.8,
+   "sym": "PYPL",
+   "signal": "2026-01-29"
+  },
+  {
+   "pnl": -253.2,
+   "sym": "TEAM",
+   "signal": "2026-02-02"
+  },
+  {
+   "pnl": -241.7,
+   "sym": "USAR",
+   "signal": "2026-10-08"
+  }
+ ],
+ "notes": [
+  "One regime (~430 sessions, mostly a bull market).",
+  "Ticker list chosen in 2026 - survivors and winners (hindsight bias).",
+  "No slippage or commissions; target filled at the limit price.",
+  "Signals overlap across tickers, so t-stats are overstated."
+ ]
+}

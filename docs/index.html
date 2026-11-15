@@ -166,6 +166,7 @@
   <a href="#rsDivPanel">↓ RS Leaders &middot; #2</a>
   <a href="#bullFlagPanel">↓ Bull Flag Watch &middot; #3</a>
   <a href="#bbPanel">↓ Base &amp; Breakout &middot; #4 (test)</a>
+  <a href="#rsiPanel">&darr; RSI Oversold &middot; #6 (test)</a>
   <a href="#intradayBreakoutPanel">↓ Intraday Breakout &middot; #5</a>
   <a href="#tradePlansPanel">↓ Trade plans</a>
   <a href="#flowPanel">↓ Options flow (test)</a>
@@ -263,6 +264,12 @@
   <strong>Backtest on this basket</strong> (Dec 2025 &ndash; Sep 2026, 19 triggers, buying the <em>next open</em>): hit the page's standard 1.5&times;ATR target within 20 sessions 83% of the time vs 64% for random entries in the same stocks; with the thesis's own exit (stop at the breakout low, sell on a close below the 21 EMA or after 40 sessions) it averaged <strong>+1.46R</strong> vs +0.20R random, winning only 47% of the time. <strong>Read the tail:</strong> without the two best trades (HYMC +11.6R, ARM +7.1R) the other 15 averaged +0.41R. That is how this style is supposed to work &mdash; many small losses, a few big wins &mdash; but 19 trades in one bull run is also exactly what luck looks like (a 7% chance of a hit rate this high by chance). Median stop distance was 9.6%, so size every position to the stop, never by habit.<br><br><strong style="color:#e5484d">Longer test (1,000 sessions, Oct 2022 &ndash; Sep 2026, 54 triggers, split-adjusted prices) &mdash; read this before using the panel.</strong> Against random high-volatility (ADR 5%+) names on the same days, the base-and-breakout added <em>nothing</em> to the odds of a 5%+ run: 85% vs 83%. With the same stop for every group it did <strong>worse</strong>: +5% before &minus;5% in 37% of trades vs 49% for random, and 46% vs 52% for a 1.5&times;ATR up-or-down race. The better-looking numbers above come from the breakout-day-low stop sitting a median 10.7% away, which makes the stop hard to hit. What remains is a fat right tail: median 20-session return +6.6% vs +3.7% for checklist-only names, mean +17% driven by HYMC, OUST, OKLO, ARM and SNDK, and 30% of trades negative after 20 sessions. 2023 and 2024 were losing years (&minus;1.8% and &minus;1.6% average). Treat this as a hunt for occasional big runners, not a reliable 5% setup.<br><br><strong>Reverse-engineered list: volatile washouts.</strong> To find what the stocks that actually ran had in common, every stock-day of the last 1,000 sessions was labelled by whether it went on to gain <strong>20% before falling 8%</strong> (from the next open, within 20 sessions), and about 25 features measured the day before were compared for runners vs non-runners. Four candidate rules were written from Oct 2022 &ndash; Nov 2024 only, then all four were run once on Jan 2025 &ndash; Sep 2026. The rule shown here was <em>not</em> the best of the four in 2022&ndash;24; it was chosen because it did best in 2025&ndash;26, which spends that test period, so the forward test below is the real out-of-sample check. Volatility explained most of it; once volatility was held fixed, the checklist above (EMA stack, tight base, relative-strength rank) carried <em>no</em> information. What did: volatile names far below their long-term averages. The surviving rule &mdash; <strong>ADR 5%+, close 20%+ below the 200 EMA, 50 EMA falling</strong> &mdash; reached +20% before &minus;8% <strong>40.8%</strong> of the time in the untouched test vs 31.0% for any volatile name (299 entries across 64 stocks, one per stock per 10 sessions; no single stock moves it more than a point), with a median 20-session return of +9.4%. <strong>But:</strong> it still hit &minus;8% first 53% of the time; in 2022&ndash;24 its edge was only +2.3 points, so most of it came from 2025&ndash;26's sharp rebounds; and hindsight bias is worst here, because the ticker list was chosen in 2026 and its beaten-down names are, by construction, ones that recovered. This is the opposite of the breakout thesis &mdash; it buys falling stocks, not leaders &mdash; and a name can sit in the list for months while it keeps falling (see <em>Days in list</em>).<br><br>
   <strong>Limits.</strong> The dashboard only sees completed daily bars, so a trigger is confirmed after the close and bought the next morning &mdash; often above the trigger price (median gap +1.8%), not &ldquo;as close to the trigger price as you can.&rdquo; During the session, setups trading above their trigger price are shown as <em>provisional</em>, with volume extrapolated for the time of day; they are not confirmed until the close. Earnings within 5 days is a red flag, not a filter. The <em>Other panels</em> column shows whether a name is also in a ranked panel; on 30 Sep none of the six setups were. Nothing here counts toward TAKE.</div>
   <div id="bbBody" style="font-size:13px"></div>
+</div>
+
+<div class="panel" id="rsiPanel">
+  <h2><span style="background:#4b5563;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">#6 &middot; RSI OVERSOLD &middot; TEST</span>Daily RSI crosses below 30 (a copy of StockKit&rsquo;s &ldquo;Ram Jet&rdquo;) &mdash; display only, not part of TAKE</h2>
+  <div class="desc" id="rsiRules"></div>
+  <div id="rsiBody" style="font-size:13px"></div>
 </div>
 
 <div class="panel" id="intradayBreakoutPanel">
@@ -3539,6 +3546,75 @@ function renderSpyLevels() {
   el.innerHTML = html;
 }
 
+// ===== RSI OVERSOLD (display-only test panel; reads rsi.json written by scripts/rsi_oversold.py; never calls addMember) =====
+let rsiData = null, rsiSummary = null;
+async function loadRSI() {
+  try { const r = await fetch('rsi.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) rsiData = await r.json(); } catch (e) {}
+  try { const r = await fetch('rsi_summary.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) rsiSummary = await r.json(); } catch (e) {}
+  try { renderRSIPanel(); } catch (e) {}
+}
+function rsiUsd(v, dp) { if (v == null) return '—'; const a = Math.abs(v).toLocaleString(undefined, { minimumFractionDigits: dp == null ? 0 : dp, maximumFractionDigits: dp == null ? 0 : dp }); return (v < 0 ? '−$' : '+$') + a; }
+function rsiOutOf100(x) { return Math.round(x * 100) + ' out of 100'; }
+function rsiFlags(r) {
+  const f = [];
+  if (r.below_sma200) f.push('<span style="color:#e5484d;font-weight:700" title="Closed below its 200-day average (' + fmtPrice(r.sma200) + '): a downtrend, where RSI can stay under 30 for weeks">🚩 below 200-day</span>');
+  if (r.earnings_days != null && r.earnings_days >= 0 && r.earnings_days <= 10) f.push('<span style="color:#e5484d;font-weight:700" title="Earnings fall inside the 10-session holding window">🚩 earnings ' + r.earnings_days + 'd</span>');
+  if (r.etf) f.push('<span style="color:#6b7280">ETF</span>');
+  if (r.split_suspect) f.push('<span style="color:#b45309">check for split</span>');
+  return f.length ? f.join('<br>') : '<span style="color:#9ca3af">—</span>';
+}
+function rsiPanels(sym) {
+  try { const t = (typeof panelMembers !== 'undefined') && panelMembers.get(sym); return t && t.length ? esc(t.join(', ')) : '<span style="color:#9ca3af">—</span>'; } catch (e) { return '<span style="color:#9ca3af">—</span>'; }
+}
+function rsiRulesHtml() {
+  const bt = rsiData && rsiData.backtest, p = bt && bt.primary;
+  let h = '<strong>The rule</strong> (completed daily bars): RSI(14, Wilder smoothing &mdash; the TradingView and StockKit definition) <em>crosses below 30</em> after the close. Buy the <em>next open</em>, sell at entry +3% or at the close of the 10th session, <strong>no stop</strong> (StockKit&rsquo;s own rule). Shown in dollars per $1,000 position. The Performance table&rsquo;s RSI column uses a plain 14-day average, so its number can differ a few points from this panel&rsquo;s.';
+  if (p) {
+    const w = bt.data_window || {}, v = bt.vs_same_day_random || {}, b = bt.all_days_baseline || {}, wd = bt.market_wide_washout_days || {}, id = bt.idiosyncratic_days || {}, eq = bt.equity || {}, ws = bt.with_10pct_stop || {};
+    h += '<br><br><strong>Backtest on this basket</strong> (' + esc(w.first) + ' &ndash; ' + esc(w.last) + ', ' + p.n + ' signals, one open trade per stock at a time): it won <strong>' + rsiOutOf100(p.hit_rate) + '</strong> but averaged only <strong>' + rsiUsd(p.avg_pnl, 2) + '</strong> a trade. The average win was ' + rsiUsd(p.avg_win) + ' and the average loss ' + rsiUsd(p.avg_loss) + ' &mdash; it takes about three wins to pay for one loss. Worst single trade <strong>' + rsiUsd(p.worst) + '</strong>; the deepest dip on any trade along the way was ' + rsiUsd(p.mae_worst) + '. Buying <em>any</em> basket stock on a day it was <em>not</em> oversold won ' + rsiOutOf100(b.hit_rate) + ' and averaged ' + rsiUsd(b.avg_pnl, 2) + '; random stocks bought the same day as each signal won ' + rsiOutOf100(v.random_hit_rate) + ' and averaged ' + rsiUsd(v.random_avg, 2) + '. <strong>So the oversold signal added nothing here</strong> (edge vs same-day random ' + rsiUsd(v.avg_edge, 2) + ' a trade, t = ' + v.t_stat + ', not significant). The high win rate comes from a small +3% target on volatile stocks, not from RSI.';
+    h += '<br><br><strong>Where the money was made:</strong> on ' + (bt.washout_dates || []).length + ' market-wide washout days (8 or more names crossed below 30 the same day) the ' + wd.n + ' signals won ' + rsiOutOf100(wd.hit_rate) + ' and averaged ' + rsiUsd(wd.avg_pnl, 2) + '. The other ' + id.n + ' signals won ' + rsiOutOf100(id.hit_rate) + ' and averaged ' + rsiUsd(id.avg_pnl, 2) + '. That is market timing (buying index-wide dips in a bull run), not stock picking. Taking every signal at $1,000 each, the running total ended at ' + rsiUsd(eq.total_pnl) + ' but dipped as low as ' + rsiUsd(eq.max_drawdown) + ' along the way, with up to ' + bt.peak_concurrent_trades + ' trades open at once. A 10% stop made the average worse (' + rsiUsd(ws.avg_pnl, 2) + ').';
+    h += '<br><br><strong>Limits.</strong> One regime (~' + w.sessions + ' sessions, mostly a bull market). The ticker list was chosen in 2026, so it is full of survivors and winners. No slippage or commissions; the target is assumed filled at the limit. Signals overlap across stocks, so the t-stat is overstated. A longer history was not available when this was built. <strong>The forward log below is the real test</strong> and its pass/fail rule is fixed in advance: at least 30 scored signals, a win rate at least 10 points above same-date random entries, and a higher average dollar result. Do not change the rules while it runs.';
+  } else {
+    h += '<br><br>No backtest numbers yet (docs/rsi_backtest.json missing).';
+  }
+  return h;
+}
+function renderRSIPanel() {
+  const el = document.getElementById('rsiBody'), ru = document.getElementById('rsiRules');
+  if (!el) return;
+  if (ru) ru.innerHTML = rsiRulesHtml();
+  if (!rsiData) { el.innerHTML = '<div class="empty" style="padding:10px">No rsi.json yet. It is written after the next market-data update once the RSI Oversold workflow is installed.</div>'; return; }
+  const m = rsiData.market || {};
+  const wash = m.n_fresh >= 8 ? ' <span style="color:#b45309;font-weight:700">&middot; market-wide washout day (8+ names)</span>' : '';
+  let h = '<div style="margin:6px 0 10px"><strong>' + m.n_below_30 + ' of ' + m.n_tickers + '</strong> names closed below RSI 30 on ' + esc(rsiData.session) + ' &middot; <strong>' + m.n_fresh + '</strong> fresh cross' + (m.n_fresh === 1 ? '' : 'es') + wash + '</div>';
+  const th = 'style="text-align:left;padding:4px 8px;border-bottom:1px solid #e5e7eb;white-space:nowrap"', td = 'style="padding:4px 8px;border-bottom:1px solid #f3f4f6;vertical-align:top"';
+  const table = (heads, rows) => '<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:13px"><thead><tr>' + heads.map(x => '<th ' + th + '>' + x + '</th>').join('') + '</tr></thead><tbody>' + rows.join('') + '</tbody></table></div>';
+  // fresh crosses
+  h += '<div style="font-weight:700;margin:8px 0 4px">New signals (crossed below 30 at the last close)</div>';
+  if (!rsiData.fresh.length) h += '<div class="empty" style="padding:6px 0;color:#6b7280">None at the last close.</div>';
+  else h += table(['Ticker', 'Close', 'RSI (prev &rarr; now)', 'Target if bought at this close', 'Red flags', 'In panels'], rsiData.fresh.map(r =>
+    '<tr><td ' + td + '><strong>' + esc(r.sym) + '</strong></td><td ' + td + '>' + fmtPrice(r.close) + '</td><td ' + td + '>' + r.rsi_prev.toFixed(1) + ' &rarr; <strong>' + r.rsi.toFixed(1) + '</strong></td><td ' + td + '><strong>' + fmtPrice(r.tp_ref) + '</strong> <span style="color:#6b7280;font-size:11px">(' + rsiUsd(r.tp_gain, 2) + ' a share)</span><br><span style="color:#6b7280;font-size:11px">the real target is the next open &times; 1.03</span></td><td ' + td + '>' + rsiFlags(r) + '</td><td ' + td + '>' + rsiPanels(r.sym) + '</td></tr>'));
+  // still below
+  h += '<div style="font-weight:700;margin:14px 0 4px">Still below 30 (not a new signal)</div>';
+  if (!rsiData.below.length) h += '<div class="empty" style="padding:6px 0;color:#6b7280">None.</div>';
+  else h += table(['Ticker', 'Close', 'RSI', 'Sessions below 30', 'Change over 5 sessions', 'Red flags'], rsiData.below.map(r =>
+    '<tr><td ' + td + '><strong>' + esc(r.sym) + '</strong></td><td ' + td + '>' + fmtPrice(r.close) + '</td><td ' + td + '><strong>' + r.rsi.toFixed(1) + '</strong></td><td ' + td + '>' + r.days_below + '</td><td ' + td + '>' + (r.drop_5d == null ? '—' : rsiUsd(r.drop_5d, 2) + ' a share') + '</td><td ' + td + '>' + rsiFlags(r) + '</td></tr>'));
+  // recent signals
+  const rec = (rsiData.recent || []).filter(r => r.status !== 'ENTRY NEXT OPEN');
+  h += '<div style="font-weight:700;margin:14px 0 4px">How the last 15 sessions&rsquo; signals went (per $1,000)</div>';
+  if (!rec.length) h += '<div class="empty" style="padding:6px 0;color:#6b7280">No signals yet.</div>';
+  else {
+    const col = { TP: '#0a9e5c', EXP: '#e5484d', OPEN: '#b45309' }, lab = { TP: 'target hit', EXP: 'expired, sold at close', OPEN: 'still open' };
+    h += table(['Signal day', 'Ticker', 'Bought at', 'Target', 'Result', 'P&amp;L per $1,000', 'Deepest dip'], rec.slice(0, 40).map(r =>
+      '<tr><td ' + td + '>' + esc(r.signal) + '</td><td ' + td + '><strong>' + esc(r.sym) + '</strong></td><td ' + td + '>' + fmtPrice(r.entry) + '</td><td ' + td + '>' + fmtPrice(r.tgt) + '</td><td ' + td + '><span style="color:' + (col[r.status] || '#374151') + ';font-weight:700">' + (lab[r.status] || esc(r.status)) + '</span> <span style="color:#6b7280;font-size:11px">session ' + r.days + '</span></td><td ' + td + '><strong style="color:' + (r.pnl1000 >= 0 ? '#0a9e5c' : '#e5484d') + '">' + rsiUsd(r.pnl1000) + '</strong>' + (r.status === 'OPEN' ? ' <span style="color:#6b7280;font-size:11px">so far</span>' : '') + '</td><td ' + td + '>' + rsiUsd(r.mae1000) + '</td></tr>'));
+    if (rec.length > 40) h += '<div style="color:#6b7280;font-size:11px;margin-top:4px">Showing 40 of ' + rec.length + '.</div>';
+  }
+  // forward test
+  const sm = rsiSummary || {}, a = sm.signals, b = sm.random_same_dates;
+  h += '<div style="font-weight:700;margin:14px 0 4px">Forward test (the real check)</div><div style="color:#374151">' + esc(sm.verdict || 'WAITING') + (a ? ' &middot; ' + a.n + ' scored: won ' + rsiOutOf100(a.hit_rate) + ', average ' + rsiUsd(a.avg_pnl_per_1000, 2) + ', worst ' + rsiUsd(a.worst_pnl_per_1000) + (b ? ' &middot; random same-date entries: won ' + rsiOutOf100(b.hit_rate) + ', average ' + rsiUsd(b.avg_pnl_per_1000, 2) : '') : ' &middot; no signal has finished its 10 sessions yet') + '. Logged after each close in rsi_log.csv.</div>';
+  el.innerHTML = h;
+}
+
 (async function init() {
   try { syncBottomJumpbar(); } catch (e) {}      // before initCollapsiblePanels, so bottom links also open hidden panels
   try { initCollapsiblePanels(); } catch (e) {}
@@ -3548,8 +3624,8 @@ function renderSpyLevels() {
   try { renderSpyLevels(); } catch (e) {}
   await loadFlow();
   try { renderTradePlans(); } catch (e) {}
-  loadBB();
-  setInterval(async () => { await loadData(); try { renderSpyLevels(); } catch (e) {} renderFlowPanel(); try { renderTradePlans(); } catch (e) {} loadBB(); }, DATA_REFRESH_MS);
+  loadBB(); loadRSI();
+  setInterval(async () => { await loadData(); try { renderSpyLevels(); } catch (e) {} renderFlowPanel(); try { renderTradePlans(); } catch (e) {} loadBB(); loadRSI(); }, DATA_REFRESH_MS);
 })();
 </script>
 </body>
