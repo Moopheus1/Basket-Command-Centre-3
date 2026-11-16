@@ -1,6 +1,6 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-16T08:23:20.754Z",
+ "updated": "2026-11-16T08:37:44.227Z",
  "logged_rows": 342,
  "logged_days": 36,
  "scored_signals": 68,
@@ -61,7 +61,7 @@
   "IGNORE": {
    "n": 2,
    "hit_rate": 0.5,
-   "avg_return": -0.067,
+   "avg_return": -0.0678,
    "median_dip": -0.0065,
    "bad_case_dip": -0.3881
   },
@@ -77,7 +77,7 @@
   "Weekly Pick": {
    "n": 28,
    "hit_rate": 0.5,
-   "avg_return": -0.0916,
+   "avg_return": -0.0917,
    "median_dip": -0.1919,
    "bad_case_dip": -0.3393
   },
@@ -121,7 +121,7 @@
   "QQQ below 50d": {
    "n": 7,
    "hit_rate": 0.571,
-   "avg_return": -0.0033,
+   "avg_return": -0.0035,
    "median_dip": -0.1576,
    "bad_case_dip": -0.2713
   }
