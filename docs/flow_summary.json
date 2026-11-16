@@ -1,52 +1,52 @@
 {
  "rules_version": "flow-v1-2026-10-01",
- "logged_rows": 2604,
- "logged_sessions": 32,
+ "logged_rows": 2682,
+ "logged_sessions": 33,
  "by_label": {
   "BULLISH": {
    "5d": {
-    "n": 639,
-    "avg_return_pct": -3.53,
-    "avg_vs_basket_pct": -0.32,
-    "right_direction_vs_basket_pct": 45.1
+    "n": 667,
+    "avg_return_pct": -3.71,
+    "avg_vs_basket_pct": -0.34,
+    "right_direction_vs_basket_pct": 45.7
    },
    "10d": {
-    "n": 515,
-    "avg_return_pct": -8.7,
-    "avg_vs_basket_pct": -0.64,
-    "right_direction_vs_basket_pct": 47.8
+    "n": 540,
+    "avg_return_pct": -8.5,
+    "avg_vs_basket_pct": -0.57,
+    "right_direction_vs_basket_pct": 47.6
    }
   },
   "BEARISH": {
    "5d": {
-    "n": 714,
-    "avg_return_pct": -3.59,
-    "avg_vs_basket_pct": 0.1,
-    "right_direction_vs_basket_pct": 48.3
+    "n": 746,
+    "avg_return_pct": -3.69,
+    "avg_vs_basket_pct": 0.13,
+    "right_direction_vs_basket_pct": 47.9
    },
    "10d": {
-    "n": 583,
-    "avg_return_pct": -7.64,
+    "n": 606,
+    "avg_return_pct": -7.55,
     "avg_vs_basket_pct": 0.51,
     "right_direction_vs_basket_pct": 49.2
    }
   },
   "NEUTRAL": {
    "5d": {
-    "n": 850,
-    "avg_return_pct": -3.14,
-    "avg_vs_basket_pct": -0.23,
-    "right_direction_vs_basket_pct": 48.6
+    "n": 884,
+    "avg_return_pct": -3.24,
+    "avg_vs_basket_pct": -0.17,
+    "right_direction_vs_basket_pct": 49.2
    },
    "10d": {
-    "n": 669,
-    "avg_return_pct": -8.77,
-    "avg_vs_basket_pct": -0.62,
-    "right_direction_vs_basket_pct": 48.1
+    "n": 704,
+    "avg_return_pct": -8.66,
+    "avg_vs_basket_pct": -0.63,
+    "right_direction_vs_basket_pct": 48.2
    }
   }
  },
  "verdict": "FAIL - BULLISH flow did not beat the basket by enough to be worth using",
  "success_test": "BULLISH readings must beat the basket average over 10 sessions by >= 1.0 point on average AND in >= 55% of cases, on >= 40 scored readings. Fixed 1 Oct 2026.",
- "updated": "2026-11-14T01:09:41Z"
+ "updated": "2026-11-16T21:26:29Z"
 }
