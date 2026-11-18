@@ -1,62 +1,62 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-18T21:13:22.141Z",
- "logged_rows": 352,
- "logged_days": 38,
- "scored_signals": 71,
+ "updated": "2026-11-18T21:23:34.826Z",
+ "logged_rows": 357,
+ "logged_days": 39,
+ "scored_signals": 75,
  "success_test": "TAKE hit rate >= random + 10 points AND TAKE average return > random (random scored with the same 2.0x target), on >= 20 scored TAKEs",
  "verdict": "NOT ENOUGH DATA YET — need 20+ scored TAKE signals",
  "random_baseline": {
-  "n": 2040,
-  "hit_rate": 0.418,
-  "avg_return": -0.1094,
-  "median_dip": -0.1863,
-  "bad_case_dip": -0.3249
+  "n": 2160,
+  "hit_rate": 0.423,
+  "avg_return": -0.1075,
+  "median_dip": -0.1843,
+  "bad_case_dip": -0.3239
  },
  "random_baseline_2x": {
-  "n": 2040,
-  "hit_rate": 0.333,
-  "avg_return": -0.1184,
-  "median_dip": -0.2021,
-  "bad_case_dip": -0.3281
+  "n": 2160,
+  "hit_rate": 0.338,
+  "avg_return": -0.1165,
+  "median_dip": -0.2013,
+  "bad_case_dip": -0.3266
  },
  "all_signals": {
-  "n": 71,
-  "hit_rate": 0.606,
-  "avg_return": -0.0441,
-  "median_dip": -0.0603,
-  "bad_case_dip": -0.2632
+  "n": 75,
+  "hit_rate": 0.573,
+  "avg_return": -0.0531,
+  "median_dip": -0.0773,
+  "bad_case_dip": -0.2695
  },
  "take": {
-  "n": 1,
-  "hit_rate": 1,
-  "avg_return": 0.0831,
-  "median_dip": -0.1388,
+  "n": 2,
+  "hit_rate": 0.5,
+  "avg_return": 0.005,
+  "median_dip": -0.1353,
   "bad_case_dip": -0.1388
  },
  "by_n_panels": {
   "1 panel": {
-   "n": 70,
-   "hit_rate": 0.6,
-   "avg_return": -0.0459,
-   "median_dip": -0.0576,
-   "bad_case_dip": -0.2632
+   "n": 73,
+   "hit_rate": 0.575,
+   "avg_return": -0.0547,
+   "median_dip": -0.0725,
+   "bad_case_dip": -0.2695
   },
   "2+ panels": {
-   "n": 1,
-   "hit_rate": 1,
-   "avg_return": 0.0831,
-   "median_dip": -0.1388,
+   "n": 2,
+   "hit_rate": 0.5,
+   "avg_return": 0.005,
+   "median_dip": -0.1353,
    "bad_case_dip": -0.1388
   }
  },
  "by_size": {
   "FULL": {
-   "n": 65,
-   "hit_rate": 0.6,
-   "avg_return": -0.0452,
-   "median_dip": -0.0576,
-   "bad_case_dip": -0.2435
+   "n": 69,
+   "hit_rate": 0.565,
+   "avg_return": -0.055,
+   "median_dip": -0.0725,
+   "bad_case_dip": -0.2658
   },
   "IGNORE": {
    "n": 2,
@@ -75,39 +75,39 @@
  },
  "by_panel": {
   "Weekly Pick": {
-   "n": 28,
-   "hit_rate": 0.5,
-   "avg_return": -0.0917,
-   "median_dip": -0.1919,
+   "n": 29,
+   "hit_rate": 0.483,
+   "avg_return": -0.0947,
+   "median_dip": -0.2003,
    "bad_case_dip": -0.3393
   },
   "Golden Cross": {
-   "n": 30,
-   "hit_rate": 0.767,
-   "avg_return": 0.0158,
-   "median_dip": -0.0168,
-   "bad_case_dip": -0.1262
+   "n": 31,
+   "hit_rate": 0.742,
+   "avg_return": 0.0031,
+   "median_dip": -0.0218,
+   "bad_case_dip": -0.1388
   },
   "RS Leader": {
-   "n": 5,
-   "hit_rate": 0.6,
-   "avg_return": -0.0561,
-   "median_dip": -0.1644,
+   "n": 6,
+   "hit_rate": 0.5,
+   "avg_return": -0.059,
+   "median_dip": -0.1353,
    "bad_case_dip": -0.182
   },
   "Bull Flag": {
-   "n": 4,
-   "hit_rate": 0.25,
-   "avg_return": -0.1198,
+   "n": 5,
+   "hit_rate": 0.2,
+   "avg_return": -0.1105,
    "median_dip": -0.2112,
    "bad_case_dip": -0.3088
   },
   "Intraday Breakout": {
-   "n": 5,
-   "hit_rate": 0.6,
-   "avg_return": -0.0384,
+   "n": 7,
+   "hit_rate": 0.429,
+   "avg_return": -0.0699,
    "median_dip": -0.1388,
-   "bad_case_dip": -0.2632
+   "bad_case_dip": -0.2695
   }
  },
  "by_qqq_above_50d": {
@@ -119,11 +119,11 @@
    "bad_case_dip": -0.2112
   },
   "QQQ below 50d": {
-   "n": 10,
-   "hit_rate": 0.5,
-   "avg_return": -0.0622,
-   "median_dip": -0.1576,
-   "bad_case_dip": -0.3354
+   "n": 14,
+   "hit_rate": 0.357,
+   "avg_return": -0.1055,
+   "median_dip": -0.1744,
+   "bad_case_dip": -0.3433
   }
  },
  "by_breadth": {
@@ -135,11 +135,11 @@
    "bad_case_dip": -0.1538
   },
   "breadth <= 50%": {
-   "n": 29,
-   "hit_rate": 0.483,
-   "avg_return": -0.077,
-   "median_dip": -0.1744,
-   "bad_case_dip": -0.3354
+   "n": 33,
+   "hit_rate": 0.424,
+   "avg_return": -0.0936,
+   "median_dip": -0.182,
+   "bad_case_dip": -0.3393
   }
  }
 }
