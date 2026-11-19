@@ -1,6 +1,6 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-19T02:43:20.374Z",
+ "updated": "2026-11-19T02:47:33.281Z",
  "logged_rows": 357,
  "logged_days": 39,
  "scored_signals": 75,
@@ -30,7 +30,7 @@
  "take": {
   "n": 2,
   "hit_rate": 0.5,
-  "avg_return": 0.005,
+  "avg_return": 0.0047,
   "median_dip": -0.1353,
   "bad_case_dip": -0.1388
  },
@@ -45,7 +45,7 @@
   "2+ panels": {
    "n": 2,
    "hit_rate": 0.5,
-   "avg_return": 0.005,
+   "avg_return": 0.0047,
    "median_dip": -0.1353,
    "bad_case_dip": -0.1388
   }
@@ -98,7 +98,7 @@
   "Bull Flag": {
    "n": 5,
    "hit_rate": 0.2,
-   "avg_return": -0.1105,
+   "avg_return": -0.1106,
    "median_dip": -0.2112,
    "bad_case_dip": -0.3088
   },
