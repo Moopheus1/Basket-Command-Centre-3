@@ -1,6 +1,6 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-20T21:38:37.509Z",
+ "updated": "2026-11-21T02:38:57.718Z",
  "logged_rows": 378,
  "logged_days": 41,
  "scored_signals": 82,
@@ -8,22 +8,22 @@
  "verdict": "NOT ENOUGH DATA YET — need 20+ scored TAKE signals",
  "random_baseline": {
   "n": 2400,
-  "hit_rate": 0.45,
-  "avg_return": -0.0977,
+  "hit_rate": 0.449,
+  "avg_return": -0.0979,
   "median_dip": -0.1666,
   "bad_case_dip": -0.3153
  },
  "random_baseline_2x": {
   "n": 2400,
-  "hit_rate": 0.352,
-  "avg_return": -0.1122,
+  "hit_rate": 0.351,
+  "avg_return": -0.1127,
   "median_dip": -0.1966,
   "bad_case_dip": -0.3234
  },
  "all_signals": {
   "n": 82,
   "hit_rate": 0.585,
-  "avg_return": -0.0463,
+  "avg_return": -0.0464,
   "median_dip": -0.0773,
   "bad_case_dip": -0.2632
  },
@@ -121,7 +121,7 @@
   "QQQ below 50d": {
    "n": 21,
    "hit_rate": 0.476,
-   "avg_return": -0.0616,
+   "avg_return": -0.0617,
    "median_dip": -0.1279,
    "bad_case_dip": -0.2752
   }
