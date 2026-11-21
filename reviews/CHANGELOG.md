@@ -6,6 +6,7 @@ re-proposed until they pass by chance.
 | Date | ID | Proposal | Stage | Decision | Notes |
 |---|---|---|---|---|---|
 | 2026-10-04 | – | None. Gate closed (0 of 60 trades, 0 of 12 weeks). | – | – | First review. |
+| 2026-11-21 | – | None. Gate closed (best group 82 of 60 trades but 5 of 12 weeks). | – | – | No proposal this week. All 20-session data from one falling market (25 Sep–23 Oct). |
 
 ## Open observations (not proposals)
 
