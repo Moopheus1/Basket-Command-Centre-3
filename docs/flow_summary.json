@@ -1,52 +1,52 @@
 {
  "rules_version": "flow-v1-2026-10-01",
- "logged_rows": 2993,
- "logged_sessions": 37,
+ "logged_rows": 3074,
+ "logged_sessions": 38,
  "by_label": {
   "BULLISH": {
    "5d": {
-    "n": 762,
-    "avg_return_pct": -4.63,
-    "avg_vs_basket_pct": -0.42,
-    "right_direction_vs_basket_pct": 46.2
+    "n": 787,
+    "avg_return_pct": -4.56,
+    "avg_vs_basket_pct": -0.24,
+    "right_direction_vs_basket_pct": 47.3
    },
    "10d": {
-    "n": 639,
-    "avg_return_pct": -8.1,
-    "avg_vs_basket_pct": -0.54,
-    "right_direction_vs_basket_pct": 48.0
+    "n": 667,
+    "avg_return_pct": -8.26,
+    "avg_vs_basket_pct": -0.37,
+    "right_direction_vs_basket_pct": 49.6
    }
   },
   "BEARISH": {
    "5d": {
-    "n": 853,
-    "avg_return_pct": -4.57,
-    "avg_vs_basket_pct": 0.06,
-    "right_direction_vs_basket_pct": 47.6
+    "n": 882,
+    "avg_return_pct": -4.6,
+    "avg_vs_basket_pct": 0.1,
+    "right_direction_vs_basket_pct": 47.3
    },
    "10d": {
-    "n": 714,
-    "avg_return_pct": -7.84,
-    "avg_vs_basket_pct": 0.11,
-    "right_direction_vs_basket_pct": 49.6
+    "n": 746,
+    "avg_return_pct": -7.88,
+    "avg_vs_basket_pct": 0.3,
+    "right_direction_vs_basket_pct": 48.3
    }
   },
   "NEUTRAL": {
    "5d": {
-    "n": 986,
-    "avg_return_pct": -3.44,
-    "avg_vs_basket_pct": 0.29,
-    "right_direction_vs_basket_pct": 49.4
+    "n": 1010,
+    "avg_return_pct": -3.95,
+    "avg_vs_basket_pct": -0.1,
+    "right_direction_vs_basket_pct": 50.1
    },
    "10d": {
-    "n": 850,
-    "avg_return_pct": -7.7,
-    "avg_vs_basket_pct": -0.03,
-    "right_direction_vs_basket_pct": 48.2
+    "n": 884,
+    "avg_return_pct": -8.49,
+    "avg_vs_basket_pct": -0.48,
+    "right_direction_vs_basket_pct": 49.7
    }
   }
  },
  "verdict": "FAIL - BULLISH flow did not beat the basket by enough to be worth using",
  "success_test": "BULLISH readings must beat the basket average over 10 sessions by >= 1.0 point on average AND in >= 55% of cases, on >= 40 scored readings. Fixed 1 Oct 2026.",
- "updated": "2026-11-20T21:35:00Z"
+ "updated": "2026-11-23T21:26:13Z"
 }
