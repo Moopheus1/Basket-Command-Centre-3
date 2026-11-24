@@ -1,6 +1,6 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-24T05:23:33.498Z",
+ "updated": "2026-11-24T05:27:43.582Z",
  "logged_rows": 382,
  "logged_days": 42,
  "scored_signals": 87,
@@ -68,7 +68,7 @@
   "HALF": {
    "n": 6,
    "hit_rate": 0.667,
-   "avg_return": -0.0025,
+   "avg_return": -0.0023,
    "median_dip": -0.079,
    "bad_case_dip": -0.1883
   }
@@ -84,14 +84,14 @@
   "Golden Cross": {
    "n": 33,
    "hit_rate": 0.697,
-   "avg_return": -0.0044,
+   "avg_return": -0.0045,
    "median_dip": -0.022,
    "bad_case_dip": -0.1388
   },
   "RS Leader": {
    "n": 13,
    "hit_rate": 0.538,
-   "avg_return": -0.038,
+   "avg_return": -0.0379,
    "median_dip": -0.1279,
    "bad_case_dip": -0.182
   },
