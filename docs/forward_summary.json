@@ -1,6 +1,6 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-24T08:33:28.787Z",
+ "updated": "2026-11-24T08:41:03.290Z",
  "logged_rows": 382,
  "logged_days": 42,
  "scored_signals": 87,
@@ -68,7 +68,7 @@
   "HALF": {
    "n": 6,
    "hit_rate": 0.667,
-   "avg_return": -0.0025,
+   "avg_return": -0.0023,
    "median_dip": -0.079,
    "bad_case_dip": -0.1883
   }
@@ -91,7 +91,7 @@
   "RS Leader": {
    "n": 13,
    "hit_rate": 0.538,
-   "avg_return": -0.038,
+   "avg_return": -0.0379,
    "median_dip": -0.1279,
    "bad_case_dip": -0.182
   },
@@ -137,7 +137,7 @@
   "breadth <= 50%": {
    "n": 45,
    "hit_rate": 0.444,
-   "avg_return": -0.0799,
+   "avg_return": -0.0798,
    "median_dip": -0.1576,
    "bad_case_dip": -0.3088
   }
