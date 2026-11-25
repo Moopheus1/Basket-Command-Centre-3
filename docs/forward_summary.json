@@ -1,6 +1,6 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-25T04:23:27.794Z",
+ "updated": "2026-11-25T04:27:30.373Z",
  "logged_rows": 386,
  "logged_days": 43,
  "scored_signals": 90,
@@ -23,14 +23,14 @@
  "all_signals": {
   "n": 90,
   "hit_rate": 0.556,
-  "avg_return": -0.0549,
+  "avg_return": -0.0548,
   "median_dip": -0.088,
   "bad_case_dip": -0.2632
  },
  "take": {
   "n": 4,
   "hit_rate": 0.5,
-  "avg_return": -0.0141,
+  "avg_return": -0.0142,
   "median_dip": -0.1353,
   "bad_case_dip": -0.1388
  },
@@ -38,14 +38,14 @@
   "1 panel": {
    "n": 86,
    "hit_rate": 0.558,
-   "avg_return": -0.0568,
+   "avg_return": -0.0567,
    "median_dip": -0.0773,
    "bad_case_dip": -0.2658
   },
   "2+ panels": {
    "n": 4,
    "hit_rate": 0.5,
-   "avg_return": -0.0141,
+   "avg_return": -0.0142,
    "median_dip": -0.1353,
    "bad_case_dip": -0.1388
   }
@@ -68,7 +68,7 @@
   "HALF": {
    "n": 6,
    "hit_rate": 0.667,
-   "avg_return": -0.0025,
+   "avg_return": -0.0023,
    "median_dip": -0.079,
    "bad_case_dip": -0.1883
   }
@@ -91,7 +91,7 @@
   "RS Leader": {
    "n": 13,
    "hit_rate": 0.538,
-   "avg_return": -0.038,
+   "avg_return": -0.0379,
    "median_dip": -0.1279,
    "bad_case_dip": -0.182
   },
