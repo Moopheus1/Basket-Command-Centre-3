@@ -1,6 +1,6 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-25T08:37:30.528Z",
+ "updated": "2026-11-25T08:40:17.195Z",
  "logged_rows": 386,
  "logged_days": 43,
  "scored_signals": 90,
@@ -30,7 +30,7 @@
  "take": {
   "n": 4,
   "hit_rate": 0.5,
-  "avg_return": -0.0142,
+  "avg_return": -0.0141,
   "median_dip": -0.1353,
   "bad_case_dip": -0.1388
  },
@@ -45,7 +45,7 @@
   "2+ panels": {
    "n": 4,
    "hit_rate": 0.5,
-   "avg_return": -0.0142,
+   "avg_return": -0.0141,
    "median_dip": -0.1353,
    "bad_case_dip": -0.1388
   }
