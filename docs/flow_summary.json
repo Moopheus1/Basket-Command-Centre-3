@@ -1,52 +1,52 @@
 {
  "rules_version": "flow-v1-2026-10-01",
- "logged_rows": 3149,
- "logged_sessions": 39,
+ "logged_rows": 3228,
+ "logged_sessions": 40,
  "by_label": {
   "BULLISH": {
    "5d": {
-    "n": 813,
-    "avg_return_pct": -4.61,
+    "n": 845,
+    "avg_return_pct": -4.67,
     "avg_vs_basket_pct": -0.23,
-    "right_direction_vs_basket_pct": 47.6
+    "right_direction_vs_basket_pct": 47.7
    },
    "10d": {
-    "n": 688,
-    "avg_return_pct": -8.39,
-    "avg_vs_basket_pct": -0.36,
-    "right_direction_vs_basket_pct": 49.9
+    "n": 714,
+    "avg_return_pct": -8.74,
+    "avg_vs_basket_pct": -0.43,
+    "right_direction_vs_basket_pct": 49.7
    }
   },
   "BEARISH": {
    "5d": {
-    "n": 910,
-    "avg_return_pct": -4.65,
-    "avg_vs_basket_pct": 0.1,
-    "right_direction_vs_basket_pct": 47.4
+    "n": 932,
+    "avg_return_pct": -4.64,
+    "avg_vs_basket_pct": 0.13,
+    "right_direction_vs_basket_pct": 47.3
    },
    "10d": {
-    "n": 775,
-    "avg_return_pct": -8.03,
-    "avg_vs_basket_pct": 0.31,
-    "right_direction_vs_basket_pct": 47.5
+    "n": 802,
+    "avg_return_pct": -8.28,
+    "avg_vs_basket_pct": 0.32,
+    "right_direction_vs_basket_pct": 47.1
    }
   },
   "NEUTRAL": {
    "5d": {
-    "n": 1032,
-    "avg_return_pct": -4.0,
-    "avg_vs_basket_pct": -0.1,
-    "right_direction_vs_basket_pct": 50.4
+    "n": 1057,
+    "avg_return_pct": -4.04,
+    "avg_vs_basket_pct": -0.09,
+    "right_direction_vs_basket_pct": 50.5
    },
    "10d": {
-    "n": 910,
-    "avg_return_pct": -8.62,
-    "avg_vs_basket_pct": -0.48,
-    "right_direction_vs_basket_pct": 50.0
+    "n": 937,
+    "avg_return_pct": -8.84,
+    "avg_vs_basket_pct": -0.49,
+    "right_direction_vs_basket_pct": 49.9
    }
   }
  },
  "verdict": "FAIL - BULLISH flow did not beat the basket by enough to be worth using",
  "success_test": "BULLISH readings must beat the basket average over 10 sessions by >= 1.0 point on average AND in >= 55% of cases, on >= 40 scored readings. Fixed 1 Oct 2026.",
- "updated": "2026-11-24T21:25:47Z"
+ "updated": "2026-11-25T21:25:52Z"
 }
