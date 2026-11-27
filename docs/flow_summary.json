@@ -1,52 +1,52 @@
 {
  "rules_version": "flow-v1-2026-10-01",
- "logged_rows": 3228,
- "logged_sessions": 40,
+ "logged_rows": 3308,
+ "logged_sessions": 41,
  "by_label": {
   "BULLISH": {
    "5d": {
-    "n": 845,
-    "avg_return_pct": -4.67,
+    "n": 861,
+    "avg_return_pct": -4.59,
     "avg_vs_basket_pct": -0.23,
-    "right_direction_vs_basket_pct": 47.7
+    "right_direction_vs_basket_pct": 47.5
    },
    "10d": {
-    "n": 714,
-    "avg_return_pct": -8.74,
-    "avg_vs_basket_pct": -0.43,
+    "n": 736,
+    "avg_return_pct": -8.79,
+    "avg_vs_basket_pct": -0.42,
     "right_direction_vs_basket_pct": 49.7
    }
   },
   "BEARISH": {
    "5d": {
-    "n": 932,
-    "avg_return_pct": -4.64,
-    "avg_vs_basket_pct": 0.13,
-    "right_direction_vs_basket_pct": 47.3
+    "n": 952,
+    "avg_return_pct": -4.53,
+    "avg_vs_basket_pct": 0.14,
+    "right_direction_vs_basket_pct": 47.4
    },
    "10d": {
-    "n": 802,
-    "avg_return_pct": -8.28,
-    "avg_vs_basket_pct": 0.32,
-    "right_direction_vs_basket_pct": 47.1
+    "n": 823,
+    "avg_return_pct": -8.25,
+    "avg_vs_basket_pct": 0.39,
+    "right_direction_vs_basket_pct": 46.8
    }
   },
   "NEUTRAL": {
    "5d": {
-    "n": 1057,
-    "avg_return_pct": -4.04,
+    "n": 1094,
+    "avg_return_pct": -3.89,
     "avg_vs_basket_pct": -0.09,
-    "right_direction_vs_basket_pct": 50.5
+    "right_direction_vs_basket_pct": 50.6
    },
    "10d": {
-    "n": 937,
-    "avg_return_pct": -8.84,
-    "avg_vs_basket_pct": -0.49,
+    "n": 965,
+    "avg_return_pct": -8.93,
+    "avg_vs_basket_pct": -0.52,
     "right_direction_vs_basket_pct": 49.9
    }
   }
  },
  "verdict": "FAIL - BULLISH flow did not beat the basket by enough to be worth using",
  "success_test": "BULLISH readings must beat the basket average over 10 sessions by >= 1.0 point on average AND in >= 55% of cases, on >= 40 scored readings. Fixed 1 Oct 2026.",
- "updated": "2026-11-25T21:25:52Z"
+ "updated": "2026-11-27T22:23:12Z"
 }
