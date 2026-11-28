@@ -1,0 +1,661 @@
+{
+ "run_date": "2026-11-28",
+ "rules_version": "v2-2026-09-27",
+ "mixed_versions": false,
+ "last_complete_session": "2026-11-27",
+ "last_logged_session": "2026-11-27",
+ "logged_rows": 405,
+ "logged_days": 45,
+ "deduped_signals": 150,
+ "basket_size": 120,
+ "gate_rule": {
+  "horizon": 20,
+  "min_signals": 60,
+  "min_weeks": 12
+ },
+ "gate": {
+  "All signals": {
+   "signals": 93,
+   "weeks": 6,
+   "open": false
+  },
+  "TAKE": {
+   "signals": 7,
+   "weeks": 4,
+   "open": false
+  },
+  "2+ panels": {
+   "signals": 9,
+   "weeks": 4,
+   "open": false
+  },
+  "1 panel": {
+   "signals": 91,
+   "weeks": 6,
+   "open": false
+  },
+  "Panel: Bull Flag": {
+   "signals": 11,
+   "weeks": 5,
+   "open": false
+  },
+  "Panel: Golden Cross": {
+   "signals": 35,
+   "weeks": 6,
+   "open": false
+  },
+  "Panel: Intraday Breakout": {
+   "signals": 13,
+   "weeks": 4,
+   "open": false
+  },
+  "Panel: RS Leader": {
+   "signals": 17,
+   "weeks": 5,
+   "open": false
+  },
+  "Panel: Weekly Pick": {
+   "signals": 40,
+   "weeks": 6,
+   "open": false
+  },
+  "Size: FULL": {
+   "signals": 85,
+   "weeks": 6,
+   "open": false
+  },
+  "Size: HALF": {
+   "signals": 9,
+   "weeks": 4,
+   "open": false
+  },
+  "Size: IGNORE": {
+   "signals": 10,
+   "weeks": 6,
+   "open": false
+  },
+  "QQQ above 50-day": {
+   "signals": 69,
+   "weeks": 5,
+   "open": false
+  },
+  "QQQ below 50-day": {
+   "signals": 33,
+   "weeks": 3,
+   "open": false
+  }
+ },
+ "any_gate_open": false,
+ "official_test": {
+  "success_test": "TAKE hit rate >= random + 10 points AND TAKE average return > random (random scored with the same 2.0x target), on >= 20 scored TAKEs",
+  "verdict": "NOT ENOUGH DATA YET — need 20+ scored TAKE signals",
+  "scored_signals": 93,
+  "take_scored": 4
+ },
+ "take_pace": {
+  "take_lost_to_official_dedupe": [
+   "2026-09-30 PFE",
+   "2026-10-06 ZS",
+   "2026-10-19 MRNA",
+   "2026-10-20 ADBE",
+   "2026-10-30 BUG",
+   "2026-11-02 MRNA",
+   "2026-11-09 BB",
+   "2026-11-12 SPOT",
+   "2026-11-19 SPOT",
+   "2026-11-24 TSLA"
+  ],
+  "take_logged": 17,
+  "logged_days": 45,
+  "per_session": 0.378,
+  "sessions_until_20_scored": 28
+ },
+ "table": {
+  "All signals": {
+   "5": {
+    "n": 135,
+    "dates": 35,
+    "weeks": 9,
+    "avg_return": -0.0166,
+    "avg_basket": -0.0259,
+    "avg_excess": 0.0093,
+    "median_excess": 0.0025,
+    "beat_basket_rate": 0.533,
+    "date_avg_excess": 0.0071,
+    "t_by_date": 0.65
+   },
+   "10": {
+    "n": 121,
+    "dates": 32,
+    "weeks": 8,
+    "avg_return": -0.0454,
+    "avg_basket": -0.0719,
+    "avg_excess": 0.0265,
+    "median_excess": 0.0227,
+    "beat_basket_rate": 0.603,
+    "date_avg_excess": 0.0109,
+    "t_by_date": 0.59
+   },
+   "20": {
+    "n": 93,
+    "dates": 24,
+    "weeks": 6,
+    "avg_return": -0.0873,
+    "avg_basket": -0.1449,
+    "avg_excess": 0.0576,
+    "median_excess": 0.0635,
+    "beat_basket_rate": 0.667,
+    "date_avg_excess": 0.0358,
+    "t_by_date": 1.21
+   },
+   "logged": 150
+  },
+  "TAKE": {
+   "5": {
+    "n": 15,
+    "dates": 13,
+    "weeks": 7,
+    "avg_return": -0.0208,
+    "avg_basket": -0.031,
+    "avg_excess": 0.0102,
+    "median_excess": 0.0161,
+    "beat_basket_rate": 0.533,
+    "date_avg_excess": 0.0127,
+    "t_by_date": 0.53
+   },
+   "10": {
+    "n": 14,
+    "dates": 12,
+    "weeks": 6,
+    "avg_return": -0.0468,
+    "avg_basket": -0.088,
+    "avg_excess": 0.0412,
+    "median_excess": 0.039,
+    "beat_basket_rate": 0.786,
+    "date_avg_excess": 0.0527,
+    "t_by_date": 2.57
+   },
+   "20": {
+    "n": 7,
+    "dates": 7,
+    "weeks": 4,
+    "avg_return": -0.0374,
+    "avg_basket": -0.1434,
+    "avg_excess": 0.106,
+    "median_excess": 0.0811,
+    "beat_basket_rate": 1,
+    "date_avg_excess": 0.106,
+    "t_by_date": 5.5
+   },
+   "logged": 17
+  },
+  "2+ panels": {
+   "5": {
+    "n": 17,
+    "dates": 13,
+    "weeks": 7,
+    "avg_return": -0.0322,
+    "avg_basket": -0.0341,
+    "avg_excess": 0.0019,
+    "median_excess": -0.0061,
+    "beat_basket_rate": 0.471,
+    "date_avg_excess": 0.0155,
+    "t_by_date": 0.61
+   },
+   "10": {
+    "n": 16,
+    "dates": 12,
+    "weeks": 6,
+    "avg_return": -0.0554,
+    "avg_basket": -0.0812,
+    "avg_excess": 0.0257,
+    "median_excess": 0.0362,
+    "beat_basket_rate": 0.75,
+    "date_avg_excess": 0.0537,
+    "t_by_date": 2.38
+   },
+   "20": {
+    "n": 9,
+    "dates": 7,
+    "weeks": 4,
+    "avg_return": -0.0365,
+    "avg_basket": -0.1333,
+    "avg_excess": 0.0968,
+    "median_excess": 0.0811,
+    "beat_basket_rate": 1,
+    "date_avg_excess": 0.1055,
+    "t_by_date": 5.44
+   },
+   "logged": 19
+  },
+  "1 panel": {
+   "5": {
+    "n": 132,
+    "dates": 35,
+    "weeks": 9,
+    "avg_return": -0.0171,
+    "avg_basket": -0.0258,
+    "avg_excess": 0.0088,
+    "median_excess": 0.0027,
+    "beat_basket_rate": 0.545,
+    "date_avg_excess": 0.0084,
+    "t_by_date": 0.71
+   },
+   "10": {
+    "n": 118,
+    "dates": 32,
+    "weeks": 8,
+    "avg_return": -0.0459,
+    "avg_basket": -0.0712,
+    "avg_excess": 0.0253,
+    "median_excess": 0.0234,
+    "beat_basket_rate": 0.602,
+    "date_avg_excess": 0.0151,
+    "t_by_date": 0.79
+   },
+   "20": {
+    "n": 91,
+    "dates": 23,
+    "weeks": 6,
+    "avg_return": -0.0894,
+    "avg_basket": -0.1454,
+    "avg_excess": 0.056,
+    "median_excess": 0.0589,
+    "beat_basket_rate": 0.648,
+    "date_avg_excess": 0.0356,
+    "t_by_date": 1.18
+   },
+   "logged": 147
+  },
+  "Panel: Bull Flag": {
+   "5": {
+    "n": 15,
+    "dates": 12,
+    "weeks": 8,
+    "avg_return": -0.0189,
+    "avg_basket": -0.0357,
+    "avg_excess": 0.0168,
+    "median_excess": 0.0001,
+    "beat_basket_rate": 0.533,
+    "date_avg_excess": 0.0144,
+    "t_by_date": 0.72
+   },
+   "10": {
+    "n": 14,
+    "dates": 11,
+    "weeks": 7,
+    "avg_return": -0.0626,
+    "avg_basket": -0.0671,
+    "avg_excess": 0.0045,
+    "median_excess": 0.011,
+    "beat_basket_rate": 0.571,
+    "date_avg_excess": 0.0113,
+    "t_by_date": 0.39
+   },
+   "20": {
+    "n": 11,
+    "dates": 8,
+    "weeks": 5,
+    "avg_return": -0.0911,
+    "avg_basket": -0.1431,
+    "avg_excess": 0.0521,
+    "median_excess": 0.0635,
+    "beat_basket_rate": 0.636,
+    "date_avg_excess": 0.0542,
+    "t_by_date": 1.44
+   },
+   "logged": 15
+  },
+  "Panel: Golden Cross": {
+   "5": {
+    "n": 41,
+    "dates": 21,
+    "weeks": 8,
+    "avg_return": 0.0024,
+    "avg_basket": -0.0266,
+    "avg_excess": 0.0289,
+    "median_excess": 0.0225,
+    "beat_basket_rate": 0.61,
+    "date_avg_excess": 0.0206,
+    "t_by_date": 1.22
+   },
+   "10": {
+    "n": 39,
+    "dates": 19,
+    "weeks": 7,
+    "avg_return": -0.0087,
+    "avg_basket": -0.0716,
+    "avg_excess": 0.0629,
+    "median_excess": 0.0606,
+    "beat_basket_rate": 0.718,
+    "date_avg_excess": 0.0242,
+    "t_by_date": 0.97
+   },
+   "20": {
+    "n": 35,
+    "dates": 15,
+    "weeks": 6,
+    "avg_return": -0.0454,
+    "avg_basket": -0.1523,
+    "avg_excess": 0.1069,
+    "median_excess": 0.1019,
+    "beat_basket_rate": 0.8,
+    "date_avg_excess": 0.0338,
+    "t_by_date": 0.81
+   },
+   "logged": 44
+  },
+  "Panel: Intraday Breakout": {
+   "5": {
+    "n": 20,
+    "dates": 12,
+    "weeks": 6,
+    "avg_return": -0.0369,
+    "avg_basket": -0.025,
+    "avg_excess": -0.0119,
+    "median_excess": -0.0118,
+    "beat_basket_rate": 0.5,
+    "date_avg_excess": -0.0127,
+    "t_by_date": -0.5
+   },
+   "10": {
+    "n": 20,
+    "dates": 12,
+    "weeks": 6,
+    "avg_return": -0.1039,
+    "avg_basket": -0.0914,
+    "avg_excess": -0.0124,
+    "median_excess": 0.0115,
+    "beat_basket_rate": 0.55,
+    "date_avg_excess": -0.0098,
+    "t_by_date": -0.49
+   },
+   "20": {
+    "n": 13,
+    "dates": 8,
+    "weeks": 4,
+    "avg_return": -0.1317,
+    "avg_basket": -0.1578,
+    "avg_excess": 0.0261,
+    "median_excess": -0.025,
+    "beat_basket_rate": 0.462,
+    "date_avg_excess": 0.0222,
+    "t_by_date": 0.73
+   },
+   "logged": 20
+  },
+  "Panel: RS Leader": {
+   "5": {
+    "n": 44,
+    "dates": 18,
+    "weeks": 7,
+    "avg_return": -0.022,
+    "avg_basket": -0.0008,
+    "avg_excess": -0.0212,
+    "median_excess": -0.0136,
+    "beat_basket_rate": 0.409,
+    "date_avg_excess": -0.0179,
+    "t_by_date": -1.91
+   },
+   "10": {
+    "n": 34,
+    "dates": 15,
+    "weeks": 6,
+    "avg_return": -0.0517,
+    "avg_basket": -0.0685,
+    "avg_excess": 0.0168,
+    "median_excess": 0.0218,
+    "beat_basket_rate": 0.676,
+    "date_avg_excess": 0.0128,
+    "t_by_date": 1.03
+   },
+   "20": {
+    "n": 17,
+    "dates": 9,
+    "weeks": 5,
+    "avg_return": -0.1042,
+    "avg_basket": -0.1341,
+    "avg_excess": 0.0299,
+    "median_excess": 0.0726,
+    "beat_basket_rate": 0.706,
+    "date_avg_excess": 0.0424,
+    "t_by_date": 1.58
+   },
+   "logged": 58
+  },
+  "Panel: Weekly Pick": {
+   "5": {
+    "n": 52,
+    "dates": 30,
+    "weeks": 9,
+    "avg_return": -0.0198,
+    "avg_basket": -0.0321,
+    "avg_excess": 0.0123,
+    "median_excess": 0.0011,
+    "beat_basket_rate": 0.519,
+    "date_avg_excess": 0.0069,
+    "t_by_date": 0.46
+   },
+   "10": {
+    "n": 50,
+    "dates": 29,
+    "weeks": 8,
+    "avg_return": -0.0452,
+    "avg_basket": -0.0763,
+    "avg_excess": 0.0311,
+    "median_excess": 0.0364,
+    "beat_basket_rate": 0.64,
+    "date_avg_excess": 0.0351,
+    "t_by_date": 1.55
+   },
+   "20": {
+    "n": 40,
+    "dates": 23,
+    "weeks": 6,
+    "avg_return": -0.096,
+    "avg_basket": -0.1418,
+    "avg_excess": 0.0457,
+    "median_excess": 0.0663,
+    "beat_basket_rate": 0.675,
+    "date_avg_excess": 0.06,
+    "t_by_date": 1.92
+   },
+   "logged": 53
+  },
+  "Size: FULL": {
+   "5": {
+    "n": 123,
+    "dates": 37,
+    "weeks": 9,
+    "avg_return": -0.0141,
+    "avg_basket": -0.0227,
+    "avg_excess": 0.0087,
+    "median_excess": 0.0028,
+    "beat_basket_rate": 0.537,
+    "date_avg_excess": 0.0053,
+    "t_by_date": 0.56
+   },
+   "10": {
+    "n": 110,
+    "dates": 33,
+    "weeks": 8,
+    "avg_return": -0.0405,
+    "avg_basket": -0.0677,
+    "avg_excess": 0.0272,
+    "median_excess": 0.0246,
+    "beat_basket_rate": 0.609,
+    "date_avg_excess": 0.0128,
+    "t_by_date": 0.7
+   },
+   "20": {
+    "n": 85,
+    "dates": 25,
+    "weeks": 6,
+    "avg_return": -0.0852,
+    "avg_basket": -0.1425,
+    "avg_excess": 0.0572,
+    "median_excess": 0.0635,
+    "beat_basket_rate": 0.659,
+    "date_avg_excess": 0.0408,
+    "t_by_date": 1.41
+   },
+   "logged": 137
+  },
+  "Size: HALF": {
+   "5": {
+    "n": 15,
+    "dates": 12,
+    "weeks": 7,
+    "avg_return": -0.0583,
+    "avg_basket": -0.0448,
+    "avg_excess": -0.0135,
+    "median_excess": -0.0142,
+    "beat_basket_rate": 0.4,
+    "date_avg_excess": -0.0185,
+    "t_by_date": -0.72
+   },
+   "10": {
+    "n": 14,
+    "dates": 11,
+    "weeks": 6,
+    "avg_return": -0.1087,
+    "avg_basket": -0.0995,
+    "avg_excess": -0.0092,
+    "median_excess": -0.0053,
+    "beat_basket_rate": 0.5,
+    "date_avg_excess": -0.0109,
+    "t_by_date": -0.33
+   },
+   "20": {
+    "n": 9,
+    "dates": 8,
+    "weeks": 4,
+    "avg_return": -0.111,
+    "avg_basket": -0.1686,
+    "avg_excess": 0.0576,
+    "median_excess": 0.0444,
+    "beat_basket_rate": 0.667,
+    "date_avg_excess": 0.0408,
+    "t_by_date": 0.94
+   },
+   "logged": 16
+  },
+  "Size: IGNORE": {
+   "5": {
+    "n": 13,
+    "dates": 12,
+    "weeks": 8,
+    "avg_return": -0.0101,
+    "avg_basket": -0.0253,
+    "avg_excess": 0.0152,
+    "median_excess": 0.0016,
+    "beat_basket_rate": 0.538,
+    "date_avg_excess": 0.0194,
+    "t_by_date": 0.95
+   },
+   "10": {
+    "n": 12,
+    "dates": 11,
+    "weeks": 7,
+    "avg_return": -0.0094,
+    "avg_basket": -0.0625,
+    "avg_excess": 0.0531,
+    "median_excess": 0.0331,
+    "beat_basket_rate": 0.667,
+    "date_avg_excess": 0.0612,
+    "t_by_date": 1.62
+   },
+   "20": {
+    "n": 10,
+    "dates": 9,
+    "weeks": 6,
+    "avg_return": -0.0265,
+    "avg_basket": -0.1555,
+    "avg_excess": 0.129,
+    "median_excess": 0.0915,
+    "beat_basket_rate": 0.9,
+    "date_avg_excess": 0.1356,
+    "t_by_date": 2.33
+   },
+   "logged": 15
+  },
+  "QQQ above 50-day": {
+   "5": {
+    "n": 69,
+    "dates": 15,
+    "weeks": 5,
+    "avg_return": -0.005,
+    "avg_basket": -0.0368,
+    "avg_excess": 0.0318,
+    "median_excess": 0.0122,
+    "beat_basket_rate": 0.652,
+    "date_avg_excess": 0.0374,
+    "t_by_date": 2.05
+   },
+   "10": {
+    "n": 69,
+    "dates": 15,
+    "weeks": 5,
+    "avg_return": -0.0245,
+    "avg_basket": -0.0661,
+    "avg_excess": 0.0416,
+    "median_excess": 0.0374,
+    "beat_basket_rate": 0.623,
+    "date_avg_excess": 0.0335,
+    "t_by_date": 1.1
+   },
+   "20": {
+    "n": 69,
+    "dates": 15,
+    "weeks": 5,
+    "avg_return": -0.0762,
+    "avg_basket": -0.151,
+    "avg_excess": 0.0747,
+    "median_excess": 0.0655,
+    "beat_basket_rate": 0.667,
+    "date_avg_excess": 0.0578,
+    "t_by_date": 1.42
+   },
+   "logged": 69
+  },
+  "QQQ below 50-day": {
+   "5": {
+    "n": 75,
+    "dates": 20,
+    "weeks": 6,
+    "avg_return": -0.0251,
+    "avg_basket": -0.025,
+    "avg_excess": -0.0001,
+    "median_excess": -0.0008,
+    "beat_basket_rate": 0.467,
+    "date_avg_excess": -0.0108,
+    "t_by_date": -1.1
+   },
+   "10": {
+    "n": 61,
+    "dates": 17,
+    "weeks": 5,
+    "avg_return": -0.0658,
+    "avg_basket": -0.0746,
+    "avg_excess": 0.0088,
+    "median_excess": 0.0112,
+    "beat_basket_rate": 0.557,
+    "date_avg_excess": -0.0059,
+    "t_by_date": -0.39
+   },
+   "20": {
+    "n": 33,
+    "dates": 9,
+    "weeks": 3,
+    "avg_return": -0.1137,
+    "avg_basket": -0.1412,
+    "avg_excess": 0.0275,
+    "median_excess": 0.067,
+    "beat_basket_rate": 0.697,
+    "date_avg_excess": 0.0086,
+    "t_by_date": 0.31
+   },
+   "logged": 90
+  }
+ }
+}
