@@ -1,7 +1,7 @@
 {
  "rules_version": "v2-2026-09-27",
- "updated": "2026-11-27T22:26:59.409Z",
- "logged_rows": 405,
+ "updated": "2026-11-28T03:26:13.927Z",
+ "logged_rows": 407,
  "logged_days": 45,
  "scored_signals": 93,
  "success_test": "TAKE hit rate >= random + 10 points AND TAKE average return > random (random scored with the same 2.0x target), on >= 20 scored TAKEs",
@@ -9,14 +9,14 @@
  "random_baseline": {
   "n": 2880,
   "hit_rate": 0.427,
-  "avg_return": -0.1047,
+  "avg_return": -0.1046,
   "median_dip": -0.1857,
   "bad_case_dip": -0.3234
  },
  "random_baseline_2x": {
   "n": 2880,
   "hit_rate": 0.335,
-  "avg_return": -0.118,
+  "avg_return": -0.1179,
   "median_dip": -0.2068,
   "bad_case_dip": -0.3286
  },
@@ -45,7 +45,7 @@
   "2+ panels": {
    "n": 5,
    "hit_rate": 0.4,
-   "avg_return": -0.0174,
+   "avg_return": -0.0175,
    "median_dip": -0.1388,
    "bad_case_dip": -0.1718
   }
@@ -61,7 +61,7 @@
   "IGNORE": {
    "n": 4,
    "hit_rate": 0.5,
-   "avg_return": -0.0335,
+   "avg_return": -0.0336,
    "median_dip": -0.0515,
    "bad_case_dip": -0.1718
   },
@@ -77,14 +77,14 @@
   "Weekly Pick": {
    "n": 34,
    "hit_rate": 0.471,
-   "avg_return": -0.0893,
+   "avg_return": -0.0894,
    "median_dip": -0.1917,
    "bad_case_dip": -0.3393
   },
   "Golden Cross": {
    "n": 35,
    "hit_rate": 0.657,
-   "avg_return": -0.0254,
+   "avg_return": -0.0255,
    "median_dip": -0.0235,
    "bad_case_dip": -0.1522
   },
@@ -98,7 +98,7 @@
   "Bull Flag": {
    "n": 7,
    "hit_rate": 0.286,
-   "avg_return": -0.0778,
+   "avg_return": -0.0779,
    "median_dip": -0.1718,
    "bad_case_dip": -0.3088
   },
@@ -114,7 +114,7 @@
   "QQQ above 50d": {
    "n": 63,
    "hit_rate": 0.603,
-   "avg_return": -0.0503,
+   "avg_return": -0.0504,
    "median_dip": -0.0603,
    "bad_case_dip": -0.2632
   },
