@@ -189,6 +189,7 @@
 
 <div class="panel" id="takePanel">
   <h2><span style="background:#1d4ed8;color:#fff;border-radius:6px;padding:3px 10px;font-size:15px;font-weight:700;margin-right:10px;vertical-align:middle">TAKE &middot; 2+ PANELS</span>Today's trades &mdash; names flagged by two or more panels</h2>
+  <div id="regimeBanner" style="margin:0 0 10px"></div>
   <div class="desc"><strong>The one rule that held for four years.</strong> Replayed day by day over Sep 2022 &ndash; Aug 2026 (4,075 signals), names in 2+ panels beat random entries in the same stocks <em>every year</em>: hit rate 71% / 74% / 78% / 82% vs random 66% / 67% / 72% / 65%. As a 2-slot book (buy next open, sell at the target or after 20 sessions, no stop, half size above 8% stretch) it returned &times;1.21 / &times;1.24 / &times;1.71 / &times;2.39 by year, against random picks &times;0.93 / &times;1.05 / &times;1.31 / &times;1.74 and SPY &times;1.11 / &times;1.25 / &times;1.16 / &times;1.20.<br><br>
   <strong style="color:#b91c1c">Expected drawdown: the 2-slot book's worst fall in each year was &minus;24%, &minus;25%, &minus;34% and &minus;15%</strong> (SPY: &minus;13%, &minus;9%, &minus;19%, &minus;9%). Size the book so a 35% fall is survivable. <strong>Target</strong> for TAKE names is entry + 2&times; the normal daily move (better than 1.5&times; per trade in all four years). <strong>No stop</strong>: stops lost money in every year tested.<br><br>
   Caveats: the ticker list was chosen in 2026, so every backtest here is flattered by hindsight (the comparison with random entries is fair; the absolute returns are not). Single-panel names were no better than random in 2022&ndash;24. The forward test below is the real check.</div>
@@ -3049,6 +3050,7 @@ async function loadData() {
       } else {
         data[sym] = computeMetrics(entry.bars);
         data[sym].cross = computeCrossStatus(entry.bars);
+        if (entry.bars.length >= 50) regimeCloses[sym] = entry.bars.slice(-50).map(b => b[4]);   // for the market-trend banner
       }
       fund[sym] = { name: entry.name, sector: entry.sector, industry: entry.industry, mcap: entry.mcap, beta: entry.beta,
                     targetMean: entry.targetMean, targetHigh: entry.targetHigh, targetLow: entry.targetLow, numAnalysts: entry.numAnalysts, recKey: entry.recKey || null, recMean: entry.recMean != null ? entry.recMean : null,
@@ -3075,6 +3077,65 @@ async function loadData() {
 // isn't updating data.json, this will faithfully re-fetch the same stale
 // file every 10 minutes.
 const DATA_REFRESH_MS = 10 * 60 * 1000;
+
+// ===== MARKET-TREND BANNER on TAKE (display only, added 28 Nov 2026) =====
+// Same definitions the forward log records for every signal (scripts/forward_log.js regime()):
+//   QQQ above its 50-day = last close > average of the last 50 closes
+//   breadth = share of basket names (SPY/QQQ/IWM/VOO excluded) whose last close is above their own 50-day
+// It changes nothing in TAKE, Weekly Picks or the forward log. It only shows the market state and how
+// the logged signals have done in each state so far.
+const regimeCloses = {};       // sym -> last 50 closes, filled by loadData()
+let regimeFwd = null;          // forward_summary.json, cached
+const REGIME_BENCH = new Set(['SPY', 'QQQ', 'IWM', 'VOO']);
+
+async function loadRegimeBanner() {
+  try { const r = await fetch('forward_summary.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) regimeFwd = await r.json(); } catch (e) {}
+  renderRegimeBanner();
+}
+
+function renderRegimeBanner() {
+  const el = document.getElementById('regimeBanner');
+  if (!el) return;
+  const avg = a => a.reduce((s, x) => s + x, 0) / a.length;
+  const q = regimeCloses.QQQ;
+  if (!q) { el.innerHTML = ''; return; }
+  const qPx = q[q.length - 1], qMa = avg(q), qUp = qPx > qMa;
+  let up = 0, n = 0;
+  for (const [s, c] of Object.entries(regimeCloses)) { if (REGIME_BENCH.has(s)) continue; n++; if (c[c.length - 1] > avg(c)) up++; }
+  const br = n ? up / n : null, brUp = br != null && br > 0.5;
+  const state = qUp && brUp ? 'STRONG' : (!qUp && !brUp ? 'WEAK' : 'MIXED');
+  const col = { STRONG: '#0a9e5c', MIXED: '#f59e0b', WEAK: '#e5484d' }[state];
+  const usd = v => '$' + v.toFixed(2);
+  const pc = v => v == null ? '—' : Math.round(v * 100) + '%';
+  const f = regimeFwd || {}, byQ = f.by_qqq_above_50d || {}, byB = f.by_breadth || {}, rnd = f.random_baseline || {};
+  const cell = st => st ? '<strong>' + pc(st.hit_rate) + '</strong> <span style="color:#6b7280">(' + (st.n || 0) + ')</span>' : '—';
+  const qNow = qUp ? 'QQQ above 50d' : 'QQQ below 50d', bNow = brUp ? 'breadth > 50%' : 'breadth <= 50%';
+  const hl = (k, now) => k === now ? 'background:#fef3c7;' : '';
+  const wq = byQ['QQQ below 50d'], wb = byB['breadth <= 50%'];
+  const vsRandom = (st, label) => (st && st.hit_rate != null && rnd.hit_rate != null)
+    ? ' Signals logged with ' + label + ' hit their target ' + pc(st.hit_rate) + ' of the time, against ' + pc(rnd.hit_rate) + ' for random entries.' : '';
+  const verdict = {
+    STRONG: 'Both market checks are healthy. This is the condition the panels were built and backtested in.',
+    MIXED: 'One market check is weak.' + (!qUp ? vsRandom(wq, 'QQQ below its 50-day') : vsRandom(wb, 'breadth at or under 50%')),
+    WEAK: 'Both market checks are weak.' + vsRandom(wq, 'QQQ below its 50-day')
+  }[state];
+  el.innerHTML =
+    '<div style="border:2px solid ' + col + ';border-radius:8px;padding:10px 12px;background:#fff">' +
+      '<div style="font-weight:800;margin-bottom:4px"><span style="background:' + col + ';color:#fff;border-radius:6px;padding:2px 8px;margin-right:8px">MARKET ' + state + '</span>' +
+      'QQQ ' + usd(qPx) + ' vs its 50-day ' + usd(qMa) + ' (' + (qUp ? usd(qPx - qMa) + ' above' : usd(qMa - qPx) + ' below') + ') &middot; ' +
+      up + ' of ' + n + ' basket names above their own 50-day (' + pc(br) + ')</div>' +
+      '<div style="color:#374151;margin-bottom:6px">' + verdict + '</div>' +
+      (regimeFwd ?
+        '<div style="overflow-x:auto"><table style="font-size:13px"><thead><tr><th style="text-align:left">Live forward log &mdash; share of logged signals that hit target (scored count)</th><th>Healthy</th><th>Weak</th></tr></thead><tbody>' +
+        '<tr><td style="text-align:left">QQQ vs its 50-day</td><td style="' + hl('QQQ above 50d', qNow) + '">' + cell(byQ['QQQ above 50d']) + '</td><td style="' + hl('QQQ below 50d', qNow) + '">' + cell(byQ['QQQ below 50d']) + '</td></tr>' +
+        '<tr><td style="text-align:left">Basket breadth (names above their 50-day)</td><td style="' + hl('breadth > 50%', bNow) + '">' + cell(byB['breadth > 50%']) + '</td><td style="' + hl('breadth <= 50%', bNow) + '">' + cell(byB['breadth <= 50%']) + '</td></tr>' +
+        '<tr><td style="text-align:left;color:#6b7280">Random entries, same dates (1.5&times; target)</td><td colspan="2" style="color:#6b7280">' + cell(rnd) + '</td></tr>' +
+        '</tbody></table></div>' : '') +
+      '<div style="color:#6b7280;font-size:12px;margin-top:6px"><strong>Display only.</strong> TAKE, Weekly Picks and the forward-test rules are unchanged; today&rsquo;s condition is shaded. ' +
+      'The scored signals so far come from one short stretch of a single market slide, so the gap between healthy and weak is probably real but its size is not settled. ' +
+      'A hard rule (half size or skip TAKE when QQQ is below its 50-day) is deferred until the November signals are scored, around late December, and would start a new rules version.</div>' +
+    '</div>';
+}
 
 async function loadForwardSummary() {
   const el = document.getElementById('forwardBody');
@@ -3621,11 +3682,12 @@ function renderRSIPanel() {
   loadForwardSummary();
   const ok = await loadData();
   if (!ok) return;
+  loadRegimeBanner();
   try { renderSpyLevels(); } catch (e) {}
   await loadFlow();
   try { renderTradePlans(); } catch (e) {}
   loadBB(); loadRSI();
-  setInterval(async () => { await loadData(); try { renderSpyLevels(); } catch (e) {} renderFlowPanel(); try { renderTradePlans(); } catch (e) {} loadBB(); loadRSI(); }, DATA_REFRESH_MS);
+  setInterval(async () => { await loadData(); try { renderRegimeBanner(); } catch (e) {} try { renderSpyLevels(); } catch (e) {} renderFlowPanel(); try { renderTradePlans(); } catch (e) {} loadBB(); loadRSI(); }, DATA_REFRESH_MS);
 })();
 </script>
 </body>
